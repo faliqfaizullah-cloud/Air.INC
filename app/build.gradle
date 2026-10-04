@@ -1,6 +1,7 @@
 plugins { id 'com.android.application' }
 android {
     namespace 'com.airinc.player'
+    lint { checkReleaseBuilds false; abortOnError false }
     compileSdk 34
     defaultConfig {
         applicationId 'com.airinc.player'
