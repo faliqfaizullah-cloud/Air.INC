@@ -45,10 +45,16 @@ public class MediaService extends Service {
                 title = i.getStringExtra("title"); artist = i.getStringExtra("artist");
                 playing = i.getBooleanExtra("playing", false);
                 pos = i.getLongExtra("pos", 0); dur = i.getLongExtra("dur", 0);
-            } else if (a.equals("toggle")) send(playing ? "pause" : "play", 0);
-            else send(a, 0);
+            } else {
+                if (listener == null) { stopSelf(); return START_NOT_STICKY; }
+                send(a.equals("toggle") ? (playing ? "pause" : "play") : a, 0);
+                return START_STICKY;
+            }
         }
+        getSharedPreferences("air", 0).edit().putString("title", title).putString("artist", artist)
+            .putBoolean("playing", playing).putLong("pos", pos).putLong("dur", dur).putLong("ts", System.currentTimeMillis()).apply();
         refresh();
+        AirWidget.refreshAll(this);
         return START_STICKY;
     }
 
@@ -81,6 +87,6 @@ public class MediaService extends Service {
         else startForeground(1, n);
     }
 
-    @Override public void onDestroy() { running = false; session.release(); super.onDestroy(); }
+    @Override public void onDestroy() { running = false; AirWidget.refreshAll(this); session.release(); super.onDestroy(); }
     @Override public IBinder onBind(Intent i) { return null; }
 }

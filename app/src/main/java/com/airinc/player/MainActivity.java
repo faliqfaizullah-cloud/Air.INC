@@ -58,6 +58,10 @@ public class MainActivity extends Activity {
         MediaService.listener = (cmd, pos) -> runOnUiThread(() ->
             web.evaluateJavascript("window.airMedia&&airMedia('" + cmd + "'," + pos + ")", null));
         web.addJavascriptInterface(new Object() {
+            @JavascriptInterface public void data(String json) {
+                getSharedPreferences("air", 0).edit().putString("json", json).apply();
+                AirWidget.refreshAll(MainActivity.this);
+            }
             @JavascriptInterface public void update(String title, String artist, boolean playing, long pos, long dur) {
                 Intent i = new Intent(MainActivity.this, MediaService.class).setAction("update")
                     .putExtra("title", title).putExtra("artist", artist)

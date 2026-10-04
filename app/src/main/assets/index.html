@@ -177,7 +177,8 @@ document.addEventListener('pointerdown',e=>{if(e.target.closest('button,.chip,.t
 document.addEventListener('input',e=>e.target.type=='range'&&hap('tick'));
 // state
 let tracks=[],idx=-1,shuf=false,rep=false,cur='music',skin=0;
-const S=JSON.parse(localStorage.air||'{"p":0,"s":0,"d":[],"w":[0,0,0,0,0,0,0]}');const save=()=>localStorage.air=JSON.stringify(S);
+const S=JSON.parse(localStorage.air||'{"p":0,"s":0,"d":[],"w":[0,0,0,0,0,0,0]}');const save=()=>{localStorage.air=JSON.stringify(S);pushData()};
+function pushData(){try{window.AirMedia&&AirMedia.data(JSON.stringify({p:S.p,s:S.s,d:S.d.length,w:S.w,t:tracks.length}))}catch(e){}}
 // nav
 const menu=$('menu');
 function go(id){cur=id;document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==id));const s=SCR.find(x=>x[0]==id);$('t1').textContent=s[1];$('t2').textContent=s[2];
@@ -243,5 +244,5 @@ function gStop(){gRun=false;clearInterval(gT);cancelAnimationFrame(gR);$('gmsg')
 function gLoop(){if(!gRun)return;ang=(ang+spd)%360;$('orbit').style.transform=`rotate(${ang}deg)`;gR=requestAnimationFrame(gLoop)}
 $('gA').onclick=()=>{if(!gRun){gRun=true;sc=0;left=120;spd=1.6;$('gscore').textContent=0;$('gmsg').textContent='Go!';gT=setInterval(()=>{left--;$('gtime').textContent=fm(left);if(left<=0)gStop()},1000);gLoop();return}
  const d=Math.min(ang,360-ang);if(d<18){sc++;spd+=.12;hap('click')}else{sc=Math.max(0,sc-1);hap('heavy')}$('gscore').textContent=sc};
-go('music');
+go('music');pushData();
 </script></body></html>
