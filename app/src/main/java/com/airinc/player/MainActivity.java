@@ -18,6 +18,7 @@ import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import org.json.JSONObject;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -26,6 +27,7 @@ public class MainActivity extends Activity {
     private WebView web;
     private SharedPreferences sp;
     private long lastScan;
+    private String pendingGo;
 
     @Override protected void onCreate(Bundle b) {
         super.onCreate(b);
@@ -58,6 +60,12 @@ public class MainActivity extends Activity {
             @Override public void state(String j) { run("window.airState&&airState(" + j + ")"); }
             @Override public void alarm() { run("window.airAlarm&&airAlarm()"); }
         };
+        pendingGo = getIntent().getStringExtra("go");
+        web.setWebViewClient(new WebViewClient() {
+            @Override public void onPageFinished(WebView v, String u) {
+                if (pendingGo != null) { run("window.airGo&&airGo('" + pendingGo + "')"); pendingGo = null; }
+            }
+        });
         web.loadUrl("file:///android_asset/index.html");
         if (hasPerm()) scanLib(); else askPermissions();
     }
@@ -87,6 +95,12 @@ public class MainActivity extends Activity {
             web.evaluateJavascript("window.airLib&&airLib(" + arr.toString() + "," + done + ")", null);
             if (MediaService.running) startService(new Intent(MainActivity.this, MediaService.class).setAction("reload"));
         }));
+    }
+
+    @Override protected void onNewIntent(Intent i) {
+        super.onNewIntent(i); setIntent(i);
+        String g = i.getStringExtra("go");
+        if (g != null) run("window.airGo&&airGo('" + g + "')");
     }
 
     @Override protected void onResume() {
@@ -128,18 +142,7 @@ public class MainActivity extends Activity {
             try { startActivity(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:" + getPackageName()))); }
             catch (Exception e) { startActivity(new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)); }
         }
-        @JavascriptInterface public void alarm(int h, int m, boolean on) {
-            AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
-            PendingIntent pi = PendingIntent.getBroadcast(MainActivity.this, 77, new Intent(MainActivity.this, AlarmReceiver.class),
-                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-            sp.edit().putBoolean("alarm_on", on).putInt("alarm_h", h).putInt("alarm_m", m).apply();
-            if (!on) { am.cancel(pi); return; }
-            Calendar c = Calendar.getInstance();
-            c.set(Calendar.HOUR_OF_DAY, h); c.set(Calendar.MINUTE, m); c.set(Calendar.SECOND, 0); c.set(Calendar.MILLISECOND, 0);
-            if (c.getTimeInMillis() <= System.currentTimeMillis()) c.add(Calendar.DAY_OF_MONTH, 1);
-            PendingIntent show = PendingIntent.getActivity(MainActivity.this, 78, new Intent(MainActivity.this, MainActivity.class), PendingIntent.FLAG_IMMUTABLE);
-            am.setAlarmClock(new AlarmManager.AlarmClockInfo(c.getTimeInMillis(), show), pi);
-        }
+        @JavascriptInterface public void alarm(int h, int m, boolean on) { Alarms.schedule(MainActivity.this, h, m, on); AirWidget.refreshAll(MainActivity.this); }
         @JavascriptInterface public String getAlarm() {
             return "{\"on\":" + sp.getBoolean("alarm_on", false) + ",\"h\":" + sp.getInt("alarm_h", 10) + ",\"m\":" + sp.getInt("alarm_m", 15) + "}";
         }

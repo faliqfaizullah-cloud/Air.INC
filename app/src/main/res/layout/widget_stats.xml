@@ -1,9 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root"
-    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical"
-    android:padding="16dp" android:background="@drawable/w_bg_light">
-    <TextView android:id="@+id/wLbl" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Listening" android:textSize="11sp"/>
-    <TextView android:id="@+id/wBig" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="34sp" android:fontFamily="sans-serif-light" android:maxLines="1"/>
-    <TextView android:id="@+id/wSub" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="11sp" android:maxLines="1"/>
-    <ImageView android:id="@+id/wBars" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
-        android:layout_marginTop="8dp" android:scaleType="fitStart" android:adjustViewBounds="true"/>
-</LinearLayout>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <ImageView android:id="@+id/img" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY"/>
+</FrameLayout>
