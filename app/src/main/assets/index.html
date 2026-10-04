@@ -62,7 +62,26 @@ input[type=time]{border:0;background:#ffffffaa;border-radius:20px;padding:12px;f
 .dome{width:90%;height:90px;border-radius:200px 200px 0 0;background:radial-gradient(ellipse at 40% 20%,#fff,#b9bcc4 55%,#6b6e76)}
 .tm{font-size:12px;color:var(--mute)}
 #gscore{font-size:28px;font-weight:200}
+
+/* Apple-Intelligence style aura while playing */
+@property --a{syntax:"<angle>";inherits:false;initial-value:0deg}
+#aura{position:fixed;inset:0;z-index:0;opacity:0;transition:opacity 1.2s ease;pointer-events:none;filter:hue-rotate(calc(var(--hr,0)*1deg))}
+body.playing #aura{opacity:1}
+#aura i{position:absolute;width:75vw;height:75vw;border-radius:50%;filter:blur(64px);opacity:.75;animation:drift 11s ease-in-out infinite alternate}
+#aura i:nth-child(1){background:radial-gradient(#ff6b6b,#ff7ad900 70%);left:-15vw;top:5vh}
+#aura i:nth-child(2){background:radial-gradient(#ff7ad9,#7b5cff00 70%);right:-20vw;top:25vh;animation-delay:-3s;animation-duration:14s}
+#aura i:nth-child(3){background:radial-gradient(#7b5cff,#4bc8ff00 70%);left:-5vw;bottom:-5vh;animation-delay:-6s}
+#aura i:nth-child(4){background:radial-gradient(#4bc8ff,#7dffb800 70%);right:-10vw;bottom:-12vh;animation-delay:-9s;animation-duration:16s}
+@keyframes drift{to{transform:translate(18vw,-12vh) scale(1.25) rotate(40deg)}}
+#edge{position:fixed;inset:0;z-index:4;pointer-events:none;border-radius:44px;padding:7px;opacity:0;transition:opacity 1s;
+ background:conic-gradient(from var(--a),#ff6b6b,#ffb86b,#ff7ad9,#7b5cff,#4bc8ff,#7dffb8,#ff6b6b);filter:blur(12px);animation:rot 6s linear infinite;
+ -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+body.playing #edge{opacity:.85}@keyframes rot{to{--a:360deg}}
+body.playing .glass{backdrop-filter:blur(34px) saturate(1.9);-webkit-backdrop-filter:blur(34px) saturate(1.9);background:rgba(255,255,255,.34)}
+body.playing .fade{backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+@media(prefers-reduced-motion:reduce){#aura i,#edge{animation:none}}
 </style></head><body>
+<div id="aura"><i></i><i></i><i></i><i></i></div><div id="edge"></div>
 <div class="fade t"></div><div class="fade b"></div>
 <div id="app">
 <header><div><h1 id="t1"></h1><small id="t2"></small></div><button id="menuBtn">⌄</button><div id="menu" class="glass"></div></header>
@@ -169,7 +188,7 @@ window.airBack=()=>{if(menu.classList.contains('on')){menu.classList.remove('on'
 const SPH=['cl','wh','bl','gr','yl','dk'],HUE=[210,30,220,110,65,0];
 ['sp1','sp2','sp3'].forEach(id=>$(id).innerHTML=SPH.map((c,i)=>`<div class="sph ${c}" data-k="${i}"></div>`).join(''));
 document.addEventListener('click',e=>{const k=e.target.dataset&&e.target.dataset.k;if(k!==undefined){skin=+k;$('iTxt').textContent='Skin '+(skin+1);paint()}});
-function paint(){const h=HUE[skin]+idx*40;document.querySelectorAll('.art').forEach(a=>a.style.background=`conic-gradient(from 20deg,hsl(${h},85%,72%),#fc4,#6d8,#4bf,hsl(${h+200},80%,72%),hsl(${h},85%,72%))`)}
+function paint(){const h=HUE[skin]+idx*40;document.documentElement.style.setProperty('--hr',h-HUE[0]);document.querySelectorAll('.art').forEach(a=>a.style.background=`conic-gradient(from 20deg,hsl(${h},85%,72%),#fc4,#6d8,#4bf,hsl(${h+200},80%,72%),hsl(${h},85%,72%))`)}
 // files
 $('open').onclick=()=>$('file').click();
 $('file').onchange=e=>{const f=[...e.target.files];if(!f.length)return;const s=tracks.length;f.forEach(x=>tracks.push({n:x.name.replace(/\.[^.]+$/,''),u:URL.createObjectURL(x)}));play(s)};
@@ -197,10 +216,14 @@ $('pp').onclick=$('pp2').onclick=toggle;$('next').onclick=$('n2').onclick=next;$
 $('shuf').onclick=e=>{shuf=!shuf;e.target.style.color=shuf?'#e8872e':''};$('rep').onclick=e=>{rep=!rep;e.target.style.color=rep?'#e8872e':''};
 const setVol=v=>{au.volume=Math.max(0,Math.min(1,v));$('vl').textContent=Math.round(au.volume*100);$('vol').textContent=au.volume>.5?'🔊':'🔉'};
 $('vol').onclick=()=>setVol(au.volume>.5?.3:1);$('vp').onclick=()=>setVol(au.volume+.1);$('vm').onclick=()=>setVol(au.volume-.1);
-au.onplay=au.onpause=()=>{const p=!au.paused;$('pp').textContent=$('pp2').textContent=p?'❚❚':'▶';document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('playing',p))};
+au.onplay=au.onpause=()=>{const p=!au.paused;$('pp').textContent=$('pp2').textContent=p?'❚❚':'▶';document.body.classList.toggle('playing',p);document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('playing',p));mediaPush()};
 au.onended=()=>rep?(au.currentTime=0,au.play()):next();
 au.ontimeupdate=()=>{$('cur').textContent=$('cur2').textContent=$('cur3').textContent=fm(au.currentTime);$('dur').textContent=$('dur2').textContent=fm(au.duration);$('prog').style.width=(au.currentTime/au.duration*100||0)+'%'};
 $('seek').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();au.currentTime=(e.clientX-r.left)/r.width*au.duration||0;hap('tick')};
+// lock-screen / quick-settings media session (native bridge)
+function mediaPush(){try{if(window.AirMedia&&idx>=0)AirMedia.update(tracks[idx].n,'Air.INC',!au.paused,Math.round(au.currentTime*1000),Math.round((au.duration||0)*1000))}catch(e){}}
+au.onloadedmetadata=au.onseeked=mediaPush;
+window.airMedia=(c,p)=>{if(c=='play')au.src&&au.play();else if(c=='pause')au.pause();else if(c=='next')next();else if(c=='prev')prev();else if(c=='seek'){au.currentTime=p/1000}};
 // stats
 function stats(){const min=Math.round(tracks.length*3.5);
  $('bd1').textContent=$('bd2').textContent=S.d.length;$('aTot').textContent=$('sTot').textContent=S.p;$('sOn').textContent=Math.max(0,S.p-S.s);$('sOff').textContent=S.s;

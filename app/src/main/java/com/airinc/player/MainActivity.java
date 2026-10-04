@@ -20,7 +20,7 @@ public class MainActivity extends Activity {
         super.onCreate(b);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (Build.VERSION.SDK_INT >= 33)
-            requestPermissions(new String[]{Manifest.permission.READ_MEDIA_AUDIO}, 1);
+            requestPermissions(new String[]{Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS}, 1);
         web = new WebView(this);
         setContentView(web);
         WebSettings s = web.getSettings();
@@ -55,6 +55,17 @@ public class MainActivity extends Activity {
                 } else vib.vibrate(18);
             }
         }, "AirHaptic");
+        MediaService.listener = (cmd, pos) -> runOnUiThread(() ->
+            web.evaluateJavascript("window.airMedia&&airMedia('" + cmd + "'," + pos + ")", null));
+        web.addJavascriptInterface(new Object() {
+            @JavascriptInterface public void update(String title, String artist, boolean playing, long pos, long dur) {
+                Intent i = new Intent(MainActivity.this, MediaService.class).setAction("update")
+                    .putExtra("title", title).putExtra("artist", artist)
+                    .putExtra("playing", playing).putExtra("pos", pos).putExtra("dur", dur);
+                if (Build.VERSION.SDK_INT >= 26 && !MediaService.running) startForegroundService(i);
+                else startService(i);
+            }
+        }, "AirMedia");
         web.loadUrl("file:///android_asset/index.html");
     }
 
@@ -80,6 +91,8 @@ public class MainActivity extends Activity {
             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
     }
+
+    @Override protected void onDestroy() { MediaService.listener = null; super.onDestroy(); }
 
     @Override public void onBackPressed() {
         web.evaluateJavascript("window.airBack&&window.airBack()", v -> {
