@@ -2,6 +2,6 @@
     android:layout_width="match_parent" android:layout_height="match_parent">
     <ImageView android:id="@+id/img" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY"/>
     <TextClock android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="center"
-        android:format12Hr="h:mm" android:format24Hr="HH:mm" android:textSize="26sp" android:textColor="#111111"
+        android:format12Hour="h:mm" android:format24Hour="HH:mm" android:textSize="26sp" android:textColor="#111111"
         android:fontFamily="sans-serif-light"/>
 </FrameLayout>
