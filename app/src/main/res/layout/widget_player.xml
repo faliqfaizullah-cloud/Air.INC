@@ -1,10 +1,25 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root"
-    android:layout_width="match_parent" android:layout_height="match_parent">
-    <ImageView android:id="@+id/img" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="fitXY"/>
-    <LinearLayout android:layout_width="match_parent" android:layout_height="60dp" android:layout_gravity="bottom" android:orientation="horizontal">
-        <View android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="11"/>
-        <View android:id="@+id/bPrev" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="3"/>
-        <View android:id="@+id/bPlay" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="3"/>
-        <View android:id="@+id/bNext" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="3"/>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/root"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="horizontal"
+    android:gravity="center_vertical" android:padding="14dp" android:background="@drawable/w_bg_light">
+    <ImageView android:id="@+id/wArt" android:layout_width="84dp" android:layout_height="84dp" android:scaleType="centerCrop"/>
+    <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+        android:layout_marginStart="12dp" android:orientation="vertical">
+        <TextView android:id="@+id/wTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="15sp" android:textStyle="bold" android:maxLines="1" android:ellipsize="end"/>
+        <TextView android:id="@+id/wArtist" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="12sp" android:maxLines="1" android:ellipsize="end"/>
+        <ProgressBar android:id="@+id/wProgL" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent"
+            android:layout_height="3dp" android:layout_marginTop="9dp" android:max="1000" android:progressDrawable="@drawable/prog_light"/>
+        <ProgressBar android:id="@+id/wProgD" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent"
+            android:layout_height="3dp" android:layout_marginTop="9dp" android:max="1000" android:progressDrawable="@drawable/prog_dark" android:visibility="gone"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="2dp"
+            android:orientation="horizontal" android:gravity="center">
+            <ImageButton android:id="@+id/wPrev" android:layout_width="44dp" android:layout_height="40dp" android:background="@null"
+                android:src="@drawable/ic_prev" android:scaleType="centerInside" android:contentDescription="Previous"/>
+            <ImageButton android:id="@+id/wPlay" android:layout_width="52dp" android:layout_height="40dp" android:background="@null"
+                android:src="@drawable/ic_play" android:scaleType="centerInside" android:contentDescription="Play or pause"/>
+            <ImageButton android:id="@+id/wNext" android:layout_width="44dp" android:layout_height="40dp" android:background="@null"
+                android:src="@drawable/ic_next" android:scaleType="centerInside" android:contentDescription="Next"/>
+        </LinearLayout>
     </LinearLayout>
-</FrameLayout>
+</LinearLayout>

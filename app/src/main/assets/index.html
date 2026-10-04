@@ -114,8 +114,23 @@ html,body{background:linear-gradient(165deg,#e2e3f4,#f5f7fd) fixed}
 @keyframes rise{from{transform:translateY(110%);filter:blur(10px);opacity:0}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px);filter:blur(8px)}}
 @media(prefers-reduced-motion:reduce){#intro *{animation-duration:.01s!important;animation-delay:0s!important}}
+
+#fx{position:fixed;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
+/* dark theme */
+body.dark{--ink:#f2f2f4;--mute:#6e6e78;--glass:rgba(44,44,52,.46);--edge:rgba(255,255,255,.12);--sh:inset 0 1px 6px #ffffff14,inset 0 -8px 16px #0000004d,0 14px 34px #00000066}
+html:has(body.dark),body.dark{background:linear-gradient(165deg,#0c0c10,#17171d) fixed}
+body.dark:before{background:linear-gradient(135deg,#5b2a3f,#3c2a66);opacity:.35}body.dark:after{background:linear-gradient(135deg,#1f3f66,#1f5a49);opacity:.32}
+.dark #nav svg{stroke:#eee}.dark #nav button.on svg{fill:#eee}.dark #pplay,.dark #start{color:#f2f2f4}
+.dark .pp{background:#ffffff1f!important;color:#fff!important}.dark .tog .on{background:#ffffff22;color:#fff}
+.dark input[type=time]{background:#ffffff18;color:#fff}.dark .bar{background:#ffffff22}.dark .dots i{background:#ffffff14}
+.dark #menu div.sel{background:#ffffff1c}.dark .list div{border-color:#ffffff12}.dark .bars i{background:linear-gradient(#4a4a54,#2c2c34)}
+.dark .ring{border-color:#f2f2f4}.dark .ring .inner{background:radial-gradient(#3a3a44,#1f1f26)}.dark .lbl b,.dark .lbl small{color:#222}
+.dark #intro{background:linear-gradient(170deg,#101015,#1b1b24)}.dark #intro h2{color:#f4f4f6}.dark .ln.g{color:#6f6f7c}
+.dark .disc2{box-shadow:0 10px 24px #0008,inset 0 0 0 2px #ffffff22}.dark #arcwrap{-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 82%,transparent)}
+.art{background-size:cover}
 </style></head><body>
 <div id="aura"><i></i><i></i><i></i><i></i></div><div id="edge"></div>
+<canvas id="fx"></canvas>
 <div class="fade t"></div><div class="fade b"></div>
 <div id="app">
 <header><div><h1 id="t1"></h1><small id="t2"></small></div><button id="menuBtn">···</button><div id="menu" class="glass"></div></header>
@@ -181,7 +196,7 @@ html,body{background:linear-gradient(165deg,#e2e3f4,#f5f7fd) fixed}
 <section class="screen" id="analytics">
  <div class="big"><div class="lab"><b>Sales</b><br>Overview</div><div class="num" id="aTot">0</div></div>
  <div class="disc glass" style="width:230px"><div class="ring"><div class="inner"></div></div></div>
- <div class="row"><span class="lab">Product</span><span class="lab">Analytics 2026</span></div>
+ <div class="row"><span class="lab">Minutes listened</span><span class="lab" id="aMin">0 min</span></div>
 </section>
 
 <section class="screen" id="sales">
@@ -217,77 +232,112 @@ html,body{background:linear-gradient(165deg,#e2e3f4,#f5f7fd) fixed}
  <h2><span class="ln"><span>New</span></span><span class="ln g"><span>Age Of</span></span><span class="ln"><span>Music</span></span></h2>
  <button id="start" class="glass">Get Started</button>
 </div>
-<audio id="au"></audio><input type="file" id="file" accept="audio/*" multiple hidden>
+<input type="file" id="file" accept="audio/*" multiple hidden>
 <script>
-const $=id=>document.getElementById(id),au=$('au');
-const SCR=[['explore','Explore',''],['music','Music',''],['library','March','Library'],['eq','Equalizer',''],['alarm','Alarm',''],['wheel','Click wheel',''],['game','Game',''],['board1','Board','Profitable'],['board2','Board','Most visited'],['analytics','Analytics','Product'],['sales','Sales','Overview'],['insights','Data','Insights'],['product','Product','Analytics']];
+const $=id=>document.getElementById(id);
+
+const SCR=[['explore','Explore',''],['music','Music',''],['library','Library',''],['eq','Equalizer',''],['alarm','Alarm',''],['wheel','Click wheel',''],['game','Game',''],['board1','Board','Profitable'],['board2','Board','Most visited'],['analytics','Analytics','Product'],['sales','Sales','Overview'],['insights','Data','Insights'],['product','Product','Analytics']];
 // haptics
 const hap=t=>{try{window.AirHaptic?AirHaptic.hap(t):navigator.vibrate&&navigator.vibrate(t=='heavy'?40:t=='tick'?8:16)}catch(e){}};
 document.addEventListener('pointerdown',e=>{if(e.target.closest('button,.chip,.tog div,#menu div,.list div,.sph,.pad button'))hap('click')});
 document.addEventListener('input',e=>e.target.type=='range'&&hap('tick'));
-// state
-let tracks=[],idx=-1,shuf=false,rep=false,cur='music',skin=0;
-const S=JSON.parse(localStorage.air||'{"p":0,"s":0,"d":[],"w":[0,0,0,0,0,0,0]}');const save=()=>{localStorage.air=JSON.stringify(S);pushData()};
-function pushData(){try{window.AirMedia&&AirMedia.data(JSON.stringify({p:S.p,s:S.s,d:S.d.length,w:S.w,t:tracks.length}))}catch(e){}}
+
+// ---- state (native engine owns playback; this is the remote control) ----
+const P=(a,o)=>{try{AirPlayer.cmd(a,JSON.stringify(o||{}))}catch(e){}};
+let tracks=[],idx=-1,cur='explore',skin=0,perm=true;
+let st={idx:-1,playing:false,pos:0,dur:0,vol:1,shuf:false,rep:false},stTs=performance.now();
+const au={get paused(){return !st.playing},play(){P('resume')},pause(){P('pause')}};
+const curPos=()=>st.pos+(st.playing?performance.now()-stTs:0);
+const fm=s=>isFinite(s)?String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0'):'00:00';
+
 // nav
 const menu=$('menu');
 function go(id){cur=id;document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==id));const s=SCR.find(x=>x[0]==id);$('t1').textContent=s[1];$('t2').textContent=s[2];
- menu.innerHTML=SCR.map(x=>`<div data-i="${x[0]}" class="${x[0]==id?'sel':''}">${x[1]} ${x[2]}</div>`).join('');menu.classList.remove('on');document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go==id));if(id=='explore')layoutArc();stats()}
-menu.onclick=e=>e.target.dataset.i&&go(e.target.dataset.i);$('menuBtn').onclick=()=>menu.classList.toggle('on');
-window.airBack=()=>{const I=$('intro');if(I&&I.style.display!='none'&&!I.classList.contains('out'))return false;if(menu.classList.contains('on')){menu.classList.remove('on');return true}if(cur!='explore'){go('explore');return true}return false};
+ menu.innerHTML=SCR.map(x=>`<div data-i="${x[0]}" class="${x[0]==id?'sel':''}">${x[1]} ${x[2]}</div>`).join('')+extras();menu.classList.remove('on');document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go==id));if(id=='explore')layoutArc();if(id=='eq')buildEq();if(id=='alarm')loadAlarm();stats()}
+$('menuBtn').onclick=()=>menu.classList.toggle('on');
 // spheres
 const SPH=['cl','wh','bl','gr','yl','dk'],HUE=[210,30,220,110,65,0];
 ['sp1','sp2','sp3'].forEach(id=>$(id).innerHTML=SPH.map((c,i)=>`<div class="sph ${c}" data-k="${i}"></div>`).join(''));
 document.addEventListener('click',e=>{const k=e.target.dataset&&e.target.dataset.k;if(k!==undefined){skin=+k;$('iTxt').textContent='Skin '+(skin+1);paint()}});
-function paint(){const h=HUE[skin]+idx*40;document.documentElement.style.setProperty('--hr',h-HUE[0]);document.querySelectorAll('.art').forEach(a=>a.style.background=`conic-gradient(from 20deg,hsl(${h},85%,72%),#fc4,#6d8,#4bf,hsl(${h+200},80%,72%),hsl(${h},85%,72%))`)}
-// files
-$('open').onclick=()=>$('file').click();
-$('file').onchange=e=>{const f=[...e.target.files];if(!f.length)return;const s=tracks.length;f.forEach(x=>tracks.push({n:x.name.replace(/\.[^.]+$/,''),u:URL.createObjectURL(x),k:x.name+'|'+x.size}));play(s)};
-function renderList(){$('list').innerHTML=tracks.length?tracks.map((t,i)=>`<div data-i="${i}" class="${i==idx?'on':''}"><span>${t.n}</span><span>${i==idx?'▶':''}</span></div>`).join(''):'<div>No songs yet</div>'}
+
+function paint(){const t=tracks[idx],h=HUE[skin]+idx*40;document.documentElement.style.setProperty('--hr',(h-HUE[0])||0);
+ document.querySelectorAll('.art').forEach(a=>{if(t&&t.art){a.style.background=`url('${t.art}') center/cover`;a.style.filter='blur(0)'}
+  else{a.style.background=`conic-gradient(from 20deg,hsl(${h},85%,72%),#fc4,#6d8,#4bf,hsl(${h+200},80%,72%),hsl(${h},85%,72%))`;a.style.filter=''}})}
+// ---- theme + menu extras ----
+const TH=['auto','light','dark'],themeNow=()=>localStorage.th||'auto';
+function applyTheme(){const m=themeNow(),d=m=='dark'||(m=='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);document.body.classList.toggle('dark',d);try{AirPlayer.theme(m)}catch(e){}if(typeof layoutArc=='function')layoutArc()}
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}
+const extras=()=>`<div data-act="theme">Theme · ${themeNow()}</div><div data-act="scan">Rescan music</div><div data-act="bg">Allow background</div>`;
+menu.onclick=e=>{const d=e.target.dataset;if(d.i)go(d.i);else if(d.act=='theme'){localStorage.th=TH[(TH.indexOf(themeNow())+1)%3];applyTheme();go(cur);menu.classList.add('on')}
+ else if(d.act=='scan'){menu.classList.remove('on');askScan()}else if(d.act=='bg'){menu.classList.remove('on');try{AirPlayer.battery()}catch(e){}}};
+// ---- library (auto-scanned natively and saved) ----
+const esc=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=a=>a.map(t=>({id:t.id,n:t.title||'Unknown',artist:t.artist||'',album:t.album||'',dur:t.dur,art:t.art?'file://'+t.art:''}));
+window.airLib=(a,done)=>{tracks=norm(a);buildArc();refreshTrack();stats()};
+window.airPerm=()=>{perm=true;$('art').textContent='Scanning your music…'};
+function askScan(){try{perm=AirPlayer.perm();if(!perm){AirPlayer.askPerm();return}AirPlayer.scan();$('art').textContent='Scanning your music…'}catch(e){}}
+$('open').onclick=askScan;
+function renderList(){$('list').innerHTML=tracks.length?tracks.map((t,i)=>`<div data-i="${i}" class="${i==idx?'on':''}"><span>${esc(t.n)}</span><span>${esc(t.artist)}</span></div>`).join(''):'<div>No songs yet</div>'}
 $('list').onclick=e=>{const d=e.target.closest('[data-i]');d&&play(+d.dataset.i)};
-const G=['Electronic','Pop','Rock','Jazz','Classical','Hip-Hop','Ambient'];let lastG=0;
-$('genres').innerHTML=G.map((g,i)=>`<span class="${i?'':'on'}">${g}</span>`).join('');
-$('genres').onscroll=()=>{const el=$('genres'),c=el.getBoundingClientRect(),m=c.left+c.width/2;let sel=lastG;
- el.querySelectorAll('span').forEach((s,i)=>{const r=s.getBoundingClientRect(),on=Math.abs(r.left+r.width/2-m)<36;s.classList.toggle('on',on);if(on)sel=i});if(sel!=lastG){lastG=sel;hap('tick')}};
-// audio + EQ
-let ctx,filters=[];const F=[60,170,400,1000,3500,10000],N=['Sub','Bass','Low','Mid','High','Air'];
-$('eqs').innerHTML=F.map((f,i)=>`<label class="glass">${N[i]}<b>0 dB</b><input type="range" min="-12" max="12" value="0" data-i="${i}"></label>`).join('');
-function initAudio(){if(ctx)return;ctx=new (window.AudioContext||webkitAudioContext)();let n=ctx.createMediaElementSource(au);
- F.forEach((f,i)=>{const b=ctx.createBiquadFilter();b.type=i==0?'lowshelf':i==5?'highshelf':'peaking';b.frequency.value=f;b.gain.value=+$('eqs').children[i].querySelector('input').value;n.connect(b);n=b;filters.push(b)});n.connect(ctx.destination)}
-$('eqs').oninput=e=>{const i=+e.target.dataset.i;e.target.previousElementSibling.textContent=e.target.value+' dB';filters[i]&&(filters[i].gain.value=+e.target.value)};
-const preset=v=>[...$('eqs').children].forEach((l,i)=>{const r=l.querySelector('input');r.value=v[i];r.dispatchEvent(new Event('input',{bubbles:true}))});
-$('flat').onclick=()=>preset([0,0,0,0,0,0]);$('bass').onclick=()=>preset([8,6,2,0,-1,0]);$('vocal').onclick=()=>preset([-3,-2,2,5,4,1]);
-function play(i){if(!tracks.length)return $('file').click();idx=(i+tracks.length)%tracks.length;initAudio();ctx.resume();au.src=tracks[idx].u;au.play();hap('heavy');
- $('trk').textContent=tracks[idx].n;$('art').textContent=tracks[idx].artist||('Track '+(idx+1)+' of '+tracks.length);renderList();buildArc();paint();focusArc(idx);
- S.p++;const n=new Date();S.w[n.getDay()]++;if(!S.d.includes(n.getDate()))S.d.push(n.getDate());save()}
-const fm=s=>isFinite(s)?String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0'):'00:00';
-const toggle=()=>au.src?(au.paused?au.play():au.pause()):play(0);
-const next=()=>{if(au.currentTime<20)S.s++,save();play(shuf?Math.floor(Math.random()*tracks.length):idx+1)},prev=()=>au.currentTime>3?au.currentTime=0:play(idx-1);
-$('pp').onclick=$('pp2').onclick=toggle;$('next').onclick=$('n2').onclick=next;$('prev').onclick=$('p2').onclick=prev;
-$('shuf').onclick=e=>{shuf=!shuf;e.target.style.color=shuf?'#e8872e':''};$('rep').onclick=e=>{rep=!rep;e.target.style.color=rep?'#e8872e':''};
-const setVol=v=>{au.volume=Math.max(0,Math.min(1,v));$('vl').textContent=Math.round(au.volume*100);$('vol').textContent=au.volume>.5?'🔊':'🔉'};
-$('vol').onclick=()=>setVol(au.volume>.5?.3:1);$('vp').onclick=()=>setVol(au.volume+.1);$('vm').onclick=()=>setVol(au.volume-.1);
-au.onplay=au.onpause=()=>{const p=!au.paused;$('pp').textContent=$('pp2').textContent=p?'❚❚':'▶';document.body.classList.toggle('playing',p);document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('playing',p));mediaPush();updatePlay()};
-au.onended=()=>rep?(au.currentTime=0,au.play()):next();
-au.ontimeupdate=()=>{$('cur').textContent=$('cur2').textContent=$('cur3').textContent=fm(au.currentTime);$('dur').textContent=$('dur2').textContent=fm(au.duration);$('prog').style.width=(au.currentTime/au.duration*100||0)+'%'};
-$('seek').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();au.currentTime=(e.clientX-r.left)/r.width*au.duration||0;hap('tick')};
-// lock-screen / quick-settings media session (native bridge)
-function mediaPush(){try{if(window.AirMedia&&idx>=0)AirMedia.update(tracks[idx].n,tracks[idx].artist||'Air.INC',!au.paused,Math.round(au.currentTime*1000),Math.round((au.duration||0)*1000),tracks[idx].art||'')}catch(e){}}
-au.onloadedmetadata=au.onseeked=mediaPush;
-window.airMedia=(c,p)=>{if(c=='play')au.src&&au.play();else if(c=='pause')au.pause();else if(c=='next')next();else if(c=='prev')prev();else if(c=='seek'){au.currentTime=p/1000}};
-// stats
-function stats(){const min=Math.round(tracks.length*3.5);
- $('bd1').textContent=$('bd2').textContent=S.d.length;$('aTot').textContent=$('sTot').textContent=S.p;$('sOn').textContent=Math.max(0,S.p-S.s);$('sOff').textContent=S.s;
- $('pA').textContent=S.p;$('pB').textContent=G.length;$('pC').textContent=tracks.length;
- $('dots').innerHTML=Array.from({length:30},(_,i)=>`<i class="${S.d.includes(i+1)?'on':''}"></i>`).join('');
- const mx=Math.max(1,...S.w);$('bars').innerHTML=S.w.map((v,i)=>`<i class="${v==mx&&v?'on':''}" style="height:${14+v/mx*86}%"></i>`).join('')}
-// alarm
-let alOn=false,alT;
-function setAl(on){alOn=on;$('alOn').classList.toggle('on',on);$('alOff').classList.toggle('on',!on);const[h,m]=$('alTime').value.split(':');$('alNum').innerHTML=h+'<br>'+m;clearInterval(alT);
- $('alMsg').textContent=on?'Alarm set for '+$('alTime').value:'Wakes you with your current song';
- if(on)alT=setInterval(()=>{const n=new Date(),t=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
-  if(t==$('alTime').value&&n.getSeconds()<2){setAl(false);setVol(1);tracks.length&&play(Math.max(idx,0));[0,250,500].forEach(d=>setTimeout(()=>hap('heavy'),d))}},1000)}
+const LET=[...'#ABCDEFGHIJKLMNOPQRSTUVWXYZ'];let lastL=0;
+$('genres').innerHTML=LET.map((g,i)=>`<span class="${i?'':'on'}">${g}</span>`).join('');
+function jumpLetter(l){const i=tracks.findIndex(t=>{const c=(t.n[0]||'#').toUpperCase();return l=='#'?!/[A-Z]/.test(c):c==l});const el=$('list').children[i];if(el)$('list').scrollTop=el.offsetTop-$('list').offsetTop}
+$('genres').onscroll=()=>{const el=$('genres'),c=el.getBoundingClientRect(),m=c.left+c.width/2;let sel=lastL;
+ el.querySelectorAll('span').forEach((s,i)=>{const r=s.getBoundingClientRect(),on=Math.abs(r.left+r.width/2-m)<14;s.classList.toggle('on',on);if(on)sel=i});if(sel!=lastL){lastL=sel;hap('tick');jumpLetter(LET[sel])}};
+// ---- playback remote ----
+function refreshTrack(){const t=tracks[idx];
+ if(t){$('trk').textContent=t.n;$('art').textContent=t.artist||t.album||('Track '+(idx+1)+' of '+tracks.length)}
+ else if(!tracks.length){$('trk').textContent='No music found';$('art').textContent=perm?'Tap 📂 to scan again':'Tap 📂 to allow music access'}
+ else{$('trk').textContent='Choose a song';$('art').textContent='Pick one from Explore'}
+ renderList();paint()}
+window.airState=s=>{const ch=s.idx!=st.idx,was=st.playing;st=s;stTs=performance.now();idx=s.idx;onState(ch,was)};
+function onState(ch,was){const p=st.playing;$('pp').textContent=$('pp2').textContent=p?'❚❚':'▶';
+ document.body.classList.toggle('playing',p);document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('playing',p));
+ $('vl').textContent=Math.round(st.vol*100);$('vol').textContent=st.vol>.5?'🔊':'🔉';
+ $('shuf').style.color=st.shuf?'#e8872e':'';$('rep').style.color=st.rep?'#e8872e':'';
+ if(ch){refreshTrack();focusArc(idx);burst()}if(p!=was)fxKick();updatePlay();progress()}
+let pf=0,lc='',ld='';
+function progress(){const pos=curPos(),d=st.dur||1,a=fm(pos/1000),b=fm(st.dur/1000);
+ if(a!=lc){lc=a;$('cur').textContent=$('cur2').textContent=$('cur3').textContent=a}if(b!=ld){ld=b;$('dur').textContent=$('dur2').textContent=b}
+ $('prog').style.width=Math.min(100,pos/d*100)+'%';if(st.playing&&!pf){pf=1;requestAnimationFrame(()=>{pf=0;progress()})}}
+function play(i){if(!tracks.length)return askScan();hap('heavy');P('play',{i})}
+const toggle=()=>tracks.length?(st.idx<0?play(0):P('toggle')):askScan();
+$('pp').onclick=$('pp2').onclick=toggle;$('next').onclick=$('n2').onclick=()=>P('next');$('prev').onclick=$('p2').onclick=()=>P('prev');
+$('shuf').onclick=()=>P('shuf',{b:!st.shuf});$('rep').onclick=()=>P('rep',{b:!st.rep});
+const setVol=v=>{v=Math.max(0,Math.min(1,v));st.vol=v;P('vol',{v});$('vl').textContent=Math.round(v*100);$('vol').textContent=v>.5?'🔊':'🔉'};
+$('vol').onclick=()=>setVol(st.vol>.5?.3:1);$('vp').onclick=()=>setVol(st.vol+.1);$('vm').onclick=()=>setVol(st.vol-.1);
+$('seek').onclick=e=>{const r=e.currentTarget.getBoundingClientRect(),f=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));P('seek',{ms:Math.round(f*st.dur)});st.pos=f*st.dur;stTs=performance.now();progress();hap('tick')};
+// ---- equalizer (Android system equalizer + bass boost) ----
+let eqI=null,eqQ={},eqT=0;
+function buildEq(){try{eqI=JSON.parse(AirPlayer.eqInfo())}catch(e){eqI={n:0}}
+ const box=$('eqs');if(!eqI.n){box.innerHTML='<div class="lab" style="grid-column:1/-1;text-align:center">Equalizer not available on this device</div>';return}
+ const lo=Math.ceil(eqI.min/100),hi=Math.floor(eqI.max/100);
+ box.innerHTML=eqI.freqs.map((f,i)=>`<label class="glass">${f>=1000?(f/1000)+' kHz':f+' Hz'}<b>${Math.round(eqI.lv[i]/100)} dB</b><input type="range" min="${lo}" max="${hi}" value="${Math.round(eqI.lv[i]/100)}" data-i="${i}"></label>`).join('')
+ +`<label class="glass">Bass boost<b>${Math.round(eqI.bass/10)}%</b><input type="range" min="0" max="100" value="${Math.round(eqI.bass/10)}" data-i="bass"></label>`}
+$('eqs').oninput=e=>{const k=e.target.dataset.i,v=+e.target.value;e.target.previousElementSibling.textContent=v+(k=='bass'?'%':' dB');eqQ[k]=v;
+ if(!eqT)eqT=setTimeout(()=>{eqT=0;for(const q in eqQ){q=='bass'?P('bass',{s:eqQ[q]*10}):P('eq',{b:+q,mb:eqQ[q]*100})}eqQ={}},70)};
+const shape={flat:[0,0,0,0,0,0],bass:[8,6,2,0,-1,0],vocal:[-3,-2,2,5,4,1]};
+function preset(n){if(!eqI||!eqI.n)return;const ins=[...document.querySelectorAll('#eqs input')].filter(x=>x.dataset.i!='bass'),sh=shape[n],lv=[];
+ ins.forEach((r,i)=>{const f=i/Math.max(1,ins.length-1)*(sh.length-1),a=Math.floor(f),b=Math.min(sh.length-1,a+1),v=Math.round(sh[a]+(sh[b]-sh[a])*(f-a));
+  r.value=Math.max(+r.min,Math.min(+r.max,v));r.previousElementSibling.textContent=r.value+' dB';lv.push(r.value*100)});P('eqall',{lv})}
+$('flat').onclick=()=>preset('flat');$('bass').onclick=()=>preset('bass');$('vocal').onclick=()=>preset('vocal');
+// ---- analytics (counted natively, so it also works in the background) ----
+function stats(){let s={p:0,s:0,ms:0,w:[0,0,0,0,0,0,0],days:[]};try{s=JSON.parse(AirPlayer.stats())}catch(e){}
+ const ar=new Set(tracks.map(t=>t.artist).filter(Boolean)).size;
+ $('bd1').textContent=$('bd2').textContent=s.days.length;$('aTot').textContent=$('sTot').textContent=s.p;$('aMin').textContent=Math.round(s.ms/60000)+' min';
+ $('sOn').textContent=Math.max(0,s.p-s.s);$('sOff').textContent=s.s;$('pA').textContent=s.p;$('pB').textContent=ar;$('pC').textContent=tracks.length;
+ $('dots').innerHTML=Array.from({length:30},(_,i)=>`<i class="${s.days.includes(i+1)?'on':''}"></i>`).join('');
+ const mx=Math.max(1,...s.w);$('bars').innerHTML=s.w.map((v,i)=>`<i class="${v==mx&&v?'on':''}" style="height:${14+v/mx*86}%"></i>`).join('')}
+setInterval(()=>{if(['analytics','sales','board1','board2','product'].includes(cur))stats()},3000);
+// ---- alarm (system alarm clock: rings with your music even when the app is closed) ----
+let alOn=false;
+function setAl(on,commit=true){alOn=on;$('alOn').classList.toggle('on',on);$('alOff').classList.toggle('on',!on);const[h,m]=$('alTime').value.split(':');$('alNum').innerHTML=h+'<br>'+m;
+ $('alMsg').textContent=on?'Rings at '+$('alTime').value+' · plays your music even when the app is closed':'Wakes you with your music';
+ if(commit)try{AirPlayer.alarm(+h,+m,on)}catch(e){}}
+function loadAlarm(){try{const a=JSON.parse(AirPlayer.getAlarm());$('alTime').value=String(a.h).padStart(2,'0')+':'+String(a.m).padStart(2,'0');setAl(a.on,false)}catch(e){setAl(false,false)}}
 $('alOn').onclick=()=>setAl(true);$('alOff').onclick=()=>setAl(false);$('alTime').onchange=()=>setAl(alOn);
+window.airAlarm=()=>{setAl(false,false);$('alMsg').textContent='Alarm rang';[0,250,500].forEach(d=>setTimeout(()=>hap('heavy'),d))};
+
 // game: tap when the dot passes the orange mark
 let gRun=false,ang=0,sc=0,left=120,spd=1.6,gT,gR;
 function gStop(){gRun=false;clearInterval(gT);cancelAnimationFrame(gR);$('gmsg').textContent='Time! Score '+sc+' · tap A to replay';hap('heavy')}
@@ -298,7 +348,6 @@ $('gA').onclick=()=>{if(!gRun){gRun=true;sc=0;left=120;spd=1.6;$('gscore').textC
 const DEMO=[['Forgotten','Nguyen, Shane'],['Dreams','Miles, Esther'],['Horizon','Kristin'],['Day light','Kernin Joki'],['Cassette','Black, Marvin'],['Crimson','Henry, Arthur'],['Phantom','Flores, Juanita']];
 const ART=['radial-gradient(circle at 30% 30%,#fff,#c9c9d0)','conic-gradient(#111,#fff,#111,#999,#111)','radial-gradient(circle at 40% 60%,#e9ff3a 0 12%,#1c1c1c 13% 58%,#7c7c7c)','radial-gradient(circle at 70% 25%,#fff 0 9%,#0d0d0d 10%)','linear-gradient(135deg,#111,#777)','radial-gradient(circle at 45% 50%,#e4d6d6 0 30%,#1a1a1a 62%)','radial-gradient(circle at 50% 50%,#fff 0 25%,#d3d3da 26%,#8f8f99)'];
 const artBg=i=>tracks[i]&&tracks[i].art?`url('${tracks[i].art}') center/cover`:ART[i%7];
-const esc=x=>x.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let pos=3,tgt=3,enterT=0,arcEls=[],moved=false,raf=0,lastC=3;
 const arcList=()=>tracks.length?tracks.map((t,i)=>[t.n,t.artist||'Track '+(i+1)]):DEMO;
 function buildArc(){const L=arcList();$('arc').innerHTML=L.map((x,i)=>`<div class="it" data-i="${i}"><div class="disc2" style="background:${artBg(i)}"></div><div class="t"><b>${esc(x[0])}</b><span>${esc(x[1])}</span></div></div>`).join('');
@@ -308,7 +357,7 @@ function layoutArc(){const now=performance.now(),tt=enterT?(now-enterT)/1000:9,c
  arcEls.forEach((el,i)=>{const d=i-pos,a=Math.abs(d);if(a>4.3){el.style.display='none';return}el.style.display='';
   let p=Math.max(0,Math.min(1,(tt-Math.abs(i-c)*.09)/.75));p=1-Math.pow(1-p,3);
   el.style.transform=`translate(${16*d*d+(1-p)*260}px,${d*94}px) scale(${1-.07*a})`;el.style.opacity=Math.max(0,1-a*.23)*p;
-  const t=el.lastChild,v=Math.round(190-173*Math.max(0,1-a));t.style.transform=`rotate(${-d*11}deg)`;t.firstChild.style.color=`rgb(${v},${v},${v+5})`;
+  const t=el.lastChild,kk=Math.max(0,1-a),v=document.body.classList.contains('dark')?Math.round(95+150*kk):Math.round(190-173*kk);t.style.transform=`rotate(${-d*11}deg)`;t.firstChild.style.color=`rgb(${v},${v},${v+5})`;
   el.firstChild.style.filter=a>2.3?`blur(${(a-2.3)*2}px)`:''});updatePlay()}
 function tick(){const prev=Math.round(pos);pos+=(tgt-pos)*.16;if(Math.abs(tgt-pos)<.002)pos=tgt;if(Math.round(pos)!=prev)hap('tick');layoutArc();
  raf=(pos!=tgt||(enterT&&performance.now()-enterT<2000))?requestAnimationFrame(tick):0}
@@ -321,14 +370,48 @@ arc.onpointermove=e=>{if(!drag)return;const dy=e.clientY-dY;if(Math.abs(dy)>6)mo
 arc.onpointerup=arc.onpointercancel=arc.onpointerleave=()=>{if(!drag)return;drag=false;tgt=Math.max(0,Math.min(arcEls.length-1,Math.round(pos-vel*6)));kick()};
 arc.onclick=e=>{if(moved)return;const it=e.target.closest('.it');if(!it)return;const i=+it.dataset.i;
  if(i==Math.round(pos)){if(e.target.classList.contains('disc2'))go('music')}else focusArc(i)};
-$('pplay').onclick=()=>{const c=Math.round(pos);if(!tracks.length)return $('file').click();if(c==idx)au.paused?au.play():au.pause();else play(c)};
+$('pplay').onclick=()=>{const c=Math.round(pos);if(!tracks.length)return askScan();if(c==idx)au.paused?au.play():au.pause();else play(c)};
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.go));
 // ---- Opening ----
 $('start').onclick=()=>{hap('heavy');$('intro').classList.add('out');enterT=performance.now();kick();setTimeout(()=>$('intro').style.display='none',1000)};
-// ---- Real album art + tags from the song files ----
-const _paint=paint;
-paint=()=>{_paint();const t=tracks[idx];document.querySelectorAll('.art').forEach(a=>{if(t&&t.art){a.style.background=`url('${t.art}') center/cover`;a.style.filter='blur(0)'}else a.style.filter=''})};
-function refreshMeta(){buildArc();renderList();if(idx>=0){$('trk').textContent=tracks[idx].n;$('art').textContent=tracks[idx].artist||('Track '+(idx+1)+' of '+tracks.length);paint();mediaPush()}}
-window.airMeta=arr=>{arr.forEach(m=>tracks.filter(t=>t.k==m.key).forEach(t=>{if(m.title)t.n=m.title;t.artist=m.artist||'';t.album=m.album||'';if(m.art)t.art=m.art}));refreshMeta()};
-go('explore');buildArc();pushData();
+
+// ---- sprinkle: Apple-Intelligence-style glitter while a song plays ----
+const fxc=$('fx'),fc=fxc.getContext('2d'),RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let W=0,H=0,parts=[],level=0,fxRaf=0,lastT=0;
+const PAL=[[255,107,107],[255,184,107],[255,122,217],[160,123,255],[75,200,255],[125,255,184],[255,242,200]];
+const SPR=PAL.map(c=>{const s=document.createElement('canvas');s.width=s.height=64;const g=s.getContext('2d'),r=g.createRadialGradient(32,32,0,32,32,32);
+ r.addColorStop(0,'rgba(255,255,255,1)');r.addColorStop(.16,`rgba(${c},.9)`);r.addColorStop(.5,`rgba(${c},.22)`);r.addColorStop(1,`rgba(${c},0)`);g.fillStyle=r;g.fillRect(0,0,64,64);return s});
+function fxSize(){const d=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;fxc.width=W*d;fxc.height=H*d;fc.setTransform(d,0,0,d,0,0)}
+addEventListener('resize',fxSize);fxSize();
+function spawn(burst){const a=Math.random()*6.283,cx=W/2,cy=H*.36;let x,y,vx,vy;
+ if(burst||Math.random()<.45){const R=Math.min(W,H)*(.16+Math.random()*.1),sp=burst?40+Math.random()*100:8+Math.random()*24;
+  x=cx+Math.cos(a)*R;y=cy+Math.sin(a)*R;vx=Math.cos(a)*sp-Math.sin(a)*14;vy=Math.sin(a)*sp+Math.cos(a)*14}
+ else{const s=Math.random()*4|0,t=Math.random();x=s<2?t*W:(s==2?Math.random()*20:W-Math.random()*20);y=s<2?(s?H-Math.random()*20:Math.random()*20):t*H;
+  vx=(W/2-x)*.02+(Math.random()-.5)*16;vy=(H/2-y)*.02+(Math.random()-.5)*16}
+ parts.push({x,y,vx,vy,r:.8+Math.random()*2.6,c:Math.random()*7|0,t:Math.random()*6.28,tw:2+Math.random()*4,life:0,max:2.2+Math.random()*3.8})}
+function star(x,y,s,rot){fc.save();fc.translate(x,y);fc.rotate(rot);fc.beginPath();fc.moveTo(0,-s);fc.quadraticCurveTo(0,0,s*.18,0);fc.quadraticCurveTo(0,0,0,s);fc.quadraticCurveTo(0,0,-s*.18,0);fc.quadraticCurveTo(0,0,0,-s);
+ fc.moveTo(-s,0);fc.quadraticCurveTo(0,0,0,s*.18);fc.quadraticCurveTo(0,0,s,0);fc.quadraticCurveTo(0,0,0,-s*.18);fc.quadraticCurveTo(0,0,-s,0);fc.fill();fc.restore()}
+function fxFrame(t){const dt=Math.min(.05,(t-lastT)/1000||.016);lastT=t;level+=((st.playing?1:0)-level)*Math.min(1,dt*1.5);
+ const dk=document.body.classList.contains('dark');
+ fc.globalCompositeOperation='destination-out';fc.fillStyle='rgba(0,0,0,.2)';fc.fillRect(0,0,W,H);   // soft motion trails
+ fc.globalCompositeOperation=dk?'lighter':'source-over';
+ const beat=.5+.5*Math.sin(curPos()/1000*Math.PI*3.8);
+ if(parts.length<Math.round(120*level)&&Math.random()<dt*45*level)spawn(false);
+ for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.life+=dt;if(p.life>p.max){parts.splice(i,1);continue}
+  p.vx+=Math.sin(p.y*.012+t*.0007+p.t)*dt*16;p.vy+=Math.cos(p.x*.012+t*.0006+p.t)*dt*16;p.vx*=1-dt*.45;p.vy*=1-dt*.45;p.x+=p.vx*dt;p.y+=p.vy*dt;
+  const tw=.55+.45*Math.sin(p.t+t*.001*p.tw),a=Math.sin(Math.PI*p.life/p.max)*tw*Math.max(level,.25),s=p.r*(1+.35*beat);
+  fc.globalAlpha=Math.min(1,a*(dk?1:.9));fc.drawImage(SPR[p.c],p.x-s*4.5,p.y-s*4.5,s*9,s*9);
+  if(p.r>1.7){fc.fillStyle=dk?'#fff':`rgb(${PAL[p.c]})`;star(p.x,p.y,s*3.4*(.6+.4*tw),p.t+p.life*.6)}}
+ fc.globalAlpha=1}
+function fxLoop(t){fxFrame(t);if(level>.01||st.playing||parts.length)fxRaf=requestAnimationFrame(fxLoop);else{fxRaf=0;fc.clearRect(0,0,W,H)}}
+const fxKick=()=>{if(RM||fxRaf)return;lastT=performance.now();fxRaf=requestAnimationFrame(fxLoop)};
+const burst=()=>{if(RM||!st.playing)return;for(let i=0;i<46;i++)spawn(true);fxKick()};
+
+
+// ---- opening + boot ----
+$('start').onclick=()=>{hap('heavy');$('intro').classList.add('out');enterT=performance.now();kick();setTimeout(()=>$('intro').style.display='none',1000)};
+applyTheme();go('explore');buildArc();
+try{perm=AirPlayer.perm();airLib(JSON.parse(AirPlayer.library()),false);airState(JSON.parse(AirPlayer.state()));loadAlarm()}catch(e){}
+stats();
+
 </script></body></html>

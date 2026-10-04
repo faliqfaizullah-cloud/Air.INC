@@ -2,32 +2,35 @@ package com.airinc.player;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
-import android.database.Cursor;
-import android.media.MediaMetadataRetriever;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.provider.OpenableColumns;
-import java.io.File;
-import java.io.FileOutputStream;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.*;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import org.json.JSONObject;
+import java.util.Calendar;
+import java.util.Iterator;
 
 public class MainActivity extends Activity {
     private WebView web;
-    private ValueCallback<Uri[]> chooser;
+    private SharedPreferences sp;
+    private long lastScan;
 
     @Override protected void onCreate(Bundle b) {
         super.onCreate(b);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        if (Build.VERSION.SDK_INT >= 33)
-            requestPermissions(new String[]{Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS}, 1);
+        sp = getSharedPreferences("air", 0);
         web = new WebView(this);
         setContentView(web);
         WebSettings s = web.getSettings();
@@ -35,104 +38,114 @@ public class MainActivity extends Activity {
         s.setDomStorageEnabled(true);
         s.setAllowFileAccess(true);
         s.setMediaPlaybackRequiresUserGesture(false);
-        web.setBackgroundColor(0xFFF2F2F2);
-        web.setWebChromeClient(new WebChromeClient() {
-            @Override public boolean onShowFileChooser(WebView w, ValueCallback<Uri[]> cb, FileChooserParams p) {
-                if (chooser != null) chooser.onReceiveValue(null);
-                chooser = cb;
-                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-                i.addCategory(Intent.CATEGORY_OPENABLE);
-                i.setType("audio/*");
-                i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                startActivityForResult(i, 7);
-                return true;
-            }
-        });
+        web.setBackgroundColor(0xFFF2F2F4);
+
         final Vibrator vib = (Vibrator) getSystemService(VIBRATOR_SERVICE);
         web.addJavascriptInterface(new Object() {
             @JavascriptInterface public void hap(String t) {
                 if (vib == null || !vib.hasVibrator()) return;
                 if (Build.VERSION.SDK_INT >= 29) {
-                    int e = t.equals("tick") ? VibrationEffect.EFFECT_TICK
-                          : t.equals("heavy") ? VibrationEffect.EFFECT_HEAVY_CLICK
-                          : VibrationEffect.EFFECT_CLICK;
+                    int e = t.equals("tick") ? VibrationEffect.EFFECT_TICK : t.equals("heavy") ? VibrationEffect.EFFECT_HEAVY_CLICK : VibrationEffect.EFFECT_CLICK;
                     vib.vibrate(VibrationEffect.createPredefined(e));
                 } else if (Build.VERSION.SDK_INT >= 26) {
                     vib.vibrate(VibrationEffect.createOneShot(t.equals("heavy") ? 45 : t.equals("tick") ? 8 : 18, 160));
                 } else vib.vibrate(18);
             }
         }, "AirHaptic");
-        MediaService.listener = (cmd, pos) -> runOnUiThread(() ->
-            web.evaluateJavascript("window.airMedia&&airMedia('" + cmd + "'," + pos + ")", null));
-        web.addJavascriptInterface(new Object() {
-            @JavascriptInterface public void data(String json) {
-                getSharedPreferences("air", 0).edit().putString("json", json).apply();
-                AirWidget.refreshAll(MainActivity.this);
-            }
-            @JavascriptInterface public void update(String title, String artist, boolean playing, long pos, long dur, String art) {
-                Intent i = new Intent(MainActivity.this, MediaService.class).setAction("update")
-                    .putExtra("title", title).putExtra("artist", artist)
-                    .putExtra("playing", playing).putExtra("pos", pos).putExtra("dur", dur).putExtra("art", art);
-                if (Build.VERSION.SDK_INT >= 26 && !MediaService.running) startForegroundService(i);
-                else startService(i);
-            }
-        }, "AirMedia");
+        web.addJavascriptInterface(new Bridge(), "AirPlayer");
+
+        MediaService.listener = new MediaService.Listener() {
+            @Override public void state(String j) { run("window.airState&&airState(" + j + ")"); }
+            @Override public void alarm() { run("window.airAlarm&&airAlarm()"); }
+        };
         web.loadUrl("file:///android_asset/index.html");
+        if (hasPerm()) scanLib(); else askPermissions();
     }
 
-    @Override protected void onActivityResult(int req, int res, Intent d) {
-        if (req == 7 && chooser != null) {
-            Uri[] r = null;
-            if (res == RESULT_OK && d != null) {
-                if (d.getClipData() != null) {
-                    int n = d.getClipData().getItemCount();
-                    r = new Uri[n];
-                    for (int i = 0; i < n; i++) r[i] = d.getClipData().getItemAt(i).getUri();
-                } else if (d.getData() != null) r = new Uri[]{d.getData()};
-            }
-            if (r != null) extract(r);
-            chooser.onReceiveValue(r);
-            chooser = null;
+    private void run(final String js) { runOnUiThread(() -> web.evaluateJavascript(js, null)); }
+
+    // ---------- permissions + scan ----------
+    private boolean hasPerm() {
+        String p = Build.VERSION.SDK_INT >= 33 ? Manifest.permission.READ_MEDIA_AUDIO : Manifest.permission.READ_EXTERNAL_STORAGE;
+        return checkSelfPermission(p) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void askPermissions() {
+        if (Build.VERSION.SDK_INT >= 33) requestPermissions(new String[]{Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS}, 1);
+        else requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+    }
+
+    @Override public void onRequestPermissionsResult(int c, String[] p, int[] r) {
+        super.onRequestPermissionsResult(c, p, r);
+        if (hasPerm()) { run("window.airPerm&&airPerm()"); scanLib(); }
+    }
+
+    private void scanLib() {
+        if (!hasPerm()) return;
+        lastScan = System.currentTimeMillis();
+        Library.scan(this, (arr, done) -> runOnUiThread(() -> {
+            web.evaluateJavascript("window.airLib&&airLib(" + arr.toString() + "," + done + ")", null);
+            if (MediaService.running) startService(new Intent(MainActivity.this, MediaService.class).setAction("reload"));
+        }));
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        if (hasPerm() && System.currentTimeMillis() - lastScan > 10 * 60 * 1000) scanLib();
+    }
+
+    // ---------- JS bridge ----------
+    class Bridge {
+        @JavascriptInterface public void cmd(String a, String json) {
+            Intent i = new Intent(MainActivity.this, MediaService.class).setAction(a);
+            try {
+                JSONObject o = new JSONObject(json == null || json.isEmpty() ? "{}" : json);
+                Iterator<String> k = o.keys();
+                while (k.hasNext()) {
+                    String key = k.next(); Object v = o.get(key);
+                    if (v instanceof Integer) i.putExtra(key, ((Integer) v).intValue());
+                    else if (v instanceof Long) i.putExtra(key, ((Long) v).longValue());
+                    else if (v instanceof Double) i.putExtra(key, ((Double) v).doubleValue());
+                    else if (v instanceof Boolean) i.putExtra(key, ((Boolean) v).booleanValue());
+                    else if (v instanceof org.json.JSONArray) {
+                        org.json.JSONArray ja = (org.json.JSONArray) v; int[] arr = new int[ja.length()];
+                        for (int n = 0; n < arr.length; n++) arr[n] = ja.optInt(n);
+                        i.putExtra(key, arr);
+                    }
+                }
+            } catch (Exception e) { }
+            if (Build.VERSION.SDK_INT >= 26 && !MediaService.running) startForegroundService(i); else startService(i);
+        }
+        @JavascriptInterface public String state() { return MediaService.lastState; }
+        @JavascriptInterface public String library() { return Library.load(MainActivity.this).toString(); }
+        @JavascriptInterface public void scan() { runOnUiThread(() -> scanLib()); }
+        @JavascriptInterface public boolean perm() { return hasPerm(); }
+        @JavascriptInterface public void askPerm() { runOnUiThread(() -> askPermissions()); }
+        @JavascriptInterface public String stats() { return MediaService.readStats(sp).toString(); }
+        @JavascriptInterface public String eqInfo() { return MediaService.eqInfo(MainActivity.this); }
+        @JavascriptInterface public void theme(String m) { sp.edit().putString("theme", m).apply(); AirWidget.refreshAll(MainActivity.this); }
+        @JavascriptInterface public void battery() {
+            try { startActivity(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:" + getPackageName()))); }
+            catch (Exception e) { startActivity(new Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)); }
+        }
+        @JavascriptInterface public void alarm(int h, int m, boolean on) {
+            AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+            PendingIntent pi = PendingIntent.getBroadcast(MainActivity.this, 77, new Intent(MainActivity.this, AlarmReceiver.class),
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+            sp.edit().putBoolean("alarm_on", on).putInt("alarm_h", h).putInt("alarm_m", m).apply();
+            if (!on) { am.cancel(pi); return; }
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.HOUR_OF_DAY, h); c.set(Calendar.MINUTE, m); c.set(Calendar.SECOND, 0); c.set(Calendar.MILLISECOND, 0);
+            if (c.getTimeInMillis() <= System.currentTimeMillis()) c.add(Calendar.DAY_OF_MONTH, 1);
+            PendingIntent show = PendingIntent.getActivity(MainActivity.this, 78, new Intent(MainActivity.this, MainActivity.class), PendingIntent.FLAG_IMMUTABLE);
+            am.setAlarmClock(new AlarmManager.AlarmClockInfo(c.getTimeInMillis(), show), pi);
+        }
+        @JavascriptInterface public String getAlarm() {
+            return "{\"on\":" + sp.getBoolean("alarm_on", false) + ",\"h\":" + sp.getInt("alarm_h", 10) + ",\"m\":" + sp.getInt("alarm_m", 15) + "}";
         }
     }
 
-    /** Reads title/artist/album and the embedded album art of each picked song. */
-    private void extract(final Uri[] uris) {
-        new Thread(() -> {
-            JSONArray out = new JSONArray();
-            for (Uri u : uris) {
-                try {
-                    String name = null; long size = -1;
-                    Cursor c = getContentResolver().query(u, null, null, null, null);
-                    if (c != null) {
-                        if (c.moveToFirst()) {
-                            int ni = c.getColumnIndex(OpenableColumns.DISPLAY_NAME), si = c.getColumnIndex(OpenableColumns.SIZE);
-                            if (ni >= 0) name = c.getString(ni);
-                            if (si >= 0) size = c.getLong(si);
-                        }
-                        c.close();
-                    }
-                    MediaMetadataRetriever r = new MediaMetadataRetriever();
-                    r.setDataSource(this, u);
-                    JSONObject o = new JSONObject();
-                    o.put("key", name + "|" + size);
-                    o.put("title", r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE));
-                    o.put("artist", r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST));
-                    o.put("album", r.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM));
-                    byte[] pic = r.getEmbeddedPicture();
-                    if (pic != null) {
-                        File f = new File(getCacheDir(), "art_" + Integer.toHexString((name + size).hashCode()) + ".img");
-                        FileOutputStream fo = new FileOutputStream(f); fo.write(pic); fo.close();
-                        o.put("art", "file://" + f.getAbsolutePath());
-                    }
-                    r.release();
-                    out.put(o);
-                } catch (Exception e) { /* skip files without readable tags */ }
-            }
-            final String js = "window.airMeta&&airMeta(" + out.toString() + ")";
-            runOnUiThread(() -> web.evaluateJavascript(js, null));
-        }).start();
-    }
+    @Override protected void onDestroy() { MediaService.listener = null; super.onDestroy(); }
 
     @Override public void onWindowFocusChanged(boolean f) {
         super.onWindowFocusChanged(f);
@@ -141,8 +154,6 @@ public class MainActivity extends Activity {
             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
     }
-
-    @Override protected void onDestroy() { MediaService.listener = null; super.onDestroy(); }
 
     @Override public void onBackPressed() {
         web.evaluateJavascript("window.airBack&&window.airBack()", v -> {

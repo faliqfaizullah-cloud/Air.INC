@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
     <application android:label="Air.INC" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:theme="@style/AppTheme" android:allowBackup="true">
         <activity android:name=".MainActivity" android:exported="true"
             android:screenOrientation="portrait"
@@ -16,21 +17,14 @@
             </intent-filter>
         </activity>
     <service android:name=".MediaService" android:exported="false" android:foregroundServiceType="mediaPlayback"/>
-    <receiver android:name=".AirWidget$Orb" android:exported="true" android:label="Air · Orb clock">
-        <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
-        <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_orb"/>
-    </receiver>
-    <receiver android:name=".AirWidget$Profile" android:exported="true" android:label="Air · Listening profile">
-        <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
-        <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_profile"/>
-    </receiver>
     <receiver android:name=".AirWidget$Player" android:exported="true" android:label="Air · Now playing">
         <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
-        <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_player"/>
+        <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_player"/>
     </receiver>
-    <receiver android:name=".AirWidget$Level" android:exported="true" android:label="Air · Listening level">
+    <receiver android:name=".AirWidget$Stats" android:exported="true" android:label="Air · Listening">
         <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
-        <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_level"/>
+        <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_stats"/>
     </receiver>
+    <receiver android:name=".AlarmReceiver" android:exported="false"/>
     </application>
 </manifest>
