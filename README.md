@@ -9,3 +9,4 @@ bash publish.sh <your-username>
 ```
 GitHub Actions builds `Air.INC.apk` automatically (Actions tab -> artifact, or Releases for tag v1.0).
 No Gradle/Android SDK needed on the phone.
+# Air.INC
