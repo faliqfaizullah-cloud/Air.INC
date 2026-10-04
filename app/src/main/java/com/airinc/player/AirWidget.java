@@ -46,6 +46,22 @@ public abstract class AirWidget extends AppWidgetProvider {
     static Shader orb(float cx, float cy, float r) {
         return new RadialGradient(cx, cy, r, new int[]{CREAM, CREAM, SALMON, ORANGE}, new float[]{0, .4f, .8f, 1}, Shader.TileMode.CLAMP);
     }
+    /** Decodes an album-art file into a centre-cropped square of at most `size` px; null if missing. */
+    static Bitmap decode(String path, int size) {
+        try {
+            if (path == null || path.isEmpty()) return null;
+            if (path.startsWith("file://")) path = path.substring(7);
+            BitmapFactory.Options o = new BitmapFactory.Options(); o.inJustDecodeBounds = true;
+            BitmapFactory.decodeFile(path, o);
+            if (o.outWidth <= 0) return null;
+            o.inSampleSize = Math.max(1, Math.min(o.outWidth, o.outHeight) / size); o.inJustDecodeBounds = false;
+            Bitmap b = BitmapFactory.decodeFile(path, o);
+            if (b == null) return null;
+            int m = Math.min(b.getWidth(), b.getHeight());
+            Bitmap sq = Bitmap.createBitmap(b, (b.getWidth() - m) / 2, (b.getHeight() - m) / 2, m, m);
+            return m > size ? Bitmap.createScaledBitmap(sq, size, size, true) : sq;
+        } catch (Throwable e) { return null; }
+    }
     static String fm(long ms) { long s = Math.max(0, ms / 1000); return String.format("%02d:%02d", s / 60, s % 60); }
     static void tri(Canvas c, Paint p, float x, float y, float s, boolean right) {
         Path t = new Path(); float d = right ? 1 : -1;
@@ -108,8 +124,11 @@ public abstract class AirWidget extends AppWidgetProvider {
             Bitmap b = Bitmap.createBitmap(800, 360, Bitmap.Config.ARGB_8888); Canvas k = new Canvas(b);
             Paint bg = P(0xFF000000); bg.setShader(new LinearGradient(0, 0, 0, 360, new int[]{0xFF8E8A82, 0xFF9A8F88, 0xFFE28F77}, new float[]{0, .45f, 1}, Shader.TileMode.CLAMP));
             k.drawRoundRect(0, 0, 800, 360, 90, 90, bg);
-            Paint o = P(0xFFFFFFFF); o.setShader(orb(110, 110, 62)); k.drawCircle(110, 110, 62, o);
-            k.drawCircle(150, 150, 12, P(0xFFFF4A2A));
+            Paint o = P(0xFFFFFFFF); Bitmap art = decode(s.getString("art", ""), 124);
+            if (art != null) {
+                o.setShader(new BitmapShader(Bitmap.createScaledBitmap(art, 124, 124, true), Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+                k.translate(48, 48); k.drawCircle(62, 62, 62, o); k.translate(-48, -48);
+            } else { o.setShader(orb(110, 110, 62)); k.drawCircle(110, 110, 62, o); k.drawCircle(150, 150, 12, P(0xFFFF4A2A)); }
             k.drawText("Daily", 220, 96, T(0xFFFFFFFF, 40, Typeface.DEFAULT));
             Paint chip = P(0x44FFFFFF); k.drawRoundRect(330, 62, 418, 104, 21, 21, chip);
             k.drawText(pl ? "play" : "pause", 342, 93, T(0xFFFFFFFF, 24, Typeface.DEFAULT));
