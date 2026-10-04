@@ -166,9 +166,12 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.3)}
 body.dark input[type=range]::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--acc) var(--p),rgba(255,255,255,.16) var(--p))}
 #seek{touch-action:none}#seek:before{content:"";position:absolute;inset:-16px 0}
 #prog:after{content:"";position:absolute;right:-6px;top:-4px;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 1px 6px rgba(0,0,0,.35)}
+#edge{display:none!important}
+#err{position:fixed;left:8px;right:8px;top:8px;z-index:99;background:#300;color:#fff;font:11px/1.35 monospace;padding:8px 10px;border-radius:10px;display:none;white-space:pre-wrap}
+.it.c .t{max-width:calc(100% - 215px)}
 </style></head><body class="introing">
-<div id="aura"><i></i><i></i><i></i><i></i></div><div id="edge"></div>
-<canvas id="fx"></canvas>
+<div id="aura"><i></i><i></i><i></i><i></i></div>
+<canvas id="fx"></canvas><div id="err"></div>
 <div class="fade t"></div><div class="fade b"></div>
 <div id="app">
 <header><div><h1 id="t1"></h1><small id="t2"></small></div><button id="menuBtn">···</button><div id="menu" class="glass"></div></header>
@@ -272,6 +275,8 @@ body.dark input[type=range]::-webkit-slider-runnable-track{background:linear-gra
 </div>
 <input type="file" id="file" accept="audio/*" multiple hidden>
 <script>
+window.onerror=(m,u,l,c)=>{const e=document.getElementById('err');if(e){e.style.display='block';e.textContent+=m+' @'+(l||'?')+':'+(c||'?')+'\n'}};
+
 const $=id=>document.getElementById(id);
 
 const SCR=[['explore','Explore',''],['music','Music',''],['library','Library',''],['eq','Equalizer',''],['alarm','Alarm',''],['wheel','Click wheel',''],['game','Game',''],['board1','Board','Profitable'],['board2','Board','Most visited'],['analytics','Analytics','Product'],['sales','Sales','Overview'],['insights','Data','Insights'],['product','Product','Analytics']];
@@ -402,7 +407,7 @@ function layoutArc(){const now=performance.now(),tt=enterT?(now-enterT)/1000:9,c
  arcEls.forEach((el,i)=>{const d=i-pos,a=Math.abs(d);if(a>4.3){el.style.display='none';return}el.style.display='';
   let p=Math.max(0,Math.min(1,(tt-Math.abs(i-c)*.09)/.75));p=1-Math.pow(1-p,3);
   el.style.transform=`translate3d(${(16*d*d+(1-p)*260).toFixed(1)}px,${(d*94).toFixed(1)}px,0) scale(${(1-.07*a).toFixed(3)})`;el.style.opacity=Math.max(0,1-a*.23)*p;
-  const t=el.lastChild,kk=Math.max(0,1-a),v=document.body.classList.contains('dark')?Math.round(95+150*kk):Math.round(190-173*kk);t.style.transform=`rotate(${-d*11}deg)`;t.firstChild.style.color=`rgb(${v},${v},${v+5})`;});updatePlay()}
+  el.classList.toggle('c',a<.5);const t=el.lastChild,kk=Math.max(0,1-a),v=document.body.classList.contains('dark')?Math.round(95+150*kk):Math.round(190-173*kk);t.style.transform=`rotate(${-d*11}deg)`;t.firstChild.style.color=`rgb(${v},${v},${v+5})`;});updatePlay()}
 let vP=0,lastTick=0,dragging=false,downEl=null,samples=[];
 function tick(t){const now=t||performance.now(),dt=Math.min(.05,(now-lastTick)/1000||.016);lastTick=now;const n=arcEls.length-1,prev=Math.round(pos);
  if(!dragging){
@@ -453,14 +458,19 @@ function fxFrame(t){const dt=Math.min(.05,(t-lastT)/1000||.016);lastT=t;level+=(
   const tw=.55+.45*Math.sin(p.t+t*.001*p.tw),a=Math.sin(Math.PI*p.life/p.max)*tw*Math.max(level,.25),s=p.r*(1+.35*beat);
   fc.globalAlpha=Math.min(1,a*(dk?1:.9));fc.drawImage(SPR[p.c],p.x-s*4.5,p.y-s*4.5,s*9,s*9);
   if(p.r>1.7){fc.fillStyle=dk?'#fff':`rgb(${PAL[p.c]})`;star(p.x,p.y,s*3.4*(.6+.4*tw),p.t+p.life*.6)}}
- fc.globalAlpha=1}
+ fc.globalAlpha=1;
+ if(level>.02){const rw=5,x=rw/2,y=rw/2,w=W-rw,h=H-rw,r=44;let g;
+  try{g=fc.createConicGradient((t*.0007)%6.283,W/2,H/2)}catch(e){g=fc.createLinearGradient(0,0,W,H)}
+  [[0,'#ff6b6b'],[.17,'#ffb86b'],[.34,'#ff7ad9'],[.5,'#7b5cff'],[.67,'#4bc8ff'],[.84,'#7dffb8'],[1,'#ff6b6b']].forEach(a=>g.addColorStop(a[0],a[1]));
+  fc.globalCompositeOperation='source-over';fc.globalAlpha=.8*level;fc.lineWidth=rw;fc.strokeStyle=g;fc.shadowColor='rgba(170,120,255,.6)';fc.shadowBlur=14;
+  fc.beginPath();fc.moveTo(x+r,y);fc.arcTo(x+w,y,x+w,y+h,r);fc.arcTo(x+w,y+h,x,y+h,r);fc.arcTo(x,y+h,x,y,r);fc.arcTo(x,y,x+w,y,r);fc.closePath();fc.stroke();fc.shadowBlur=0;fc.globalAlpha=1}}
 function fxLoop(t){fxFrame(t);if(level>.01||st.playing||parts.length)fxRaf=requestAnimationFrame(fxLoop);else{fxRaf=0;fc.clearRect(0,0,W,H)}}
 const fxKick=()=>{if(RM||fxRaf)return;lastT=performance.now();fxRaf=requestAnimationFrame(fxLoop)};
 const burst=()=>{if(RM||!st.playing)return;for(let i=0;i<46;i++)spawn(true);fxKick()};
 
 
 // ---- opening + boot ----
-$('start').onclick=()=>{hap('heavy');$('intro').classList.add('out');enterT=performance.now();kick();setTimeout(()=>$('intro').style.display='none',1000)};
+
 window.airGo=id=>{if(!SCR.find(x=>x[0]==id))return;document.body.classList.remove('introing');$('intro').style.display='none';go(id)};
 applyTheme();go('explore');buildArc();
 try{perm=AirPlayer.perm();airLib(JSON.parse(AirPlayer.library()),false);airState(JSON.parse(AirPlayer.state()));loadAlarm()}catch(e){}

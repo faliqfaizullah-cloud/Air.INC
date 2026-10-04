@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
+import android.webkit.RenderProcessGoneDetail;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import org.json.JSONObject;
@@ -33,6 +34,7 @@ public class MainActivity extends Activity {
         super.onCreate(b);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         sp = getSharedPreferences("air", 0);
+        WebView.setWebContentsDebuggingEnabled(true);
         web = new WebView(this);
         setContentView(web);
         WebSettings s = web.getSettings();
@@ -62,6 +64,7 @@ public class MainActivity extends Activity {
         };
         pendingGo = getIntent().getStringExtra("go");
         web.setWebViewClient(new WebViewClient() {
+            @Override public boolean onRenderProcessGone(WebView v, RenderProcessGoneDetail d) { runOnUiThread(() -> recreate()); return true; }
             @Override public void onPageFinished(WebView v, String u) {
                 if (pendingGo != null) { run("window.airGo&&airGo('" + pendingGo + "')"); pendingGo = null; }
             }
