@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Air.INC</title>
+<style>
+:root{--bg:#f1f1f2;--ink:#111;--mute:#b4b4b8;--acc:#e8872e;--glass:rgba(255,255,255,.46);--edge:rgba(255,255,255,.8);
+--sh:inset 0 2px 8px #fff,inset 0 -8px 16px #0000000a,0 14px 34px #00000010}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:"Helvetica Neue",system-ui,sans-serif;overflow:hidden}
+body:before,body:after{content:"";position:fixed;border-radius:50%;filter:blur(70px);z-index:0;opacity:.55}
+body:before{width:70vw;height:70vw;left:-20vw;top:8vh;background:linear-gradient(135deg,#ffd9b8,#f4c6ff)}
+body:after{width:80vw;height:80vw;right:-30vw;bottom:2vh;background:linear-gradient(135deg,#bfe3ff,#d6ffd9)}
+.glass{background:var(--glass);backdrop-filter:blur(22px) saturate(1.6);-webkit-backdrop-filter:blur(22px) saturate(1.6);border:1px solid var(--edge);box-shadow:var(--sh)}
+#app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top,0px) + 26px) 22px calc(env(safe-area-inset-bottom,0px) + 22px)}
+.fade{position:fixed;left:0;right:0;height:110px;z-index:3;pointer-events:none;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.fade.t{top:0;-webkit-mask-image:linear-gradient(#000 30%,transparent);mask-image:linear-gradient(#000 30%,transparent)}
+.fade.b{bottom:0;-webkit-mask-image:linear-gradient(transparent,#000 70%);mask-image:linear-gradient(transparent,#000 70%)}
+header{display:flex;justify-content:space-between;position:relative;z-index:6}
+h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.3px}small{display:block;font-size:20px;font-weight:700;color:var(--mute)}
+#menuBtn{background:none;border:0;font-size:20px;color:#777;padding:6px 10px}
+#menu{position:absolute;right:0;top:38px;border-radius:26px;padding:8px;display:none;min-width:190px;max-height:68vh;overflow:auto;z-index:9}
+#menu.on{display:block}#menu div{padding:12px 16px;border-radius:16px;font-weight:600;font-size:15px}#menu div.sel{background:#ffffffaa}
+main{flex:1;position:relative;min-height:0}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:14px 0 6px}
+.screen.on{display:flex;animation:in .35s ease}@keyframes in{from{opacity:0;filter:blur(10px)}}
+.disc{width:min(72vw,300px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;position:relative}
+.art{width:76%;aspect-ratio:1;border-radius:50%;filter:blur(7px);background:conic-gradient(from 20deg,#f66,#fc4,#6d8,#4bf,#a6f,#f66);animation:spin 14s linear infinite paused}
+.playing .art,.playing .rec{animation-play-state:running}@keyframes spin{to{transform:rotate(360deg)}}
+.knob{position:absolute;top:10%;left:50%;width:9px;height:9px;border-radius:50%;background:#000}
+.title{text-align:center}.title b{font-size:17px}.title span{display:block;color:var(--mute);font-size:12px;margin-top:3px}
+.pad{width:min(50vw,200px);aspect-ratio:1;border-radius:50%;position:relative}
+.pad button{position:absolute;background:none;border:0;font-size:19px;color:#777}
+.pp{inset:30%;border-radius:50%;background:#fffc!important;color:var(--ink)!important;box-shadow:var(--sh);font-size:21px!important}
+.pad .l{left:6%;top:42%}.pad .r{right:6%;top:42%}.pad .u{top:6%;left:44%;font-size:14px}.pad .d{bottom:6%;left:44%;font-size:14px}
+.row{display:flex;gap:12px;width:100%;justify-content:space-between;align-items:center}
+.chip{width:46px;height:46px;border-radius:50%;font-size:17px;color:#555;border:1px solid var(--edge)}
+.bar{width:100%;height:4px;background:#0000001a;border-radius:4px;position:relative;margin:6px 0}.bar i{position:absolute;inset:0 auto 0 0;background:var(--acc);border-radius:4px;width:0}
+.time{display:flex;justify-content:space-between;width:100%;font-size:11px;color:var(--mute)}
+.num{font-weight:200;font-size:84px;letter-spacing:-4px;line-height:.9;font-family:"Courier New",monospace}.num.s{font-size:52px}
+.lab{font-size:11px;color:var(--mute);line-height:1.3}.lab b{color:var(--ink);font-size:12px}
+.rec{width:76%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fff 0 8%,#000 9%);animation:spin 4s linear infinite paused}
+.eq{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%}.eq label{border-radius:26px;padding:12px 8px;text-align:center;font-size:10px;color:var(--mute)}
+.eq input,input[type=time]{accent-color:var(--acc)}.eq input{width:100%}.eq b{display:block;color:var(--ink);font-size:13px}
+.genres{display:flex;gap:26px;overflow-x:auto;width:100%;padding:30px 42vw 20px;scroll-snap-type:x mandatory;scrollbar-width:none}.genres::-webkit-scrollbar{display:none}
+.genres span{scroll-snap-align:center;font-size:15px;color:var(--mute);white-space:nowrap}.genres span.on{color:var(--ink);font-weight:600}
+.tick{width:2px;height:22px;background:var(--acc);margin:0 auto -6px}
+.list{width:100%;max-height:32%;overflow:auto;border-radius:26px;padding:6px 16px}.list div{padding:11px 0;border-bottom:1px solid #0000000d;font-size:13px;display:flex;justify-content:space-between}.list .on{font-weight:700;color:var(--acc)}
+.tog{display:flex;border-radius:40px;padding:6px;width:100%}.tog div{flex:1;text-align:center;padding:16px;border-radius:34px;font-weight:700;color:var(--mute)}.tog .on{background:#ffffffcc;color:var(--ink);box-shadow:var(--sh)}
+input[type=time]{border:0;background:#ffffffaa;border-radius:20px;padding:12px;font-size:19px}
+.dots{display:grid;grid-template-columns:repeat(10,1fr);gap:9px;width:100%;border-radius:24px;padding:18px}.dots i{aspect-ratio:1;border-radius:50%;background:#0000000f}.dots i.on{background:var(--acc)}
+.bars{display:flex;gap:10px;width:100%;height:42%;border-radius:24px;padding:18px;align-items:flex-end}.bars i{flex:1;border-radius:20px;background:linear-gradient(#fff,#d4d8e2);min-height:14px}.bars i.on{background:linear-gradient(#f7b27a,var(--acc))}
+.ring{width:170px;height:170px;border-radius:50%;border:4px solid #000;position:relative;display:grid;place-items:center}
+.ring:before{content:"";position:absolute;top:-7px;left:calc(50% - 2px);width:4px;height:12px;background:var(--acc)}.ring .inner{width:60%;aspect-ratio:1;border-radius:50%;background:radial-gradient(#fff,#e6e6ea)}
+.big{width:100%;display:flex;justify-content:space-between;align-items:flex-end}
+.sph{width:22%;aspect-ratio:1;border-radius:50%;box-shadow:0 8px 16px #0003}
+.cl{background:radial-gradient(circle at 35% 30%,#fff,#9a9ca3 45%,#40424a)}.wh{background:radial-gradient(circle at 35% 30%,#fff,#d9dadf 60%,#9a9ca3)}
+.bl{background:radial-gradient(circle at 35% 30%,#dfe8ff,#8a9fd6 60%,#5a6aa6)}.gr{background:radial-gradient(circle at 35% 30%,#7fb35a,#2f6a1f 70%),repeating-radial-gradient(#0002 0 2px,transparent 3px 5px)}
+.yl{background:radial-gradient(circle at 35% 30%,#f0f2a0,#a9b23a 70%)}.dk{background:radial-gradient(circle at 35% 30%,#777,#111 70%)}
+.cluster{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;width:260px;padding:22px;border-radius:50%;aspect-ratio:1;align-content:center}.cluster .sph{width:34%}
+.spk{width:min(64vw,260px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fff 0 20%,transparent 21%),radial-gradient(#9a9ca3 1.5px,transparent 2px) 0 0/10px 10px,#eceef2;box-shadow:var(--sh)}
+.rowp{width:100%;border-radius:22px;padding:14px 18px}.rowp .big{align-items:center}
+.dome{width:90%;height:90px;border-radius:200px 200px 0 0;background:radial-gradient(ellipse at 40% 20%,#fff,#b9bcc4 55%,#6b6e76)}
+.tm{font-size:12px;color:var(--mute)}
+#gscore{font-size:28px;font-weight:200}
+</style></head><body>
+<div class="fade t"></div><div class="fade b"></div>
+<div id="app">
+<header><div><h1 id="t1"></h1><small id="t2"></small></div><button id="menuBtn">⌄</button><div id="menu" class="glass"></div></header>
+<main>
+
+<section class="screen" id="game">
+ <div class="row"><span id="gscore">0</span><span class="tm" id="gtime">02:00</span></div>
+ <div class="disc glass"><div id="orbit" style="position:absolute;inset:8%"><i style="position:absolute;top:-5px;left:calc(50% - 5px);width:10px;height:10px;border-radius:50%;background:#000"></i></div><div class="ring" style="width:48%;height:48%;border-width:3px"></div></div>
+ <div class="title"><b id="gmsg">Tap A when the dot hits the orange tick</b></div>
+ <button class="chip glass" id="gA" style="width:84px;height:84px;font-size:26px">A</button>
+</section>
+
+<section class="screen on" id="music">
+ <div class="disc glass"><div class="art"></div><i class="knob"></i></div>
+ <div class="title"><b id="trk">Open music</b><span id="art">Tap the folder to add songs</span></div>
+ <div style="width:100%"><div class="bar" id="seek"><i id="prog"></i></div><div class="time"><span id="cur">00:00</span><span id="dur">00:00</span></div></div>
+ <div class="pad glass"><button class="l" id="prev">◀◀</button><button class="r" id="next">▶▶</button><button class="u" id="shuf">⇄</button><button class="d" id="rep">↻</button><button class="pp" id="pp">▶</button></div>
+ <div class="row"><button class="chip glass" id="open">📂</button><button class="chip glass" id="vol">🔊</button></div>
+</section>
+
+<section class="screen" id="library">
+ <div class="disc glass" style="width:min(56vw,230px)"><div class="art" style="animation-play-state:paused"></div></div>
+ <div class="list glass" id="list"><div>No songs yet</div></div>
+ <div style="width:100%;text-align:center"><div class="lab">Music</div><div class="tick"></div><div class="genres" id="genres"></div></div>
+</section>
+
+<section class="screen" id="eq">
+ <div class="disc glass"><div class="rec"></div></div>
+ <div class="time"><span id="cur2">00:00</span><span id="dur2">00:00</span></div>
+ <div class="eq" id="eqs"></div>
+ <div class="row"><button class="chip glass" id="flat">◎</button><button class="chip glass" id="bass">≋</button><button class="chip glass" id="vocal">♪</button></div>
+</section>
+
+<section class="screen" id="alarm">
+ <div class="glass" style="width:100%;border-radius:54px;padding:36px;display:grid;place-items:center"><div class="num" id="alNum">10<br>15</div></div>
+ <input type="time" id="alTime" value="10:15">
+ <div class="tog glass"><div id="alOff" class="on">Off</div><div id="alOn">On</div></div>
+ <div class="lab" id="alMsg">Wakes you with your current song</div>
+</section>
+
+<section class="screen" id="wheel">
+ <div class="spk"></div><div class="tm" id="cur3">00:00</div>
+ <div class="pad glass" style="width:min(62vw,240px)"><button class="l" id="p2">◀◀</button><button class="r" id="n2">▶▶</button><button class="u" id="vp">+</button><button class="d" id="vm">–</button><button class="pp" id="pp2">▶</button></div>
+ <div class="lab">Volume <span id="vl">100</span>%</div>
+</section>
+
+<section class="screen" id="board1">
+ <div class="rowp glass"><div class="big"><div class="lab"><b>Profitable</b><br>Month</div><div class="num" id="bd1">0</div></div></div>
+ <div class="dots glass" id="dots"></div>
+ <div class="cluster glass" id="sp1"></div>
+</section>
+
+<section class="screen" id="board2">
+ <div class="rowp glass"><div class="big"><div class="lab"><b>Most</b><br>Visited</div><div class="num" id="bd2">0</div></div></div>
+ <div class="bars glass" id="bars"></div>
+ <div class="cluster glass" id="sp2" style="width:200px"></div>
+</section>
+
+<section class="screen" id="analytics">
+ <div class="big"><div class="lab"><b>Sales</b><br>Overview</div><div class="num" id="aTot">0</div></div>
+ <div class="disc glass" style="width:230px"><div class="ring"><div class="inner"></div></div></div>
+ <div class="row"><span class="lab">Product</span><span class="lab">Analytics 2026</span></div>
+</section>
+
+<section class="screen" id="sales">
+ <div class="big"><div class="lab">All Sales</div><div class="num" id="sTot">0</div></div>
+ <div class="disc glass" style="width:230px"><div class="ring"><div class="inner"></div></div></div>
+ <div class="big"><div class="num s" id="sOn">0</div><div class="num s" id="sOff">0</div></div>
+ <div class="row"><span class="lab">Played</span><span class="lab">Skipped</span></div>
+</section>
+
+<section class="screen" id="insights">
+ <div class="rowp glass"><div class="big"><div class="lab"><b>Product</b><br>Analytics</div><div class="lab" id="iTxt">Tap a sphere</div></div></div>
+ <div class="cluster glass" id="sp3" style="width:min(80vw,310px)"></div>
+ <div class="lab">Pick a sphere to restyle the player</div>
+</section>
+
+<section class="screen" id="product">
+ <div class="rowp glass"><div class="big"><div class="lab"><b>Sold</b><br>Services</div><div class="num s" id="pA">0</div></div></div>
+ <div class="rowp glass"><div class="big"><div class="lab"><b>The Best</b><br>Categories</div><div class="num s" id="pB">0</div></div></div>
+ <div class="rowp glass"><div class="big"><div class="lab"><b>Analysis</b><br>Of Goods</div><div class="num s" id="pC">0</div></div></div>
+ <div class="dome"></div>
+</section>
+
+</main></div>
+<audio id="au"></audio><input type="file" id="file" accept="audio/*" multiple hidden>
+<script>
+const $=id=>document.getElementById(id),au=$('au');
+const SCR=[['music','Music',''],['library','March','Library'],['eq','Equalizer',''],['alarm','Alarm',''],['wheel','Click wheel',''],['game','Game',''],['board1','Board','Profitable'],['board2','Board','Most visited'],['analytics','Analytics','Product'],['sales','Sales','Overview'],['insights','Data','Insights'],['product','Product','Analytics']];
+// haptics
+const hap=t=>{try{window.AirHaptic?AirHaptic.hap(t):navigator.vibrate&&navigator.vibrate(t=='heavy'?40:t=='tick'?8:16)}catch(e){}};
+document.addEventListener('pointerdown',e=>{if(e.target.closest('button,.chip,.tog div,#menu div,.list div,.sph,.pad button'))hap('click')});
+document.addEventListener('input',e=>e.target.type=='range'&&hap('tick'));
+// state
+let tracks=[],idx=-1,shuf=false,rep=false,cur='music',skin=0;
+const S=JSON.parse(localStorage.air||'{"p":0,"s":0,"d":[],"w":[0,0,0,0,0,0,0]}');const save=()=>localStorage.air=JSON.stringify(S);
+// nav
+const menu=$('menu');
+function go(id){cur=id;document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==id));const s=SCR.find(x=>x[0]==id);$('t1').textContent=s[1];$('t2').textContent=s[2];
+ menu.innerHTML=SCR.map(x=>`<div data-i="${x[0]}" class="${x[0]==id?'sel':''}">${x[1]} ${x[2]}</div>`).join('');menu.classList.remove('on');stats()}
+menu.onclick=e=>e.target.dataset.i&&go(e.target.dataset.i);$('menuBtn').onclick=()=>menu.classList.toggle('on');
+window.airBack=()=>{if(menu.classList.contains('on')){menu.classList.remove('on');return true}if(cur!='music'){go('music');return true}return false};
+// spheres
+const SPH=['cl','wh','bl','gr','yl','dk'],HUE=[210,30,220,110,65,0];
+['sp1','sp2','sp3'].forEach(id=>$(id).innerHTML=SPH.map((c,i)=>`<div class="sph ${c}" data-k="${i}"></div>`).join(''));
+document.addEventListener('click',e=>{const k=e.target.dataset&&e.target.dataset.k;if(k!==undefined){skin=+k;$('iTxt').textContent='Skin '+(skin+1);paint()}});
+function paint(){const h=HUE[skin]+idx*40;document.querySelectorAll('.art').forEach(a=>a.style.background=`conic-gradient(from 20deg,hsl(${h},85%,72%),#fc4,#6d8,#4bf,hsl(${h+200},80%,72%),hsl(${h},85%,72%))`)}
+// files
+$('open').onclick=()=>$('file').click();
+$('file').onchange=e=>{const f=[...e.target.files];if(!f.length)return;const s=tracks.length;f.forEach(x=>tracks.push({n:x.name.replace(/\.[^.]+$/,''),u:URL.createObjectURL(x)}));play(s)};
+function renderList(){$('list').innerHTML=tracks.length?tracks.map((t,i)=>`<div data-i="${i}" class="${i==idx?'on':''}"><span>${t.n}</span><span>${i==idx?'▶':''}</span></div>`).join(''):'<div>No songs yet</div>'}
+$('list').onclick=e=>{const d=e.target.closest('[data-i]');d&&play(+d.dataset.i)};
+const G=['Electronic','Pop','Rock','Jazz','Classical','Hip-Hop','Ambient'];let lastG=0;
+$('genres').innerHTML=G.map((g,i)=>`<span class="${i?'':'on'}">${g}</span>`).join('');
+$('genres').onscroll=()=>{const el=$('genres'),c=el.getBoundingClientRect(),m=c.left+c.width/2;let sel=lastG;
+ el.querySelectorAll('span').forEach((s,i)=>{const r=s.getBoundingClientRect(),on=Math.abs(r.left+r.width/2-m)<36;s.classList.toggle('on',on);if(on)sel=i});if(sel!=lastG){lastG=sel;hap('tick')}};
+// audio + EQ
+let ctx,filters=[];const F=[60,170,400,1000,3500,10000],N=['Sub','Bass','Low','Mid','High','Air'];
+$('eqs').innerHTML=F.map((f,i)=>`<label class="glass">${N[i]}<b>0 dB</b><input type="range" min="-12" max="12" value="0" data-i="${i}"></label>`).join('');
+function initAudio(){if(ctx)return;ctx=new (window.AudioContext||webkitAudioContext)();let n=ctx.createMediaElementSource(au);
+ F.forEach((f,i)=>{const b=ctx.createBiquadFilter();b.type=i==0?'lowshelf':i==5?'highshelf':'peaking';b.frequency.value=f;b.gain.value=+$('eqs').children[i].querySelector('input').value;n.connect(b);n=b;filters.push(b)});n.connect(ctx.destination)}
+$('eqs').oninput=e=>{const i=+e.target.dataset.i;e.target.previousElementSibling.textContent=e.target.value+' dB';filters[i]&&(filters[i].gain.value=+e.target.value)};
+const preset=v=>[...$('eqs').children].forEach((l,i)=>{const r=l.querySelector('input');r.value=v[i];r.dispatchEvent(new Event('input',{bubbles:true}))});
+$('flat').onclick=()=>preset([0,0,0,0,0,0]);$('bass').onclick=()=>preset([8,6,2,0,-1,0]);$('vocal').onclick=()=>preset([-3,-2,2,5,4,1]);
+function play(i){if(!tracks.length)return $('file').click();idx=(i+tracks.length)%tracks.length;initAudio();ctx.resume();au.src=tracks[idx].u;au.play();hap('heavy');
+ $('trk').textContent=tracks[idx].n;$('art').textContent='Track '+(idx+1)+' of '+tracks.length;renderList();paint();
+ S.p++;const n=new Date();S.w[n.getDay()]++;if(!S.d.includes(n.getDate()))S.d.push(n.getDate());save()}
+const fm=s=>isFinite(s)?String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math.floor(s%60)).padStart(2,'0'):'00:00';
+const toggle=()=>au.src?(au.paused?au.play():au.pause()):play(0);
+const next=()=>{if(au.currentTime<20)S.s++,save();play(shuf?Math.floor(Math.random()*tracks.length):idx+1)},prev=()=>au.currentTime>3?au.currentTime=0:play(idx-1);
+$('pp').onclick=$('pp2').onclick=toggle;$('next').onclick=$('n2').onclick=next;$('prev').onclick=$('p2').onclick=prev;
+$('shuf').onclick=e=>{shuf=!shuf;e.target.style.color=shuf?'#e8872e':''};$('rep').onclick=e=>{rep=!rep;e.target.style.color=rep?'#e8872e':''};
+const setVol=v=>{au.volume=Math.max(0,Math.min(1,v));$('vl').textContent=Math.round(au.volume*100);$('vol').textContent=au.volume>.5?'🔊':'🔉'};
+$('vol').onclick=()=>setVol(au.volume>.5?.3:1);$('vp').onclick=()=>setVol(au.volume+.1);$('vm').onclick=()=>setVol(au.volume-.1);
+au.onplay=au.onpause=()=>{const p=!au.paused;$('pp').textContent=$('pp2').textContent=p?'❚❚':'▶';document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('playing',p))};
+au.onended=()=>rep?(au.currentTime=0,au.play()):next();
+au.ontimeupdate=()=>{$('cur').textContent=$('cur2').textContent=$('cur3').textContent=fm(au.currentTime);$('dur').textContent=$('dur2').textContent=fm(au.duration);$('prog').style.width=(au.currentTime/au.duration*100||0)+'%'};
+$('seek').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();au.currentTime=(e.clientX-r.left)/r.width*au.duration||0;hap('tick')};
+// stats
+function stats(){const min=Math.round(tracks.length*3.5);
+ $('bd1').textContent=$('bd2').textContent=S.d.length;$('aTot').textContent=$('sTot').textContent=S.p;$('sOn').textContent=Math.max(0,S.p-S.s);$('sOff').textContent=S.s;
+ $('pA').textContent=S.p;$('pB').textContent=G.length;$('pC').textContent=tracks.length;
+ $('dots').innerHTML=Array.from({length:30},(_,i)=>`<i class="${S.d.includes(i+1)?'on':''}"></i>`).join('');
+ const mx=Math.max(1,...S.w);$('bars').innerHTML=S.w.map((v,i)=>`<i class="${v==mx&&v?'on':''}" style="height:${14+v/mx*86}%"></i>`).join('')}
+// alarm
+let alOn=false,alT;
+function setAl(on){alOn=on;$('alOn').classList.toggle('on',on);$('alOff').classList.toggle('on',!on);const[h,m]=$('alTime').value.split(':');$('alNum').innerHTML=h+'<br>'+m;clearInterval(alT);
+ $('alMsg').textContent=on?'Alarm set for '+$('alTime').value:'Wakes you with your current song';
+ if(on)alT=setInterval(()=>{const n=new Date(),t=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  if(t==$('alTime').value&&n.getSeconds()<2){setAl(false);setVol(1);tracks.length&&play(Math.max(idx,0));[0,250,500].forEach(d=>setTimeout(()=>hap('heavy'),d))}},1000)}
+$('alOn').onclick=()=>setAl(true);$('alOff').onclick=()=>setAl(false);$('alTime').onchange=()=>setAl(alOn);
+// game: tap when the dot passes the orange mark
+let gRun=false,ang=0,sc=0,left=120,spd=1.6,gT,gR;
+function gStop(){gRun=false;clearInterval(gT);cancelAnimationFrame(gR);$('gmsg').textContent='Time! Score '+sc+' · tap A to replay';hap('heavy')}
+function gLoop(){if(!gRun)return;ang=(ang+spd)%360;$('orbit').style.transform=`rotate(${ang}deg)`;gR=requestAnimationFrame(gLoop)}
+$('gA').onclick=()=>{if(!gRun){gRun=true;sc=0;left=120;spd=1.6;$('gscore').textContent=0;$('gmsg').textContent='Go!';gT=setInterval(()=>{left--;$('gtime').textContent=fm(left);if(left<=0)gStop()},1000);gLoop();return}
+ const d=Math.min(ang,360-ang);if(d<18){sc++;spd+=.12;hap('click')}else{sc=Math.max(0,sc-1);hap('heavy')}$('gscore').textContent=sc};
+go('music');
+</script></body></html>
