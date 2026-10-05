@@ -4,7 +4,14 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.media.AudioDeviceCallback;
+import android.media.AudioDeviceInfo;
+import android.media.AudioManager;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -71,6 +78,24 @@ public class MainActivity extends Activity {
         });
         web.loadUrl("file:///android_asset/index.html");
         if (hasPerm()) scanLib(); else askPermissions();
+        // refresh the headphone card when devices connect / disconnect or report a battery level
+        AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
+        am.registerAudioDeviceCallback(new AudioDeviceCallback() {
+            @Override public void onAudioDevicesAdded(AudioDeviceInfo[] a) { run("window.airHp&&airHp()"); }
+            @Override public void onAudioDevicesRemoved(AudioDeviceInfo[] a) { run("window.airHp&&airHp()"); }
+        }, null);
+        BroadcastReceiver batt = new BroadcastReceiver() {
+            @Override public void onReceive(Context c, Intent i) {
+                try {
+                    BluetoothDevice d = i.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    int lv = i.getIntExtra("android.bluetooth.device.extra.BATTERY_LEVEL", -1);
+                    if (d != null && lv >= 0) sp.edit().putInt("hp_bat_" + d.getAddress(), lv).apply();
+                } catch (Throwable t) { }
+                run("window.airHp&&airHp()");
+            }
+        };
+        IntentFilter bf = new IntentFilter("android.bluetooth.device.action.BATTERY_LEVEL_CHANGED");
+        if (Build.VERSION.SDK_INT >= 33) registerReceiver(batt, bf, Context.RECEIVER_EXPORTED); else registerReceiver(batt, bf);
     }
 
     private void run(final String js) { runOnUiThread(() -> web.evaluateJavascript(js, null)); }
@@ -82,12 +107,14 @@ public class MainActivity extends Activity {
     }
 
     private void askPermissions() {
-        if (Build.VERSION.SDK_INT >= 33) requestPermissions(new String[]{Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS}, 1);
+        if (Build.VERSION.SDK_INT >= 33) requestPermissions(new String[]{Manifest.permission.READ_MEDIA_AUDIO, Manifest.permission.POST_NOTIFICATIONS, Manifest.permission.BLUETOOTH_CONNECT}, 1);
+        else if (Build.VERSION.SDK_INT >= 31) requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.BLUETOOTH_CONNECT}, 1);
         else requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
     }
 
     @Override public void onRequestPermissionsResult(int c, String[] p, int[] r) {
         super.onRequestPermissionsResult(c, p, r);
+        run("window.airHp&&airHp()");
         if (hasPerm()) { run("window.airPerm&&airPerm()"); scanLib(); }
     }
 
@@ -133,6 +160,10 @@ public class MainActivity extends Activity {
             } catch (Exception e) { }
             if (Build.VERSION.SDK_INT >= 26 && !MediaService.running) startForegroundService(i); else startService(i);
         }
+        @JavascriptInterface public String headphones() { return Headphones.info(MainActivity.this); }
+        @JavascriptInterface public void setPref(String k, boolean v) { sp.edit().putBoolean(k, v).apply(); }
+        @JavascriptInterface public void askBt() { runOnUiThread(() -> { if (Build.VERSION.SDK_INT >= 31) requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 2); }); }
+        @JavascriptInterface public void openBt() { startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS)); }
         @JavascriptInterface public String state() { return MediaService.lastState; }
         @JavascriptInterface public String library() { return Library.load(MainActivity.this).toString(); }
         @JavascriptInterface public void scan() { runOnUiThread(() -> scanLib()); }
