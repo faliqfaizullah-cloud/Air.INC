@@ -160,6 +160,8 @@ public class MainActivity extends Activity {
             } catch (Exception e) { }
             if (Build.VERSION.SDK_INT >= 26 && !MediaService.running) startForegroundService(i); else startService(i);
         }
+        @JavascriptInterface public void setNum(String k, double v) { sp.edit().putFloat(k, (float) v).apply(); }
+        @JavascriptInterface public void setLong(String k, double v) { sp.edit().putLong(k, (long) v).apply(); }
         @JavascriptInterface public String headphones() { return Headphones.info(MainActivity.this); }
         @JavascriptInterface public void setPref(String k, boolean v) { sp.edit().putBoolean(k, v).apply(); }
         @JavascriptInterface public void askBt() { runOnUiThread(() -> { if (Build.VERSION.SDK_INT >= 31) requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 2); }); }
@@ -178,7 +180,8 @@ public class MainActivity extends Activity {
         }
         @JavascriptInterface public void alarm(int h, int m, boolean on) { Alarms.schedule(MainActivity.this, h, m, on); AirWidget.refreshAll(MainActivity.this); }
         @JavascriptInterface public String getAlarm() {
-            return "{\"on\":" + sp.getBoolean("alarm_on", false) + ",\"h\":" + sp.getInt("alarm_h", 10) + ",\"m\":" + sp.getInt("alarm_m", 15) + "}";
+            return "{\"on\":" + sp.getBoolean("alarm_on", false) + ",\"h\":" + sp.getInt("alarm_h", 10) + ",\"m\":" + sp.getInt("alarm_m", 15)
+                + ",\"vol\":" + sp.getFloat("alarm_vol", .6f) + ",\"vib\":" + sp.getBoolean("alarm_vib", true) + ",\"aid\":" + sp.getLong("alarm_id", -1) + "}";
         }
     }
 

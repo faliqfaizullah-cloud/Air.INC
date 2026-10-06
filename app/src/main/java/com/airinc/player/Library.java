@@ -77,8 +77,11 @@ public class Library {
             try {
                 JSONArray out = new JSONArray();
                 Cursor c = ctx.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    new String[]{MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST,
-                        MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.ALBUM_ID, MediaStore.Audio.Media.DURATION},
+                    Build.VERSION.SDK_INT >= 30
+                        ? new String[]{MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST,
+                            MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.ALBUM_ID, MediaStore.Audio.Media.DURATION, MediaStore.Audio.AudioColumns.GENRE}
+                        : new String[]{MediaStore.Audio.Media._ID, MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.ARTIST,
+                            MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.ALBUM_ID, MediaStore.Audio.Media.DURATION},
                     MediaStore.Audio.Media.IS_MUSIC + "!=0 AND " + MediaStore.Audio.Media.DURATION + ">=20000", null,
                     MediaStore.Audio.Media.TITLE + " COLLATE NOCASE ASC");
                 if (c != null) {
@@ -89,6 +92,7 @@ public class Library {
                         o.put("id", id); o.put("title", c.getString(1));
                         o.put("artist", artist == null || artist.equals("<unknown>") ? "" : artist);
                         o.put("album", c.getString(3)); o.put("aid", aid); o.put("dur", c.getLong(5));
+                        if (Build.VERSION.SDK_INT >= 30) { String gn = c.getString(6); o.put("genre", gn == null ? "" : gn.trim()); }
                         File f = artFile(ctx, aid > 0 ? "al" + aid : "tr" + id);
                         o.put("art", f.exists() ? f.getAbsolutePath() : "");
                         out.put(o);

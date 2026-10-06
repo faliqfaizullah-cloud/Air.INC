@@ -231,9 +231,62 @@ body.air header h1{font-size:25px;letter-spacing:-.03em}
 .pb svg{width:26px;height:26px}
 .mini svg{width:19px;height:19px}
 .mleft{grid-template-columns:minmax(0,1fr)!important}
+
+/* ===== Alarm · Game · March (Air OS) ===== */
+#alarm,#game,#library{justify-content:flex-start;gap:8px;padding-top:0}
+.rb{width:44px;height:44px;border-radius:50%;border:0;background:#fff;color:#222;box-shadow:0 6px 16px rgba(0,0,0,.08),inset 0 -2px 6px rgba(0,0,0,.03);display:grid;place-items:center;padding:0;flex:none}
+.rb svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.rb.sm{width:40px;height:40px;box-shadow:0 4px 12px rgba(0,0,0,.07);border:1px solid #f0f0f0}.rb.on{color:var(--acc)}
+#alc{width:min(92vw,40vh);height:auto;aspect-ratio:680/740;flex:none;touch-action:none;margin-top:-2px}
+.altog{position:relative;width:100%;height:78px;border-radius:40px;background:linear-gradient(180deg,#ebebec,#f4f4f5);box-shadow:inset 0 3px 10px rgba(0,0,0,.07),inset 0 -2px 6px #fff;touch-action:none;flex:none;margin-top:-30px;transition:background .4s}
+.alk{position:absolute;left:5px;top:5px;width:68px;height:68px;border-radius:50%;background:#fff;box-shadow:0 8px 20px rgba(0,0,0,.14);display:grid;place-items:center;transition:transform .5s cubic-bezier(.2,.9,.2,1.1);transform:translateX(var(--tx,0px));font-size:15px}
+.altog.drag .alk{transition:none}
+.alblob{position:absolute;right:15%;top:50%;width:48px;height:48px;margin-top:-24px;border-radius:50%;background:radial-gradient(circle,#c9c9cd,rgba(201,201,205,0) 70%);pointer-events:none;transition:opacity .3s}.altog.on .alblob{opacity:0}
+#alIn{position:absolute;left:26px;top:50%;transform:translateY(-50%);font:12px ui-monospace,monospace;color:#8f8f95;opacity:0;transition:opacity .3s}.altog.on #alIn{opacity:1}
+.altog.on{background:linear-gradient(90deg,#fff0e8,#f4f4f5 72%)}
+.alcap{width:100%;display:flex;justify-content:space-between;font-size:12px;color:#a4a4aa;padding:0 8px;flex:none}.alcap button{border:0;background:none;color:inherit;font:inherit;padding:0}.alcap button.on{color:var(--acc)}
+.alpanel{position:relative;width:calc(100% + 44px);margin:0 -22px;flex:1;min-height:96px;max-height:170px}
+#alarc{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.alpanel .rb{position:absolute;bottom:14px;width:42px;height:42px}
+.alsk{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;align-items:center;gap:56px}
+.alsk button{border:0;background:none;color:#222;padding:8px}.alsk svg{width:16px;height:16px;fill:currentColor}
+.gdisc{position:relative;width:min(88vw,38vh);aspect-ratio:1;border-radius:50%;margin-top:22px;background:radial-gradient(circle,#f4f4f4 0 28%,#ececec 30% 33%,#f5f5f5 35% 58%,#e8e8e8 60% 64%,#f6f6f6 66%);box-shadow:inset 0 0 50px rgba(0,0,0,.05),0 0 0 8px #f6f6f6,0 20px 50px rgba(0,0,0,.05);display:grid;place-items:center;flex:none;color:#111}
+.gl{position:absolute;top:-24px;width:8px;height:8px;border-radius:50%;background:#d0d0d4;transition:background .3s}.gl.on{background:#111}#gl1{left:calc(50% - 16px)}#gl2{left:calc(50% + 8px)}
+#gstar{width:20%;transition:transform .35s cubic-bezier(.2,.9,.3,1.4)}#gstar.spin{animation:spin 2.2s linear infinite}
+#gMsg{position:absolute;bottom:19%;font:11px ui-monospace,monospace;color:#a4a4aa;text-align:center;width:70%}
+.gfl{position:relative;width:min(66vw,270px,30vh);aspect-ratio:1;flex:none;margin:6px auto 0;transition:opacity .3s}
+.gp{position:absolute;width:38%;aspect-ratio:1;border:0;border-radius:50%;background:radial-gradient(circle at 50% 32%,#f8f8f8,#ececed);box-shadow:inset 0 2px 5px #fff,inset 0 -8px 14px rgba(0,0,0,.05),0 10px 22px rgba(0,0,0,.04);padding:0;transition:transform .15s,background .15s,box-shadow .15s;color:#222}
+.gp:active{transform:scale(.94)}.gp.lit{background:#fff;box-shadow:0 0 0 2px var(--acc),0 0 26px rgba(232,135,46,.45);transform:scale(1.06)}.gp b{font:400 22px ui-monospace,monospace}
+#gGo{position:absolute;left:50%;top:50%;width:22%;aspect-ratio:1;transform:translate(-50%,-50%);border:0;background:none;color:#d6d6da;padding:0}#gGo svg{width:100%;height:100%}
+.grow{width:100%;display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-bottom:2px}
+.gtime{font:300 20px ui-monospace,monospace;color:#111}.gtime i{font-style:normal;color:#b6b6bb}
+.mcard{width:100%;border-radius:30px;background:#fff;box-shadow:0 14px 34px rgba(0,0,0,.06);padding:12px 12px 12px;flex:none}
+.mtop{display:flex;align-items:center;gap:12px;padding:2px 4px 0}
+.msph{width:50px;height:50px;border-radius:50%;flex:none;background:radial-gradient(circle at 35% 30%,#b9b9b9,#2a2a2a 60%,#000);box-shadow:0 6px 14px rgba(0,0,0,.25)}
+.mtx{flex:1;min-width:0}.mtx b,.mtx span{display:block;font-size:16px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mtx span{color:#cfcfd3;font-weight:600}
+.mdw{position:relative;width:min(100%,36vh);margin:4px auto 0}.mdw canvas{width:100%;aspect-ratio:1;display:block;touch-action:pan-y}
+.mdw .rb{position:absolute;bottom:4px}#mSpk{left:2px}#mNote{right:2px}
+.mdial{position:relative;width:calc(100% + 44px);margin:0 -22px;flex:1;min-height:130px}
+#mruler{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.mlab{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);text-align:center;pointer-events:none;width:46%}.mlab small{display:block;font-size:13px;color:#a4a4aa}.mlab b{display:block;font-size:19px;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mdial .rb{position:absolute;bottom:12px}#mSrch{left:22px}#mCal{right:22px}
+#sq{width:100%;border:0;border-radius:18px;background:#ececee;padding:14px 16px;font-size:16px;margin-bottom:8px;outline:none;color:inherit}
+#sres{max-height:42vh;overflow:auto}.sr{padding:11px 4px;border-bottom:1px solid rgba(0,0,0,.06)}.sr b{display:block;font-size:15px}.sr span{font-size:12px;color:#a4a4aa}
+.calg{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}.cday{aspect-ratio:1;display:grid;place-items:center;border-radius:50%;font-size:14px}.cday.on{background:var(--acc);color:#fff}.cday.today{box-shadow:0 0 0 2px #111}.cwd{font-size:11px;color:#a4a4aa}
+.dark .rb{background:#2a2a2f;color:#eee;border-color:#323238}.dark .mcard{background:#1e1e22}.dark .altog{background:linear-gradient(180deg,#1a1a1d,#222226);box-shadow:inset 0 3px 10px rgba(0,0,0,.5)}
+.dark .altog.on{background:linear-gradient(90deg,#3a2a22,#222226 72%)}.dark .alk{background:#35353b;color:#eee}.dark .alsk button{color:#eee}.dark .alblob{background:radial-gradient(circle,#444,rgba(68,68,68,0) 70%)}
+.dark .gdisc{background:radial-gradient(circle,#1f1f23 0 28%,#26262b 30% 33%,#1d1d21 35% 58%,#27272c 60% 64%,#1c1c20 66%);box-shadow:inset 0 0 50px rgba(0,0,0,.4),0 0 0 8px #18181b;color:#f2f2f4}
+.dark .gl.on{background:#f2f2f4}.dark .gl{background:#3a3a40}.dark .gp{background:radial-gradient(circle at 50% 32%,#2e2e34,#222227);color:#eee}.dark .gp.lit{background:#3c3c44}
+.dark .gtime{color:#f2f2f4}.dark #gGo{color:#444}.dark #sq{background:#2a2a2f}.dark .cday.today{box-shadow:0 0 0 2px #eee}.dark .sr{border-color:rgba(255,255,255,.08)}
+.gp{width:32%!important}
+.sheetwrap .sheet{box-shadow:none}.sheetwrap.on .sheet{box-shadow:0 -20px 50px rgba(0,0,0,.18)}
+.alpanel{flex:none!important;margin-top:auto;height:auto!important;aspect-ratio:780/240;min-height:0!important;max-height:none!important}
+#alarc{height:auto;aspect-ratio:780/240;bottom:0;top:auto}
 </style></head><body class="introing">
 <div id="aura"><i></i><i></i><i></i><i></i></div>
-<canvas id="fx"></canvas><div id="err"></div><svg width="0" height="0" style="position:absolute"><defs>
+<canvas id="fx"></canvas><div id="err"></div><div class="sheetwrap" id="srch"><div class="sheet"><div class="grab"></div><input id="sq" type="search" placeholder="Search songs, artists, albums" autocomplete="off"><div id="sres"></div></div></div>
+<div class="sheetwrap" id="calw"><div class="sheet"><div class="grab"></div><h3 id="calT"></h3><p id="calS"></p><div class="calg" id="calg"></div><div class="srow2"><button class="pillbtn dim" id="calX">Done</button></div></div></div>
+<svg width="0" height="0" style="position:absolute"><defs>
 <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#cfdbc9"/><stop offset="1" stop-color="#8ea489"/></linearGradient>
 <linearGradient id="hg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#c3cfbf"/><stop offset="1" stop-color="#a9baa4"/></linearGradient></defs></svg>
 <div class="sheetwrap" id="hp"><div class="sheet"><div class="grab"></div>
@@ -257,10 +310,11 @@ body.air header h1{font-size:25px;letter-spacing:-.03em}
 </section>
 
 <section class="screen" id="game">
- <div class="row"><span id="gscore">0</span><span class="tm" id="gtime">02:00</span></div>
- <div class="disc glass"><div id="orbit" style="position:absolute;inset:8%"><i style="position:absolute;top:-5px;left:calc(50% - 5px);width:10px;height:10px;border-radius:50%;background:#000"></i></div><div class="ring" style="width:48%;height:48%;border-width:3px"></div></div>
- <div class="title"><b id="gmsg">Tap A when the dot hits the orange tick</b></div>
- <button class="chip glass" id="gA" style="width:84px;height:84px;font-size:26px">A</button>
+ <div class="gdisc" id="gdisc"><i class="gl on" id="gl1"></i><i class="gl on" id="gl2"></i>
+  <svg id="gstar" viewBox="-30 -30 60 60"><g stroke="currentColor" stroke-width="3.2" stroke-linecap="round" fill="none"><path d="M0 0V-20M0 0L17.3 10M0 0L-17.3 10"/></g></svg>
+  <small id="gMsg">Tap the triangle to start</small></div>
+ <div class="gfl" id="gfl"><button class="gp" data-k="0" aria-label="Pad 1"><b>A</b></button><button class="gp" data-k="1" aria-label="Pad 2"></button><button class="gp" data-k="2" aria-label="Pad 3"></button><button class="gp" data-k="3" aria-label="Pad 4"></button><button class="gp" data-k="4" aria-label="Pad 5"></button><button class="gp" data-k="5" aria-label="Pad 6"></button><button id="gGo" aria-label="Start or replay"><svg viewBox="0 0 24 24"><path d="M12 5l8 14H4z" fill="currentColor"/></svg></button></div>
+ <div class="grow"><button class="rb" id="gRe" aria-label="Restart"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v5h-5"/></svg></button><span class="gtime" id="gTime"></span><button class="rb" id="gPause" aria-label="Pause"><svg viewBox="0 0 24 24" style="fill:currentColor;stroke:none"><rect x="7" y="5" width="3.6" height="14" rx="1"/><rect x="13.4" y="5" width="3.6" height="14" rx="1"/></svg></button></div>
 </section>
 
 <section class="screen" id="music">
@@ -282,9 +336,13 @@ body.air header h1{font-size:25px;letter-spacing:-.03em}
 </section>
 
 <section class="screen" id="library">
- <div class="disc glass" style="width:min(56vw,230px)"><div class="art" style="animation-play-state:paused"></div></div>
- <div class="list glass" id="list"><div>No songs yet</div></div>
- <div style="width:100%;text-align:center"><div class="lab">Music</div><div class="tick"></div><div class="genres" id="genres"></div></div>
+ <div class="mcard">
+  <div class="mtop"><i class="msph" id="mSph"></i><div class="mtx"><b id="mArtist">Artist</b><span id="mTitle">Title</span></div><button class="rb sm" id="mWave" aria-label="Equalizer"><svg viewBox="0 0 24 24"><path d="M5 10v4M8.5 7v10M12 4v16M15.5 8v8M19 10v4"/></svg></button></div>
+  <div class="mdw"><canvas id="mc" width="640" height="640"></canvas><button class="rb sm" id="mSpk" aria-label="Mute"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor" stroke="none"/><path d="M15.5 9a4 4 0 0 1 0 6"/></svg></button><button class="rb sm" id="mNote" aria-label="Shuffle"><svg viewBox="0 0 24 24"><path d="M10 17V5l9-2v12"/><circle cx="7.5" cy="17" r="2.5" fill="currentColor"/><circle cx="16.5" cy="15" r="2.5" fill="currentColor"/></svg></button></div>
+ </div>
+ <div class="mdial"><canvas id="mruler" width="780" height="240"></canvas>
+  <div class="mlab"><small id="mKind">Music</small><b id="mCat">All music</b></div>
+  <button class="rb sm" id="mSrch" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="5.5"/><path d="M15.5 15.5L20 20"/></svg></button><button class="rb sm" id="mCal" aria-label="Calendar"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></button></div>
 </section>
 
 <section class="screen" id="eq">
@@ -295,10 +353,13 @@ body.air header h1{font-size:25px;letter-spacing:-.03em}
 </section>
 
 <section class="screen" id="alarm">
- <div class="glass" style="width:100%;border-radius:54px;padding:36px;display:grid;place-items:center"><div class="num" id="alNum">10<br>15</div></div>
- <input type="time" id="alTime" value="10:15">
- <div class="tog glass"><div id="alOff" class="on">Off</div><div id="alOn">On</div></div>
- <div class="lab" id="alMsg">Wakes you with your current song</div>
+ <canvas id="alc" width="680" height="740"></canvas>
+ <div class="altog" id="altog"><div class="alk" id="alk"><b id="alkT">Off</b></div><span id="alIn"></span><i class="alblob"></i></div>
+ <div class="alcap"><span id="alSong">Last played song</span><button id="alVib">Vibrate on</button></div>
+ <div class="alpanel"><canvas id="alarc" width="780" height="240"></canvas>
+  <button class="rb" id="alSpk" style="left:22px" aria-label="Preview"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor" stroke="none"/><path d="M15.5 9a4 4 0 0 1 0 6"/></svg></button>
+  <div class="alsk"><button id="alPrev" aria-label="Previous sound"><svg viewBox="0 0 24 24"><path d="M6 5v14h-2V5zM20 5v14L8 12z"/></svg></button><button id="alNext" aria-label="Next sound"><svg viewBox="0 0 24 24"><path d="M18 5v14h2V5zM4 5v14l12-7z"/></svg></button></div>
+  <button class="rb" id="alNote" style="right:22px" aria-label="Use current song"><svg viewBox="0 0 24 24"><path d="M10 17V5l9-2v12"/><circle cx="7.5" cy="17" r="2.5" fill="currentColor"/><circle cx="16.5" cy="15" r="2.5" fill="currentColor"/></svg></button></div>
 </section>
 
 <section class="screen" id="wheel">
@@ -364,7 +425,7 @@ window.onerror=(m,u,l,c)=>{const e=document.getElementById('err');if(e){e.style.
 
 const $=id=>document.getElementById(id);
 
-const SCR=[['explore','Explore',''],['music','Music',''],['library','Library',''],['eq','Equalizer',''],['alarm','Alarm',''],['wheel','Click wheel',''],['game','Game',''],['board1','Board','Profitable'],['board2','Board','Most visited'],['analytics','Analytics','Product'],['sales','Sales','Overview'],['insights','Data','Insights'],['product','Product','Analytics']];
+const SCR=[['explore','Explore',''],['music','Music',''],['library','Calendar',''],['eq','Equalizer',''],['alarm','Alarm',''],['wheel','Click wheel',''],['game','Game',''],['board1','Board','Profitable'],['board2','Board','Most visited'],['analytics','Analytics','Product'],['sales','Sales','Overview'],['insights','Data','Insights'],['product','Product','Analytics']];
 // haptics
 const hap=t=>{try{window.AirHaptic?AirHaptic.hap(t):navigator.vibrate&&navigator.vibrate(t=='heavy'?40:t=='tick'?8:16)}catch(e){}};
 document.addEventListener('pointerdown',e=>{if(e.target.closest('button,.chip,.tog div,#menu div,.list div,.sph,.pad button'))hap('click')});
@@ -380,8 +441,8 @@ const fm=s=>isFinite(s)?String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math
 
 // nav
 const menu=$('menu');
-function go(id){cur=id;document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==id));const s=SCR.find(x=>x[0]==id);$('t1').textContent=s[1];$('t2').textContent=s[2];
- menu.innerHTML=SCR.map(x=>`<div data-i="${x[0]}" class="${x[0]==id?'sel':''}">${x[1]} ${x[2]}</div>`).join('')+extras();menu.classList.remove('on');document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go==id));if(id=='explore')layoutArc();if(id=='eq'){buildEq();eqStart()}document.body.classList.toggle('air',id=='music'||id=='eq');if(id=='music'){loadCover();drawDial();uiMusic()}if(id=='alarm')loadAlarm();stats()}
+function go(id){cur=id;document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==id));const s=SCR.find(x=>x[0]==id);$('t1').textContent=s[1];$('t2').textContent=s[2];if(id=='library')$('t1').textContent=MONTH;
+ menu.innerHTML=SCR.map(x=>`<div data-i="${x[0]}" class="${x[0]==id?'sel':''}">${x[1]} ${x[2]}</div>`).join('')+extras();menu.classList.remove('on');document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go==id));if(id=='explore')layoutArc();if(id=='eq'){buildEq();eqStart()}document.body.classList.toggle('air',['music','eq','alarm','game','library'].includes(id));if(id=='music'){loadCover();drawDial();uiMusic()}if(id=='alarm')loadAlarm();if(id=='game')gEnter();else gLeave();if(id=='library')libEnter();stats()}
 $('menuBtn').onclick=()=>menu.classList.toggle('on');
 // spheres
 const SPH=['cl','wh','bl','gr','yl','dk'],HUE=[210,30,220,110,65,0];
@@ -400,18 +461,13 @@ menu.onclick=e=>{const d=e.target.dataset;if(d.i)go(d.i);else if(d.act=='theme')
  else if(d.act=='scan'){menu.classList.remove('on');askScan()}else if(d.act=='bg'){menu.classList.remove('on');try{AirPlayer.battery()}catch(e){}}};
 // ---- library (auto-scanned natively and saved) ----
 const esc=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const norm=a=>a.map(t=>({id:t.id,n:t.title||'Unknown',artist:t.artist||'',album:t.album||'',dur:t.dur,art:t.art?'file://'+t.art:''}));
-window.airLib=(a,done)=>{tracks=norm(a);buildArc();refreshTrack();stats()};
+const norm=a=>a.map(t=>({id:t.id,genre:t.genre||'',n:t.title||'Unknown',artist:t.artist||'',album:t.album||'',dur:t.dur,art:t.art?'file://'+t.art:''}));
+window.airLib=(a,done)=>{tracks=norm(a);buildCats();buildArc();refreshTrack();stats()};
 window.airPerm=()=>{perm=true;$('art').textContent='Scanning your music…'};
 function askScan(){try{perm=AirPlayer.perm();if(!perm){AirPlayer.askPerm();return}AirPlayer.scan();$('art').textContent='Scanning your music…'}catch(e){}}
 $('open').onclick=askScan;
-function renderList(){$('list').innerHTML=tracks.length?tracks.map((t,i)=>`<div data-i="${i}" class="${i==idx?'on':''}"><span>${esc(t.n)}</span><span>${esc(t.artist)}</span></div>`).join(''):'<div>No songs yet</div>'}
-$('list').onclick=e=>{const d=e.target.closest('[data-i]');d&&play(+d.dataset.i)};
-const LET=[...'#ABCDEFGHIJKLMNOPQRSTUVWXYZ'];let lastL=0;
-$('genres').innerHTML=LET.map((g,i)=>`<span class="${i?'':'on'}">${g}</span>`).join('');
-function jumpLetter(l){const i=tracks.findIndex(t=>{const c=(t.n[0]||'#').toUpperCase();return l=='#'?!/[A-Z]/.test(c):c==l});const el=$('list').children[i];if(el)$('list').scrollTop=el.offsetTop-$('list').offsetTop}
-$('genres').onscroll=()=>{const el=$('genres'),c=el.getBoundingClientRect(),m=c.left+c.width/2;let sel=lastL;
- el.querySelectorAll('span').forEach((s,i)=>{const r=s.getBoundingClientRect(),on=Math.abs(r.left+r.width/2-m)<14;s.classList.toggle('on',on);if(on)sel=i});if(sel!=lastL){lastL=sel;hap('tick');jumpLetter(LET[sel])}};
+function renderList(){const q=catIdx.indexOf(st.idx);if(q>=0)focus=q;libRefresh()}
+
 // ---- playback remote ----
 function refreshTrack(){const t=tracks[idx];
  if(t){$('trk').textContent=t.n;$('art').textContent=t.artist||t.album||('Track '+(idx+1)+' of '+tracks.length)}
@@ -464,21 +520,7 @@ function stats(){let s={p:0,s:0,ms:0,w:[0,0,0,0,0,0,0],days:[]};try{s=JSON.parse
  $('dots').innerHTML=Array.from({length:30},(_,i)=>`<i class="${s.days.includes(i+1)?'on':''}"></i>`).join('');
  const mx=Math.max(1,...s.w);$('bars').innerHTML=s.w.map((v,i)=>`<i class="${v==mx&&v?'on':''}" style="height:${14+v/mx*86}%"></i>`).join('')}
 setInterval(()=>{if(['analytics','sales','board1','board2','product'].includes(cur))stats()},3000);
-// ---- alarm (system alarm clock: rings with your music even when the app is closed) ----
-let alOn=false;
-function setAl(on,commit=true){alOn=on;$('alOn').classList.toggle('on',on);$('alOff').classList.toggle('on',!on);const[h,m]=$('alTime').value.split(':');$('alNum').innerHTML=h+'<br>'+m;
- $('alMsg').textContent=on?'Rings at '+$('alTime').value+' · plays your music even when the app is closed':'Wakes you with your music';
- if(commit)try{AirPlayer.alarm(+h,+m,on)}catch(e){}}
-function loadAlarm(){try{const a=JSON.parse(AirPlayer.getAlarm());$('alTime').value=String(a.h).padStart(2,'0')+':'+String(a.m).padStart(2,'0');setAl(a.on,false)}catch(e){setAl(false,false)}}
-$('alOn').onclick=()=>setAl(true);$('alOff').onclick=()=>setAl(false);$('alTime').onchange=()=>setAl(alOn);
-window.airAlarm=()=>{setAl(false,false);$('alMsg').textContent='Alarm rang';[0,250,500].forEach(d=>setTimeout(()=>hap('heavy'),d))};
 
-// game: tap when the dot passes the orange mark
-let gRun=false,ang=0,sc=0,left=120,spd=1.6,gT,gR;
-function gStop(){gRun=false;clearInterval(gT);cancelAnimationFrame(gR);$('gmsg').textContent='Time! Score '+sc+' · tap A to replay';hap('heavy')}
-function gLoop(){if(!gRun)return;ang=(ang+spd)%360;$('orbit').style.transform=`rotate(${ang}deg)`;gR=requestAnimationFrame(gLoop)}
-$('gA').onclick=()=>{if(!gRun){gRun=true;sc=0;left=120;spd=1.6;$('gscore').textContent=0;$('gmsg').textContent='Go!';gT=setInterval(()=>{left--;$('gtime').textContent=fm(left);if(left<=0)gStop()},1000);gLoop();return}
- const d=Math.min(ang,360-ang);if(d<18){sc++;spd+=.12;hap('click')}else{sc=Math.max(0,sc-1);hap('heavy')}$('gscore').textContent=sc};
 // ---- Explore arc list ----
 const DEMO=[['Forgotten','Nguyen, Shane'],['Dreams','Miles, Esther'],['Horizon','Kristin'],['Day light','Kernin Joki'],['Cassette','Black, Marvin'],['Crimson','Henry, Arthur'],['Phantom','Flores, Juanita']];
 const ART=['radial-gradient(circle at 30% 30%,#fff,#c9c9d0)','conic-gradient(#111,#fff,#111,#999,#111)','radial-gradient(circle at 40% 60%,#e9ff3a 0 12%,#1c1c1c 13% 58%,#7c7c7c)','radial-gradient(circle at 70% 25%,#fff 0 9%,#0d0d0d 10%)','linear-gradient(135deg,#111,#777)','radial-gradient(circle at 45% 50%,#e4d6d6 0 30%,#1a1a1a 62%)','radial-gradient(circle at 50% 50%,#fff 0 25%,#d3d3da 26%,#8f8f99)'];
@@ -558,7 +600,7 @@ const burst=()=>{if(RM||!st.playing)return;for(let i=0;i<46;i++)spawn(true);fxKi
 // ================= Air OS · Music + Equalizer =================
 const TAU=Math.PI*2,DK=()=>document.body.classList.contains('dark');
 const ICO_PAUSE='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',ICO_PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
-window.airBack=()=>{if($('hp').classList.contains('on')||$('bands').classList.contains('on')){$('hp').classList.remove('on');$('bands').classList.remove('on');return true}
+window.airBack=()=>{const sw=document.querySelector('.sheetwrap.on');if(sw){sw.classList.remove('on');return true}
  const I=$('intro');if(I&&I.style.display!='none'&&!I.classList.contains('out'))return false;
  if(menu.classList.contains('on')){menu.classList.remove('on');return true}if(cur!='explore'){go('explore');return true}return false};
 function rr(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()}
@@ -643,6 +685,159 @@ ec.onpointerdown=e=>{ec.setPointerCapture(e.pointerId);const{a,d}=eqAng(e);eqDra
  if(eqDrag.k){hap('click');eqMove(e)}};
 ec.onpointermove=e=>{if(eqDrag&&eqDrag.k)eqMove(e)};
 ec.onpointerup=ec.onpointercancel=e=>{const d=eqDrag;eqDrag=null;if(!d||d.k)return;if(eqAng(e).d<.5){hap('click');$('bands').classList.add('on')}};
+
+// ================= Alarm · Game · March (Air OS) =================
+const MONTH=new Date().toLocaleString('en-US',{month:'long'});
+const DOT=['01110 10011 10101 10101 10101 11001 01110','00100 01100 00100 00100 00100 00100 01110','01110 10001 00001 00010 00100 01000 11111','11110 00001 00001 01110 00001 00001 11110','00010 00110 01010 10010 11111 00010 00010','11111 10000 11110 00001 00001 10001 01110','00110 01000 10000 11110 10001 10001 01110','11111 00001 00010 00100 01000 01000 01000','01110 10001 10001 01110 10001 10001 01110','01110 10001 10001 01111 00001 00010 01100'].map(r=>r.split(' '));
+function dotText(x,s,cx,cy,step,col){const cols=s.length*6-1;let ox=cx-cols*step/2;x.fillStyle=col;for(const ch of s){const g=DOT[+ch];for(let r=0;r<7;r++)for(let c=0;c<5;c++)if(g[r][c]=='1'){x.beginPath();x.arc(ox+c*step+step/2,cy-3.5*step+r*step+step/2,step*.44,0,TAU);x.fill()}ox+=6*step}}
+const angD=(a,b)=>{let d=a-b;while(d>Math.PI)d-=TAU;while(d<-Math.PI)d+=TAU;return d};
+// ---------- Alarm ----------
+const alc=$('alc'),alx=alc.getContext('2d'),aac=$('alarc'),aax=aac.getContext('2d');
+let AL={on:false,h:10,m:15,hAbs:10.25,vol:.6,vib:true,aid:-1},alD=null;
+function drawAl(){const W=alc.width,x=alx,dk=DK(),C=W/2,cy=340,R=300;x.clearRect(0,0,W,alc.height);
+ x.fillStyle=dk?'#222226':'#efefef';rr(x,C-84,cy+R-50,168,120,44);x.fill();
+ x.save();x.shadowColor=dk?'rgba(0,0,0,.55)':'rgba(0,0,0,.08)';x.shadowBlur=44;x.shadowOffsetY=14;
+ const g=x.createRadialGradient(C-70,cy-90,40,C,cy,R);g.addColorStop(0,dk?'#2c2c31':'#fcfcfc');g.addColorStop(1,dk?'#1d1d21':'#ebebec');x.fillStyle=g;x.beginPath();x.arc(C,cy,R,0,TAU);x.fill();x.restore();
+ x.strokeStyle=dk?'#2b2b30':'#e6e6e7';x.lineWidth=16;x.beginPath();x.arc(C,cy,R-32,0,TAU);x.stroke();
+ const col=dk?'#f2f2f4':'#111';dotText(x,String(AL.h).padStart(2,'0'),C,cy-88,15,col);dotText(x,String(AL.m).padStart(2,'0'),C,cy+88,15,col);
+ const ra=R-32,ha=(AL.hAbs%12)/12*TAU-Math.PI/2,ma=AL.m/60*TAU-Math.PI/2;
+ x.fillStyle=col;x.beginPath();x.arc(C+Math.cos(ha)*ra,cy+Math.sin(ha)*ra,13,0,TAU);x.fill();
+ x.fillStyle='#ff6a2b';x.beginPath();x.arc(C+Math.cos(ma)*ra,cy+Math.sin(ma)*ra,12,0,TAU);x.fill()}
+const alPt=e=>{const r=alc.getBoundingClientRect(),k=alc.width/r.width,dx=(e.clientX-r.left)*k-alc.width/2,dy=(e.clientY-r.top)*k-340;return{a:Math.atan2(dy,dx),d:Math.hypot(dx,dy)/300}};
+alc.onpointerdown=e=>{alc.setPointerCapture(e.pointerId);const{a,d}=alPt(e);alD=null;if(d<.45||d>1.1)return;
+ const ha=(AL.hAbs%12)/12*TAU-Math.PI/2,ma=AL.m/60*TAU-Math.PI/2,dh=Math.abs(angD(a,ha)),dm=Math.abs(angD(a,ma));
+ if(Math.min(dh,dm)<.7){alD={k:dh<=dm?'h':'m',a};hap('click')}};
+alc.onpointermove=e=>{if(!alD)return;const{a}=alPt(e);
+ if(alD.k=='m'){const m=Math.round(((a+Math.PI/2)/TAU*60+60)%60)%60;if(m!=AL.m){AL.m=m;hap('tick')}AL.hAbs=Math.floor(AL.hAbs)+AL.m/60}
+ else{const da=angD(a,alD.a);alD.a=a;const pv=Math.floor(AL.hAbs);AL.hAbs=((AL.hAbs+da/TAU*12)%24+24)%24;const h=Math.floor(AL.hAbs);if(h!=pv)hap('tick');AL.h=h}
+ drawAl();alIn()};
+alc.onpointerup=alc.onpointercancel=()=>{if(!alD)return;alD=null;AL.hAbs=AL.h+AL.m/60;drawAl();alCommit()};
+const alCommit=()=>{try{AirPlayer.alarm(AL.h,AL.m,AL.on)}catch(e){}};
+const tg=$('altog'),alk=$('alk');let tgD=null;
+const alSpan=()=>Math.max(0,tg.clientWidth-alk.offsetWidth-10);
+function alPill(){tg.classList.toggle('on',AL.on);alk.style.setProperty('--tx',(AL.on?alSpan():0)+'px');$('alkT').textContent=AL.on?'On':'Off';alIn()}
+tg.onpointerdown=e=>{tg.setPointerCapture(e.pointerId);tgD={x:e.clientX,tx:AL.on?alSpan():0,moved:false}};
+tg.onpointermove=e=>{if(!tgD)return;const dx=e.clientX-tgD.x;if(Math.abs(dx)>6)tgD.moved=true;if(tgD.moved){tg.classList.add('drag');alk.style.setProperty('--tx',Math.max(0,Math.min(alSpan(),tgD.tx+dx))+'px')}};
+tg.onpointerup=tg.onpointercancel=e=>{if(!tgD)return;const d=tgD;tgD=null;tg.classList.remove('drag');let on=AL.on;
+ if(d.moved)on=Math.max(0,Math.min(alSpan(),d.tx+e.clientX-d.x))>alSpan()/2;else on=!on;
+ if(on!=AL.on)hap('heavy');AL.on=on;alPill();alCommit()};
+function alIn(){if(!AL.on){$('alIn').textContent='';return}const n=new Date(),t=new Date();t.setHours(AL.h,AL.m,0,0);if(t<=n)t.setDate(t.getDate()+1);const mn=Math.round((t-n)/60000);$('alIn').textContent='rings in '+Math.floor(mn/60)+'h '+mn%60+'m'}
+setInterval(()=>{if(cur=='alarm')alIn()},20000);
+const AR={r:1150,cx:390,cy:1290},yAt=px=>AR.cy-Math.sqrt(AR.r*AR.r-(px-AR.cx)**2);
+function drawArc(){const W=aac.width,H=aac.height,x=aax,dk=DK();x.clearRect(0,0,W,H);
+ x.beginPath();x.moveTo(0,H);for(let px=0;px<=W;px+=10)x.lineTo(px,yAt(px));x.lineTo(W,H);x.closePath();x.fillStyle=dk?'#1b1b1e':'#fbfbfb';x.fill();
+ for(let px=10;px<=W-10;px+=15){x.fillStyle=dk?'#4a4a52':'#d0d0d4';x.beginPath();x.arc(px,yAt(px)-6,2.4,0,TAU);x.fill()}
+ x.fillStyle=dk?'#35353b':'#dcdcdf';x.fillRect(W/2-.75,yAt(W/2)+6,1.5,H);
+ const t=(AL.vol-.2)/.8,ox=20+t*740;x.fillStyle='#ff6a2b';x.beginPath();x.arc(ox,yAt(ox)-6,7,0,TAU);x.fill()}
+let arD=false,arK=0;
+const arSet=e=>{const r=aac.getBoundingClientRect(),t=Math.max(0,Math.min(1,((e.clientX-r.left)/r.width*aac.width-20)/740));AL.vol=Math.round((.2+.8*t)*100)/100;const k=Math.round(AL.vol*20);if(k!=arK){arK=k;hap('tick')}drawArc();alCap()};
+aac.onpointerdown=e=>{aac.setPointerCapture(e.pointerId);arD=true;arSet(e)};aac.onpointermove=e=>{if(arD)arSet(e)};
+aac.onpointerup=aac.onpointercancel=()=>{if(!arD)return;arD=false;try{AirPlayer.setNum('alarm_vol',AL.vol)}catch(e){}};
+const alSongIdx=()=>AL.aid<0?-1:tracks.findIndex(t=>t.id==AL.aid);
+function alCap(){const t=tracks[alSongIdx()];$('alSong').textContent='♪ '+(t?t.n:'Last played song')+' · '+Math.round(AL.vol*100)+'%';$('alVib').textContent='Vibrate '+(AL.vib?'on':'off');$('alVib').classList.toggle('on',AL.vib)}
+function alPick(d){if(!tracks.length)return askScan();hap('click');const n=tracks.length,i=alSongIdx(),ni=i<0?(d>0?0:n-1):(i+d+n)%n;AL.aid=tracks[ni].id;try{AirPlayer.setLong('alarm_id',AL.aid)}catch(e){}alCap()}
+$('alPrev').onclick=()=>alPick(-1);$('alNext').onclick=()=>alPick(1);
+$('alNote').onclick=()=>{const t=tracks[st.idx];if(!t)return;hap('click');AL.aid=t.id;try{AirPlayer.setLong('alarm_id',AL.aid)}catch(e){}alCap()};
+$('alSpk').onclick=()=>{const i=alSongIdx(),pi=i>=0?i:st.idx;if(pi<0)return askScan();if(st.idx==pi&&st.playing)P('pause');else{P('queue',{q:[]});P('play',{i:pi})}};
+$('alVib').onclick=()=>{AL.vib=!AL.vib;try{AirPlayer.setPref('alarm_vib',AL.vib)}catch(e){}hap('click');alCap()};
+function loadAlarm(){try{const a=JSON.parse(AirPlayer.getAlarm());Object.assign(AL,{on:a.on,h:a.h,m:a.m,vol:a.vol,vib:a.vib,aid:a.aid})}catch(e){}AL.hAbs=AL.h+AL.m/60;alPill();alCap();drawAl();drawArc()}
+window.airAlarm=()=>{AL.on=false;alPill();[0,250,500].forEach(d=>setTimeout(()=>hap('heavy'),d))};
+// ---------- Game: tone memory (6 pads, 2 lives, 2:00) ----------
+const GP=[...document.querySelectorAll('.gp')],FQ=[261.63,293.66,329.63,392,440,523.25];
+GP.forEach((b,k)=>{const a=(-90+k*60)*Math.PI/180;b.style.left=(50+Math.cos(a)*34-16)+'%';b.style.top=(50+Math.sin(a)*34-16)+'%'});
+let G={s:'idle',seq:[],pos:0,lives:2,left:120,paused:false,tm:0,best:+localStorage.gbest||0,tok:0},aCtx=null;
+function tone(k){try{aCtx=aCtx||new(window.AudioContext||webkitAudioContext)();aCtx.resume();const o=aCtx.createOscillator(),g=aCtx.createGain(),t=aCtx.currentTime;o.type='triangle';o.frequency.value=FQ[k];
+ g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.16,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.45);o.connect(g);g.connect(aCtx.destination);o.start();o.stop(t+.5)}catch(e){}}
+const gMsg=t=>$('gMsg').textContent=t,sleepMs=ms=>new Promise(r=>setTimeout(r,ms));
+function gTimeUI(){const t=G.left;$('gTime').innerHTML=`<i>00:</i>${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')}`}
+function gLives(){$('gl1').classList.toggle('on',G.lives>=1);$('gl2').classList.toggle('on',G.lives>=2)}
+async function gWait(ms,tok){const t0=performance.now();while(performance.now()-t0<ms){await sleepMs(40);while(G.paused&&tok==G.tok)await sleepMs(80);if(tok!=G.tok)return false}return tok==G.tok}
+function light(k,ms=380){GP[k].classList.add('lit');tone(k);hap('tick');setTimeout(()=>GP[k].classList.remove('lit'),ms)}
+async function gShow(){const tok=++G.tok;G.s='show';$('gstar').classList.add('spin');gMsg('Watch…');if(!await gWait(500,tok))return;
+ const sp=Math.max(260,520-G.seq.length*18);for(const k of G.seq){light(k,sp*.7);if(!await gWait(sp,tok))return}
+ $('gstar').classList.remove('spin');G.s='input';G.pos=0;gMsg('Your turn · '+G.seq.length)}
+const gNext=()=>{G.seq.push(Math.floor(Math.random()*6));gShow()};
+function gStart(){G.seq=[];G.lives=2;G.left=120;G.paused=false;gLives();gTimeUI();clearInterval(G.tm);G.tm=setInterval(gTick,1000);$('gPause').classList.remove('on');$('gfl').style.opacity=1;hap('heavy');gNext()}
+function gTick(){if(G.paused||G.s=='idle'||G.s=='over')return;G.left--;gTimeUI();if(G.left<=0)gOver('Time up')}
+function gOver(why){G.s='over';G.tok++;clearInterval(G.tm);$('gstar').classList.remove('spin');const sc=Math.max(0,G.seq.length-1);if(sc>G.best){G.best=sc;localStorage.gbest=sc}gMsg(why+' · '+sc+' (best '+G.best+')');hap('heavy')}
+function gPress(k){if(G.s!='input'||G.paused)return;light(k,220);
+ if(k==G.seq[G.pos]){G.pos++;if(G.pos==G.seq.length){G.s='wait';gMsg('Nice!');hap('click');setTimeout(()=>{if(G.s=='wait')gNext()},800)}}
+ else{G.lives--;gLives();hap('heavy');if(G.lives<=0)return gOver('Game over');G.s='wait';gMsg('Oops · replay');setTimeout(()=>{if(G.s=='wait')gShow()},900)}}
+GP.forEach((b,k)=>b.onclick=()=>gPress(k));
+$('gGo').onclick=()=>{if(G.s=='idle'||G.s=='over')gStart();else if(G.s=='input'&&!G.paused){G.left=Math.max(1,G.left-5);gTimeUI();gShow()}};
+$('gRe').onclick=()=>{G.tok++;clearInterval(G.tm);G.s='idle';G.seq=[];G.lives=2;G.left=120;G.paused=false;gLives();gTimeUI();gMsg('Tap the triangle to start');$('gstar').classList.remove('spin');$('gPause').classList.remove('on');$('gfl').style.opacity=1;hap('click')};
+$('gPause').onclick=()=>{if(G.s=='idle'||G.s=='over')return;G.paused=!G.paused;$('gPause').classList.toggle('on',G.paused);$('gfl').style.opacity=G.paused?.45:1;gMsg(G.paused?'Paused':(G.s=='input'?'Your turn · '+G.seq.length:'…'));hap('click')};
+function gEnter(){gTimeUI();gLives()}
+function gLeave(){if(G.s!='idle'&&G.s!='over'&&!G.paused){G.paused=true;$('gPause').classList.add('on');$('gfl').style.opacity=.45}}
+// ---------- March: categories dial + browse card ----------
+let cats=[{n:'All music',k:'Music',ix:null}],cI=0,focus=0,catIdx=[],dialPos=0,dialTgt=0;
+const covC=new Map();
+function buildCats(){const gm=new Map(),am=new Map();
+ tracks.forEach((t,i)=>{if(t.genre){if(!gm.has(t.genre))gm.set(t.genre,[]);gm.get(t.genre).push(i)}if(t.artist){if(!am.has(t.artist))am.set(t.artist,[]);am.get(t.artist).push(i)}});
+ const kind=gm.size?'Genre':'Artist',src=gm.size?gm:am;cats=[{n:'All music',k:'Music',ix:null}];
+ [...src.entries()].sort((a,b)=>b[1].length-a[1].length||a[0].localeCompare(b[0])).slice(0,60).forEach(([n,ix])=>cats.push({n,k:kind,ix}));
+ cI=Math.min(cI,cats.length-1);dialPos=dialTgt=cI;pickCat(false)}
+function pickCat(h=true){const c=cats[cI];catIdx=c.ix||tracks.map((_,i)=>i);const q=catIdx.indexOf(st.idx);focus=q>=0?q:0;
+ $('mKind').textContent=c.k;$('mCat').textContent=c.n;libRefresh();if(h)hap('tick')}
+function libRefresh(){const t=tracks[catIdx[focus]];$('mArtist').textContent=t?(t.artist||t.album||'Unknown artist'):'No music found';$('mTitle').textContent=t?t.n:'Tap search or rescan';
+ $('mSph').style.background=t&&t.art?`url('${t.art}') center/cover`:'';drawMc();if(cur=='library')mKick()}
+function getCov(t){if(!t||!t.art)return null;let c=covC.get(t.art);if(c)return c;c={img:null,blur:null};covC.set(t.art,c);const im=new Image();
+ im.onload=()=>{c.img=im;const b=document.createElement('canvas');b.width=b.height=160;const g=b.getContext('2d');try{g.filter='blur(8px)'}catch(e){}g.drawImage(im,-10,-10,180,180);c.blur=b;drawMc()};im.src=t.art;return c}
+let mSlide=0,mRaf=0,mRot=0,mD=null;const mcv=$('mc'),mcx=mcv.getContext('2d');
+function drawMc(){if(cur!='library')return;const S=mcv.width,C=S/2,x=mcx,dk=DK(),t=tracks[catIdx[focus]],cov=getCov(t);x.clearRect(0,0,S,S);
+ x.save();x.translate(mSlide,0);x.globalAlpha=1-Math.min(.8,Math.abs(mSlide)/S*2.2);
+ x.save();x.shadowColor='rgba(0,0,0,.1)';x.shadowBlur=S*.05;x.shadowOffsetY=S*.02;const g=x.createRadialGradient(C-S*.1,C-S*.12,S*.04,C,C,S*.46);g.addColorStop(0,dk?'#2b2b30':'#fafafa');g.addColorStop(1,dk?'#1c1c20':'#e4e4e6');x.fillStyle=g;x.beginPath();x.arc(C,C,S*.46,0,TAU);x.fill();x.restore();
+ x.save();x.beginPath();x.arc(C,C,S*.44,0,TAU);x.clip();x.translate(C,C);x.rotate(mRot);
+ if(cov&&cov.blur)x.drawImage(cov.blur,-S*.5,-S*.5,S,S);
+ else[[-.18,-.05,.26,'#e0a24a'],[-.05,-.12,.2,'#4aa0e0'],[.12,.2,.28,'#e07a54'],[-.2,.12,.2,'#8a6ae0']].forEach(b=>{const gg=x.createRadialGradient(b[0]*S,b[1]*S,0,b[0]*S,b[1]*S,b[2]*S);gg.addColorStop(0,b[3]+'cc');gg.addColorStop(1,b[3]+'00');x.fillStyle=gg;x.fillRect(-S/2,-S/2,S,S)});
+ x.restore();x.fillStyle=dk?'rgba(20,20,24,.3)':'rgba(250,250,252,.45)';x.beginPath();x.arc(C,C,S*.44,0,TAU);x.fill();
+ const a=Math.PI*.28,lx=C+Math.cos(a)*S*.3,ly=C+Math.sin(a)*S*.3,lr=S*.115;
+ x.save();x.translate(lx,ly);x.rotate(a+Math.PI/2);
+ x.save();x.shadowColor='rgba(0,0,0,.22)';x.shadowBlur=S*.04;x.shadowOffsetY=S*.015;x.fillStyle='#fff';x.beginPath();x.arc(0,0,lr,0,TAU);x.fill();x.restore();
+ x.save();x.beginPath();x.arc(0,0,lr*.94,0,TAU);x.clip();x.beginPath();x.rect(-lr,lr*.05,lr*2,lr);x.clip();
+ if(cov&&cov.img)x.drawImage(cov.img,-lr,-lr*.2,lr*2,lr*1.4);else{const lg=x.createLinearGradient(-lr,0,lr,0);['#4aa0e0','#6ad39a','#f0d24a','#f08a4a','#e0505a'].forEach((c,i)=>lg.addColorStop(i/4,c));x.fillStyle=lg;x.fillRect(-lr,0,lr*2,lr)}
+ x.restore();x.fillStyle='#111';rr(x,-S*.011,-lr*.94,S*.022,S*.05,S*.011);x.fill();x.restore();x.restore()}
+function mLoop(){if(cur!='library'){mRaf=0;return}if(st.playing)mRot+=.003;mSlide*=.82;if(Math.abs(mSlide)<.5)mSlide=0;drawMc();mRaf=(st.playing||mSlide)?requestAnimationFrame(mLoop):0}
+const mKick=()=>{if(!mRaf)mRaf=requestAnimationFrame(mLoop)};
+function playFocus(){const gi=catIdx[focus];if(gi==null)return askScan();hap('heavy');if(st.idx==gi){P('toggle');return}P('queue',{q:cats[cI].ix?catIdx:[]});P('play',{i:gi})}
+mcv.onpointerdown=e=>{mcv.setPointerCapture(e.pointerId);mD={x:e.clientX,m:false}};
+mcv.onpointermove=e=>{if(mD&&Math.abs(e.clientX-mD.x)>8)mD.m=true};
+mcv.onpointerup=mcv.onpointercancel=e=>{if(!mD)return;const d=mD,dx=e.clientX-d.x,n=catIdx.length;mD=null;if(!n)return;
+ if(Math.abs(dx)>50){focus=(focus+(dx<0?1:n-1))%n;mSlide=(dx<0?1:-1)*mcv.width*.22;hap('tick');libRefresh()}else if(!d.m)playFocus()};
+// ruler dial (swipe = scroll categories, orange tick = selection)
+const rc=$('mruler'),rxc=rc.getContext('2d'),RR=1000,TS=14,PER=10;let dV=0,dDrag=null,dRaf=0,dLast=0;
+function drawRuler(){const W=rc.width,H=rc.height,x=rxc,dk=DK(),cx=W/2,cy=H+RR-150,yy=px=>cy-Math.sqrt(RR*RR-(px-cx)**2);x.clearRect(0,0,W,H);
+ x.beginPath();x.moveTo(0,H);for(let px=0;px<=W;px+=10)x.lineTo(px,yy(px));x.lineTo(W,H);x.closePath();x.fillStyle=dk?'#1b1b1e':'#fcfcfc';x.fill();
+ const dth=TS/RR,off=dialPos*PER;x.lineCap='round';
+ for(let i=Math.floor(off)-36;i<=Math.ceil(off)+36;i++){const th=(i-off)*dth,px=cx+Math.sin(th)*RR;if(px<-10||px>W+10)continue;const py=cy-Math.cos(th)*RR,major=((i%PER)+PER)%PER==0,len=major?24:16,al=Math.max(0,1-Math.abs(th)/.5);
+  x.strokeStyle=dk?`rgba(150,150,160,${al})`:`rgba(170,170,178,${al})`;x.lineWidth=2;x.beginPath();x.moveTo(px,py-3);x.lineTo(px+Math.sin(th)*len,py-3-Math.cos(th)*len);x.stroke()}
+ x.strokeStyle='#ff5a2a';x.lineWidth=4;x.beginPath();x.moveTo(cx,yy(cx)-3);x.lineTo(cx,yy(cx)-52);x.stroke()}
+function dTick(t){const now=t||performance.now(),dt=Math.min(.05,(now-dLast)/1000||.016),n=cats.length-1;dLast=now;
+ if(!dDrag){if(Math.abs(dV)>.5){dialPos+=dV*dt;dV*=Math.exp(-dt*3.4);if(dialPos<0||dialPos>n){dialPos=Math.max(-.2,Math.min(n+.2,dialPos));dV*=.4}dialTgt=Math.max(0,Math.min(n,Math.round(dialPos+dV*.2)))}
+  else{dV=0;dialPos+=(dialTgt-dialPos)*(1-Math.exp(-dt*12));if(Math.abs(dialTgt-dialPos)<.001)dialPos=dialTgt}}
+ const c=Math.max(0,Math.min(n,Math.round(dialPos)));if(c!=cI){cI=c;pickCat()}
+ drawRuler();dRaf=(dDrag||dV||dialPos!=dialTgt)?requestAnimationFrame(dTick):0}
+const dKick=()=>{if(!dRaf){dLast=performance.now();dRaf=requestAnimationFrame(dTick)}};
+rc.onpointerdown=e=>{rc.setPointerCapture(e.pointerId);dDrag={x:e.clientX,p:dialPos,s:[[performance.now(),dialPos]]};dV=0;dKick()};
+rc.onpointermove=e=>{if(!dDrag)return;const r=rc.getBoundingClientRect(),k=rc.width/r.width,d=(e.clientX-dDrag.x)*k/(TS*PER);dialPos=Math.max(-.3,Math.min(cats.length-.7,dDrag.p-d));dialTgt=dialPos;dDrag.s.push([performance.now(),dialPos]);if(dDrag.s.length>6)dDrag.s.shift()};
+rc.onpointerup=rc.onpointercancel=()=>{if(!dDrag)return;const s=dDrag.s,a=s[0],b=s[s.length-1];dDrag=null;dV=(b[0]>a[0]&&performance.now()-b[0]<90)?(b[1]-a[1])/((b[0]-a[0])/1000):0;dV=Math.max(-10,Math.min(10,dV));dialTgt=Math.max(0,Math.min(cats.length-1,Math.round(dialPos+dV*.2)));dKick()};
+function libEnter(){buildCatsIfEmpty();drawRuler();drawMc();mKick()}
+function buildCatsIfEmpty(){if(!catIdx.length&&tracks.length)buildCats()}
+$('mWave').onclick=()=>{hap('click');go('eq')};
+$('mSpk').onclick=()=>{if(st.vol>.001){muteV=st.vol;setVol(0)}else setVol(muteV||.7);$('mSpk').classList.toggle('on',st.vol<.001);hap('click')};
+$('mNote').onclick=()=>P('shuf',{b:!st.shuf});
+const _um=uiMusic;uiMusic=function(){_um();$('mNote').classList.toggle('on',!!st.shuf)};
+function srchRender(){const q=$('sq').value.trim().toLowerCase(),hits=[];tracks.forEach((t,i)=>{if(!q||(t.n+' '+t.artist+' '+t.album).toLowerCase().includes(q))hits.push(i)});
+ $('sres').innerHTML=hits.slice(0,60).map(i=>`<div class="sr" data-i="${i}"><b>${esc(tracks[i].n)}</b><span>${esc(tracks[i].artist)}</span></div>`).join('')||'<div class="note">No songs found</div>';$('sres').dataset.h=JSON.stringify(hits)}
+$('sq').oninput=srchRender;
+$('sres').onclick=e=>{const r=e.target.closest('.sr');if(!r)return;const hits=JSON.parse($('sres').dataset.h||'[]');hap('click');P('queue',{q:hits});P('play',{i:+r.dataset.i});$('srch').classList.remove('on')};
+$('mSrch').onclick=()=>{srchRender();$('srch').classList.add('on');setTimeout(()=>$('sq').focus(),350)};$('srch').onclick=e=>{if(e.target.id=='srch')$('srch').classList.remove('on')};
+function calRender(){let s={p:0,ms:0,days:[]};try{s=JSON.parse(AirPlayer.stats())}catch(e){}
+ const now=new Date(),y=now.getFullYear(),m=now.getMonth(),first=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate();
+ $('calT').textContent=MONTH+' '+y;$('calS').textContent=s.days.length+' days with music · '+s.p+' plays · '+Math.round(s.ms/60000)+' min';
+ let h=['S','M','T','W','T','F','S'].map(d=>`<span class="cwd">${d}</span>`).join('');for(let i=0;i<first;i++)h+='<span></span>';
+ for(let d=1;d<=dim;d++)h+=`<span class="cday${s.days.includes(d)?' on':''}${d==now.getDate()?' today':''}">${d}</span>`;$('calg').innerHTML=h}
+$('mCal').onclick=()=>{calRender();$('calw').classList.add('on')};$('calX').onclick=()=>$('calw').classList.remove('on');$('calw').onclick=e=>{if(e.target.id=='calw')$('calw').classList.remove('on')};
 // ---- opening + boot ----
 
 window.airGo=id=>{if(!SCR.find(x=>x[0]==id))return;document.body.classList.remove('introing');$('intro').style.display='none';go(id)};

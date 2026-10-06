@@ -26,7 +26,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     static final String CH = "air_media";
 
     MediaPlayer mp; Equalizer eq; BassBoost bb; LoudnessEnhancer le; AudioDeviceCallback devCb;
-    float speed = 1f; long sleepEnd; boolean pausedByNoisy;
+    float speed = 1f; long sleepEnd; boolean pausedByNoisy; int[] queue;
     final Runnable sleepR = new Runnable() { @Override public void run() { pause(); sleepEnd = 0; push(); } };
     MediaSession session; AudioManager am; AudioFocusRequest fr;
     final Handler h = new Handler(Looper.getMainLooper());
@@ -156,6 +156,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
             case "alarm": alarm(); break;
             case "eq": setBand(I(i, "b"), I(i, "mb")); break;
             case "eqall": { int[] lv = i.getIntArrayExtra("lv"); if (lv != null) for (int b = 0; b < lv.length; b++) setBand(b, lv[b]); break; }
+            case "queue": { int[] q = i.getIntArrayExtra("q"); queue = (q != null && q.length > 0) ? q : null; break; }
             case "bass": sp.edit().putInt("bass", I(i, "s")).apply(); applyFx(); break;
             case "loud": sp.edit().putInt("loud", I(i, "g")).apply(); applyFx(); break;
             case "limit": sp.edit().putFloat("vlimit", Math.max(.4f, Math.min(1f, F(i, "v")))).apply(); av(1f); break;
@@ -263,13 +264,22 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     void next(boolean auto) {
         int n = lib.length(); if (n == 0) return;
         try { if (!auto && prepared && mp.getCurrentPosition() < 20000) { st.put("s", st.optInt("s") + 1); flushStats(); } } catch (Exception e) { }
-        int ni = shuffle && n > 1 ? (idx + 1 + (int) (Math.random() * (n - 1))) % n : idx + 1;
+        int ni;
+        if (queue != null) {
+            int m = queue.length, pos = -1;
+            for (int q = 0; q < m; q++) if (queue[q] == idx) { pos = q; break; }
+            ni = queue[shuffle && m > 1 ? (Math.max(pos, 0) + 1 + (int) (Math.random() * (m - 1))) % m : (pos + 1) % m];
+        } else ni = shuffle && n > 1 ? (idx + 1 + (int) (Math.random() * (n - 1))) % n : idx + 1;
         playIdx(ni, true);
     }
 
     void prev() {
         try { if (prepared && mp.getCurrentPosition() > 3000) { seek(0); return; } } catch (Exception e) { }
-        playIdx(idx - 1, true);
+        if (queue != null) {
+            int m = queue.length, pos = 0;
+            for (int q = 0; q < m; q++) if (queue[q] == idx) { pos = q; break; }
+            playIdx(queue[(pos - 1 + m) % m], true);
+        } else playIdx(idx - 1, true);
     }
 
     void seek(long ms) { try { if (prepared) mp.seekTo((int) ms); } catch (Exception e) { } refresh(); push(); }
@@ -280,10 +290,14 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
         sp.edit().putBoolean("alarm_on", false).apply();
         if (lib.length() == 0) lib = Library.load(this);
         vol = 0.1f;
-        if (lib.length() > 0) playIdx(idx >= 0 ? idx : 0, true);
+        queue = null;
+        long aid = sp.getLong("alarm_id", -1); int ai = -1;
+        for (int q = 0; q < lib.length(); q++) if (aid >= 0 && lib.optJSONObject(q).optLong("id") == aid) { ai = q; break; }
+        if (lib.length() > 0) playIdx(ai >= 0 ? ai : (idx >= 0 ? idx : 0), true);
         else { try { RingtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)).play(); } catch (Exception e) { } }
-        h.postDelayed(new Runnable() { @Override public void run() { vol = Math.min(1f, vol + .06f); av(1f); if (vol < 1f) h.postDelayed(this, 1000); } }, 1000);
-        try { ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(new long[]{0, 400, 250, 400}, -1); } catch (Exception e) { }
+        final float tgt = sp.getFloat("alarm_vol", .6f);
+        h.postDelayed(new Runnable() { @Override public void run() { vol = Math.min(tgt, vol + .06f); av(1f); if (vol < tgt) h.postDelayed(this, 1000); } }, 1000);
+        if (sp.getBoolean("alarm_vib", true)) { try { ((Vibrator) getSystemService(VIBRATOR_SERVICE)).vibrate(new long[]{0, 400, 250, 400}, -1); } catch (Exception e) { } }
         if (listener != null) listener.alarm();
     }
 
