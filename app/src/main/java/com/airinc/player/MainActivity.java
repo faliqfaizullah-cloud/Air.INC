@@ -162,6 +162,9 @@ public class MainActivity extends Activity {
         }
         @JavascriptInterface public void setNum(String k, double v) { sp.edit().putFloat(k, (float) v).apply(); }
         @JavascriptInterface public void setLong(String k, double v) { sp.edit().putLong(k, (long) v).apply(); }
+        @JavascriptInterface public void share(String text) {
+            runOnUiThread(() -> startActivity(Intent.createChooser(new Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text), "Share")));
+        }
         @JavascriptInterface public String headphones() { return Headphones.info(MainActivity.this); }
         @JavascriptInterface public void setPref(String k, boolean v) { sp.edit().putBoolean(k, v).apply(); }
         @JavascriptInterface public void askBt() { runOnUiThread(() -> { if (Build.VERSION.SDK_INT >= 31) requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 2); }); }

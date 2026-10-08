@@ -312,10 +312,35 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
             JSONArray ds = st.getJSONArray("days"); int dm = c.get(Calendar.DAY_OF_MONTH); boolean has = false;
             for (int i = 0; i < ds.length(); i++) if (ds.optInt(i) == dm) has = true;
             if (!has) ds.put(dm);
+            JSONObject m = monthObj(c);
+            JSONArray dp = m.getJSONArray("dp"), mw = m.getJSONArray("w");
+            dp.put(dm - 1, dp.optInt(dm - 1) + 1); mw.put(d, mw.optInt(d) + 1);
         } catch (Exception e) { }
         flushStats();
     }
-    void addListen(long ms) { try { st.put("ms", st.optLong("ms") + ms); } catch (Exception e) { } }
+    /** Per-month history used by the Board / Product Analytics screens. */
+    JSONObject monthObj(Calendar c) throws Exception {
+        JSONObject ms = st.optJSONObject("months");
+        if (ms == null) { ms = new JSONObject(); st.put("months", ms); }
+        String k = c.get(Calendar.YEAR) + "-" + (c.get(Calendar.MONTH) + 1);
+        JSONObject m = ms.optJSONObject(k);
+        if (m == null) {
+            m = new JSONObject();
+            JSONArray dp = new JSONArray(), dmn = new JSONArray(), w = new JSONArray();
+            for (int i = 0; i < 31; i++) { dp.put(0); dmn.put(0L); }
+            for (int i = 0; i < 7; i++) w.put(0);
+            m.put("dp", dp); m.put("dm", dmn); m.put("w", w); ms.put(k, m);
+        }
+        return m;
+    }
+    void addListen(long ms) {
+        try {
+            st.put("ms", st.optLong("ms") + ms);
+            Calendar c = Calendar.getInstance();
+            JSONArray dmn = monthObj(c).getJSONArray("dm"); int d = c.get(Calendar.DAY_OF_MONTH) - 1;
+            dmn.put(d, dmn.optLong(d) + ms);
+        } catch (Exception e) { }
+    }
     void flushStats() { sp.edit().putString("stats", st.toString()).apply(); }
 
     // ---------- state out ----------

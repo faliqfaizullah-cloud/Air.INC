@@ -282,6 +282,31 @@ body.air header h1{font-size:25px;letter-spacing:-.03em}
 .sheetwrap .sheet{box-shadow:none}.sheetwrap.on .sheet{box-shadow:0 -20px 50px rgba(0,0,0,.18)}
 .alpanel{flex:none!important;margin-top:auto;height:auto!important;aspect-ratio:780/240;min-height:0!important;max-height:none!important}
 #alarc{height:auto;aspect-ratio:780/240;bottom:0;top:auto}
+
+/* ===== Data Insights · Product Analytics · Board ===== */
+#insights,#product,#board1,#board2{justify-content:flex-start;gap:8px;padding-top:0}
+#insights{justify-content:flex-end}
+.stk{position:relative;width:100%;margin-top:30px;flex:none}
+.stk>i{position:absolute;left:5%;right:5%;top:-14px;height:70px;border-radius:30px;background:rgba(255,255,255,.7)}.stk>i+i{left:10%;right:10%;top:-26px;background:rgba(255,255,255,.45)}
+.icard{position:relative;border-radius:34px;background:#fbfbfb;padding:12px 12px 6px;box-shadow:0 14px 34px rgba(0,0,0,.05)}
+.ich{display:flex;justify-content:space-between;align-items:flex-start}.ititle{border:0;background:none;text-align:center;padding:4px 0}.ititle b,.ititle span{display:block;font-size:17px;letter-spacing:-.02em;line-height:1.15}.ititle span{color:#c4c4c9;font-weight:600}
+#flc{width:min(100%,43vh);display:block;margin:2px auto 0;aspect-ratio:1;touch-action:manipulation}
+.inrow{display:flex;justify-content:space-between;width:100%;flex:none;padding:2px 2px 4px}
+.binn{position:relative;background:#fff;border-radius:30px;padding:16px 18px;box-shadow:0 14px 34px rgba(0,0,0,.05);height:min(44vh,370px);display:flex;flex-direction:column;justify-content:space-between}
+.btop{display:flex;justify-content:space-between;align-items:flex-start}.bt b,.bt span{display:block;font-size:22px;letter-spacing:-.03em;line-height:1.1}.bt span{color:#d0d0d4;font-weight:700}
+.bmid{display:flex;justify-content:space-between;align-items:flex-end}.dl{font-size:13px;color:#b9b9be;padding-bottom:8px}.bn{width:52%;height:auto;aspect-ratio:420/190}
+#b1d{width:100%;height:auto;aspect-ratio:700/170;margin-top:4px;touch-action:manipulation}
+.pills{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:6px}.plr{border:0;height:min(8.5vh,70px);border-radius:30px;background:#efeff1;box-shadow:inset 0 2px 5px rgba(0,0,0,.04);padding:0;transition:background .3s}
+.car{position:relative;width:calc(100% + 44px);margin:0 -22px;flex:1;min-height:170px}.car canvas{position:absolute;left:0;top:0;width:100%;height:auto;aspect-ratio:780/300;touch-action:none}
+.clabel{position:absolute;left:0;right:0;top:calc(22.6vw + 12px);text-align:center;pointer-events:none}.clabel b{display:block;font-size:16px;letter-spacing:-.02em}.clabel span{display:block;font-size:13px;color:#c4c4c9;font-weight:600}
+.pcs{width:100%;display:flex;flex-direction:column;gap:8px;flex:none;margin-top:6px}
+.pc{position:relative;height:min(17vh,150px);background:#fafafa;border-radius:26px;padding:14px 18px;overflow:hidden;box-shadow:0 8px 22px rgba(0,0,0,.04)}.pc:nth-child(2){background:#fcfcfc}.pc:nth-child(3){background:#fff}
+.pt b,.pt span{display:block;font-size:16px;letter-spacing:-.02em;line-height:1.2}.pt span{color:#b9b9be;font-weight:700}.pc small{position:absolute;left:18px;bottom:14px;font-size:12px;color:#b9b9be}
+.pn{position:absolute;right:14px;bottom:8px;width:56%;height:auto;aspect-ratio:420/220}
+.domew{position:relative;width:calc(100% + 44px);flex:1;min-height:90px;margin:0 -22px;overflow:hidden}.domew canvas{position:absolute;left:0;bottom:0;width:100%;height:auto;aspect-ratio:780/300;touch-action:manipulation}
+.dark .icard,.dark .binn{background:#1e1e22}.dark .stk>i{background:rgba(255,255,255,.07)}.dark .stk>i+i{background:rgba(255,255,255,.04)}
+.dark .pc,.dark .pc:nth-child(2),.dark .pc:nth-child(3){background:#1e1e22}.dark .plr{background:#26262b}.dark .ititle span,.dark .bt span,.dark .pt span{color:#5b5b64}
+.dark .clabel span{color:#6b6b74}
 </style></head><body class="introing">
 <div id="aura"><i></i><i></i><i></i><i></i></div>
 <canvas id="fx"></canvas><div id="err"></div><div class="sheetwrap" id="srch"><div class="sheet"><div class="grab"></div><input id="sq" type="search" placeholder="Search songs, artists, albums" autocomplete="off"><div id="sres"></div></div></div>
@@ -369,15 +394,15 @@ body.air header h1{font-size:25px;letter-spacing:-.03em}
 </section>
 
 <section class="screen" id="board1">
- <div class="rowp glass"><div class="big"><div class="lab"><b>Profitable</b><br>Month</div><div class="num" id="bd1">0</div></div></div>
- <div class="dots glass" id="dots"></div>
- <div class="cluster glass" id="sp1"></div>
+ <div class="stk bst"><i></i><i></i><div class="binn"><div class="btop"><div class="bt"><b>Listening</b><span>Month</span></div><button class="rb sm" id="b1Mk" aria-label="Switch board"><svg viewBox="0 0 24 24"><path d="M7 4h10v16l-5-4-5 4z"/></svg></button></div>
+  <div class="bmid"><small class="dl" id="b1Tip">Days</small><canvas class="bn" id="b1n" width="420" height="190"></canvas></div><canvas id="b1d" width="700" height="170"></canvas></div></div>
+ <div class="car" id="car1"><canvas width="780" height="300"></canvas><div class="clabel"><b></b><span></span></div></div>
 </section>
 
 <section class="screen" id="board2">
- <div class="rowp glass"><div class="big"><div class="lab"><b>Most</b><br>Visited</div><div class="num" id="bd2">0</div></div></div>
- <div class="bars glass" id="bars"></div>
- <div class="cluster glass" id="sp2" style="width:200px"></div>
+ <div class="stk bst"><i></i><i></i><div class="binn"><div class="btop"><div class="bt"><b>Most</b><span>Played</span></div><button class="rb sm" id="b2Mk" aria-label="Switch board"><svg viewBox="0 0 24 24"><path d="M7 4h10v16l-5-4-5 4z"/></svg></button></div>
+  <div class="bmid"><small class="dl" id="b2Tip">Days</small><canvas class="bn" id="b2n" width="420" height="190"></canvas></div><div class="pills" id="b2p"></div></div></div>
+ <div class="car" id="car2"><canvas width="780" height="300"></canvas><div class="clabel"><b></b><span></span></div></div>
 </section>
 
 <section class="screen" id="analytics">
@@ -394,16 +419,20 @@ body.air header h1{font-size:25px;letter-spacing:-.03em}
 </section>
 
 <section class="screen" id="insights">
- <div class="rowp glass"><div class="big"><div class="lab"><b>Product</b><br>Analytics</div><div class="lab" id="iTxt">Tap a sphere</div></div></div>
- <div class="cluster glass" id="sp3" style="width:min(80vw,310px)"></div>
- <div class="lab">Pick a sphere to restyle the player</div>
+ <div class="stk"><i></i><i></i>
+  <div class="icard"><div class="ich"><button class="rb sm" id="inTune" aria-label="Tune"><svg viewBox="0 0 24 24"><path d="M8 4v16M16 4v16"/><circle cx="8" cy="9" r="2.4" fill="currentColor"/><circle cx="16" cy="15" r="2.4" fill="currentColor"/></svg></button>
+   <button class="ititle" id="inGo"><b>Product</b><span id="inSkin">Analytics</span></button><button class="rb sm" id="inPin" aria-label="Save skin"><svg viewBox="0 0 24 24"><path d="M7 4h10v16l-5-4-5 4z"/></svg></button></div>
+   <canvas id="flc" width="600" height="600"></canvas></div></div>
+ <div class="inrow"><button class="rb sm" id="inLink" aria-label="Share"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.6 0l3-3a4 4 0 0 0-5.6-5.6l-1 1M14 10a4 4 0 0 0-5.6 0l-3 3a4 4 0 0 0 5.6 5.6l1-1"/></svg></button><button class="rb sm" id="inPlus" aria-label="More materials"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>
 </section>
 
 <section class="screen" id="product">
- <div class="rowp glass"><div class="big"><div class="lab"><b>Sold</b><br>Services</div><div class="num s" id="pA">0</div></div></div>
- <div class="rowp glass"><div class="big"><div class="lab"><b>The Best</b><br>Categories</div><div class="num s" id="pB">0</div></div></div>
- <div class="rowp glass"><div class="big"><div class="lab"><b>Analysis</b><br>Of Goods</div><div class="num s" id="pC">0</div></div></div>
- <div class="dome"></div>
+ <div class="pcs">
+  <div class="pc"><div class="pt"><b>Played</b><span>Today</span></div><small>Plays</small><canvas class="pn" width="420" height="220"></canvas></div>
+  <div class="pc"><div class="pt"><b>The Best</b><span>Artists</span></div><small>In your library</small><canvas class="pn" width="420" height="220"></canvas></div>
+  <div class="pc"><div class="pt"><b>Listening</b><span>Minutes</span></div><small>This month</small><canvas class="pn" width="420" height="220"></canvas></div>
+ </div>
+ <div class="domew"><canvas id="dome" width="780" height="300"></canvas></div>
 </section>
 
 </main>
@@ -425,7 +454,7 @@ window.onerror=(m,u,l,c)=>{const e=document.getElementById('err');if(e){e.style.
 
 const $=id=>document.getElementById(id);
 
-const SCR=[['explore','Explore',''],['music','Music',''],['library','Calendar',''],['eq','Equalizer',''],['alarm','Alarm',''],['wheel','Click wheel',''],['game','Game',''],['board1','Board','Profitable'],['board2','Board','Most visited'],['analytics','Analytics','Product'],['sales','Sales','Overview'],['insights','Data','Insights'],['product','Product','Analytics']];
+const SCR=[['explore','Explore',''],['music','Music',''],['library','Calendar',''],['eq','Equalizer',''],['alarm','Alarm',''],['wheel','Click wheel',''],['game','Game',''],['board1','Board','Month'],['board2','Board','Weekdays'],['analytics','Analytics','Product'],['sales','Sales','Overview'],['insights','Data','Insights'],['product','Product','Analytics']];
 // haptics
 const hap=t=>{try{window.AirHaptic?AirHaptic.hap(t):navigator.vibrate&&navigator.vibrate(t=='heavy'?40:t=='tick'?8:16)}catch(e){}};
 document.addEventListener('pointerdown',e=>{if(e.target.closest('button,.chip,.tog div,#menu div,.list div,.sph,.pad button'))hap('click')});
@@ -441,13 +470,11 @@ const fm=s=>isFinite(s)?String(Math.floor(s/60)).padStart(2,'0')+':'+String(Math
 
 // nav
 const menu=$('menu');
-function go(id){cur=id;document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==id));const s=SCR.find(x=>x[0]==id);$('t1').textContent=s[1];$('t2').textContent=s[2];if(id=='library')$('t1').textContent=MONTH;
- menu.innerHTML=SCR.map(x=>`<div data-i="${x[0]}" class="${x[0]==id?'sel':''}">${x[1]} ${x[2]}</div>`).join('')+extras();menu.classList.remove('on');document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go==id));if(id=='explore')layoutArc();if(id=='eq'){buildEq();eqStart()}document.body.classList.toggle('air',['music','eq','alarm','game','library'].includes(id));if(id=='music'){loadCover();drawDial();uiMusic()}if(id=='alarm')loadAlarm();if(id=='game')gEnter();else gLeave();if(id=='library')libEnter();stats()}
+function go(id){cur=id;document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id==id));const s=SCR.find(x=>x[0]==id);$('t1').textContent=s[1];$('t2').textContent=s[2];if(id=='library')$('t1').textContent=MONTH;if(id=='board1'||id=='board2')$('t2').textContent='';
+ menu.innerHTML=SCR.map(x=>`<div data-i="${x[0]}" class="${x[0]==id?'sel':''}">${x[1]} ${x[2]}</div>`).join('')+extras();menu.classList.remove('on');document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.go==id));if(id=='explore')layoutArc();if(id=='eq'){buildEq();eqStart()}document.body.classList.toggle('air',['music','eq','alarm','game','library','insights','product','board1','board2'].includes(id));if(id=='music'){loadCover();drawDial();uiMusic()}if(id=='alarm')loadAlarm();if(id=='game')gEnter();else gLeave();if(id=='library')libEnter();if(id=='insights')insEnter();if(id=='product')prodRender();if(id=='board1'||id=='board2')boardEnter();stats()}
 $('menuBtn').onclick=()=>menu.classList.toggle('on');
 // spheres
-const SPH=['cl','wh','bl','gr','yl','dk'],HUE=[210,30,220,110,65,0];
-['sp1','sp2','sp3'].forEach(id=>$(id).innerHTML=SPH.map((c,i)=>`<div class="sph ${c}" data-k="${i}"></div>`).join(''));
-document.addEventListener('click',e=>{const k=e.target.dataset&&e.target.dataset.k;if(k!==undefined){skin=+k;$('iTxt').textContent='Skin '+(skin+1);paint()}});
+const SPH=[];
 
 function paint(){const t=tracks[idx],h=HUE[skin]+idx*40;document.documentElement.style.setProperty('--hr',(h-HUE[0])||0);
  document.querySelectorAll('.art').forEach(a=>{if(t&&t.art){a.style.background=`url('${t.art}') center/cover`;a.style.filter='blur(0)'}
@@ -514,11 +541,8 @@ function preset(n){if(!eqI||!eqI.n)return;const ins=[...document.querySelectorAl
 
 // ---- analytics (counted natively, so it also works in the background) ----
 function stats(){let s={p:0,s:0,ms:0,w:[0,0,0,0,0,0,0],days:[]};try{s=JSON.parse(AirPlayer.stats())}catch(e){}
- const ar=new Set(tracks.map(t=>t.artist).filter(Boolean)).size;
- $('bd1').textContent=$('bd2').textContent=s.days.length;$('aTot').textContent=$('sTot').textContent=s.p;$('aMin').textContent=Math.round(s.ms/60000)+' min';
- $('sOn').textContent=Math.max(0,s.p-s.s);$('sOff').textContent=s.s;$('pA').textContent=s.p;$('pB').textContent=ar;$('pC').textContent=tracks.length;
- $('dots').innerHTML=Array.from({length:30},(_,i)=>`<i class="${s.days.includes(i+1)?'on':''}"></i>`).join('');
- const mx=Math.max(1,...s.w);$('bars').innerHTML=s.w.map((v,i)=>`<i class="${v==mx&&v?'on':''}" style="height:${14+v/mx*86}%"></i>`).join('')}
+ $('aTot').textContent=$('sTot').textContent=s.p;$('aMin').textContent=Math.round(s.ms/60000)+' min';$('sOn').textContent=Math.max(0,s.p-s.s);$('sOff').textContent=s.s;
+ STATS=s;if(cur=='board1'||cur=='board2')boardRender();if(cur=='product')prodRender()}
 setInterval(()=>{if(['analytics','sales','board1','board2','product'].includes(cur))stats()},3000);
 
 // ---- Explore arc list ----
@@ -838,10 +862,131 @@ function calRender(){let s={p:0,ms:0,days:[]};try{s=JSON.parse(AirPlayer.stats()
  let h=['S','M','T','W','T','F','S'].map(d=>`<span class="cwd">${d}</span>`).join('');for(let i=0;i<first;i++)h+='<span></span>';
  for(let d=1;d<=dim;d++)h+=`<span class="cday${s.days.includes(d)?' on':''}${d==now.getDate()?' today':''}">${d}</span>`;$('calg').innerHTML=h}
 $('mCal').onclick=()=>{calRender();$('calw').classList.add('on')};$('calX').onclick=()=>$('calw').classList.remove('on');$('calw').onclick=e=>{if(e.target.id=='calw')$('calw').classList.remove('on')};
+
+// ================= Materials · Data Insights · Product Analytics · Board =================
+const MAT=[['chrome','Chrome','#8a96a8'],['matte','Plaster','#8e8e93'],['concrete','Concrete','#7c7f86'],['golf','Golf','#7f8fd8'],['stripe','Lime','#b5c42f'],['moss','Moss','#4f9a2f'],['bowling','Bowling','#2a3a66'],['cobble','Cobble','#8d9096'],['shingle','Slate','#565b66'],['char','Char','#6b6460'],['felt','Felt','#909498'],['wood','Wood','#b5703c'],['chalk','Chalk','#b0aca8'],['rubber','Rubber','#4a4a50'],['stone','Stone','#8a8a84'],['spike','Spike','#4e74b0'],['clay','Clay','#a5753f'],['pebble','Pebble','#b0603f'],['steel','Steel','#8fa0b0'],['pearl','Pearl','#b9bdc8']];
+const MIDX=Object.fromEntries(MAT.map((m,i)=>[m[0],i]));
+const HUE=MAT.map(m=>{const c=parseInt(m[2].slice(1),16),r=(c>>16)/255,g=(c>>8&255)/255,b=(c&255)/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;if(!d)return 0;const h=mx==r?((g-b)/d)%6:mx==g?(b-r)/d+2:(r-g)/d+4;return Math.round((h*60+360)%360)});
+const hs=(x,y,z)=>{let h=Math.imul(x|0,374761393)^Math.imul(y|0,668265263)^Math.imul(z|0,1274126177);h=Math.imul(h^(h>>>13),1274126177);return((h^(h>>>16))>>>0)/4294967295};
+const fd=t=>t*t*(3-2*t),lp=(a,b,t)=>a+(b-a)*t;
+function vn(x,y,z){const xi=Math.floor(x),yi=Math.floor(y),zi=Math.floor(z),xf=fd(x-xi),yf=fd(y-yi),zf=fd(z-zi);
+ return lp(lp(lp(hs(xi,yi,zi),hs(xi+1,yi,zi),xf),lp(hs(xi,yi+1,zi),hs(xi+1,yi+1,zi),xf),yf),lp(lp(hs(xi,yi,zi+1),hs(xi+1,yi,zi+1),xf),lp(hs(xi,yi+1,zi+1),hs(xi+1,yi+1,zi+1),xf),yf),zf)}
+const fbm=(x,y,z,o=2)=>{let a=.5,s=0,f=1;for(let i=0;i<o;i++){s+=a*vn(x*f,y*f,z*f);a*=.5;f*=2.1}return s};
+function cel(u,v){const ui=Math.floor(u),vi=Math.floor(v);let f1=9,f2=9,id=0;for(let j=-1;j<=1;j++)for(let i=-1;i<=1;i++){const cx=ui+i,cy=vi+j,px=cx+hs(cx,cy,7),py=cy+hs(cx,cy,13),dx=px-u,dy=py-v,d=Math.sqrt(dx*dx+dy*dy);if(d<f1){f2=f1;f1=d;id=hs(cx,cy,3)}else if(d<f2)f2=d}return[f1,f2,id]}
+const smt=(a,b,x)=>fd(Math.max(0,Math.min(1,(x-a)/(b-a))));
+function mat(k,nx,ny,nz,u,v){const F=(s,o)=>fbm(nx*s,ny*s,nz*s,o);
+ switch(k){
+ case'chrome':{const ry=2*nz*ny,t=smt(-.12,.3,-ry),b=lp(40,236,t),band=Math.max(0,1-Math.abs(ry+.03)*16)*26;return[b+band,b+band+2,b+band+6,.95,70]}
+ case'matte':{const c=172+F(8)*34;return[c,c,c+3,.08,12]}
+ case'concrete':{const pit=vn(nx*28,ny*28,nz*28)>.8?.55:1,c=(138+F(10,3)*50)*pit;return[c,c,c+4,.05,10]}
+ case'golf':{const q=cel(u*9,v*9+((Math.floor(u*9)&1)?.5:0)),dim=Math.max(0,1-q[0]*1.9),c=232-dim*48;return[c-8,c-4,c+12,.5,30]}
+ case'stripe':{const s=Math.sin(u*72)*.5+.5,c=1-.4*s*s;return[205*c,212*c,70*c,.35,20]}
+ case'moss':{const n=F(16,3),n2=vn(nx*60,ny*60,nz*60),c=.35+n*.9;return[(50+60*c)*(.8+.4*n2),(105+80*c)*(.85+.3*n2),30+20*c,.05,8]}
+ case'bowling':{let hole=0;[[-.2,-.38],[.17,-.4],[.0,-.1]].forEach(h=>{const d=Math.hypot(nx-h[0],ny-h[1]);if(d<.09)hole=1;else if(d<.11)hole=.5});const c=hole==1?4:20*(1-hole*.6);return[c,c*1.3+4,c*2.4+10,.85,60]}
+ case'cobble':{const q=cel(u*7,v*7),c=q[1]-q[0]<.13?58:150+q[2]*60;return[c,c,c+3,.15,16]}
+ case'shingle':{const row=Math.floor(v*10),off=(row&1)?.5:0,cx=((u*9+off)%1+1)%1,cy=((v*10)%1+1)%1,gap=(cx<.05||cy<.08)?.4:1,c=(70+hs(row,Math.floor(u*9+off),1)*30)*gap;return[c,c+2,c+8,.15,16]}
+ case'char':{const n=F(7,3),c=Math.abs(n-.5)<.045?125:25+n*40;return[c,c*.97,c*.95,.12,12]}
+ case'felt':{const c=150+vn(nx*90,ny*90,nz*90)*60;return[c,c+2,c+4,0,4]}
+ case'wood':{const t=(u+Math.PI/2)/Math.PI*10,pl=Math.floor(t),sh=hs(pl,3,3),gr=vn(nx*4,ny*40,nz*4),e=(t%1)<.05?.6:1,b=(150+sh*40)*e*(.9+gr*.2);return[b,b*.62,b*.38,.2,18]}
+ case'chalk':{const n=F(6,3),r=Math.abs(F(5,2)-.5)<.025?.78:1,c=(225+n*20)*r;return[c,c,c-2,.08,10]}
+ case'rubber':{const q=cel(u*10,v*10),c=40*(q[0]<.22?1.6:1);return[c,c,c+3,.3,22]}
+ case'stone':{const c=120+F(5,3)*70;return[c,c-2,c-6,.05,8]}
+ case'spike':{const q=cel(u*8,v*8),c=Math.max(0,1-q[0]*1.6);return[70+c*90,95+c*95,130+c*100,.7,40]}
+ case'clay':{const q=cel(u*5,v*5),e=q[1]-q[0]<.07,c=e?30:120+F(8)*50;return[c*1.05,c*.9,c*.78,.04,8]}
+ case'pebble':{const q=cel(u*8,v*8),e=q[1]-q[0]<.1,c=e?40:90+q[2]*80;return[c*(.9+q[2]*.5),c*(.65+q[2]*.2),c*(.5+q[2]*.1),.25,18]}
+ case'steel':{const q=cel(u*14,v*14),hole=q[0]<.2,c=hole?60:150+F(6)*60;return[c,c+4,c+10,hole?0:.7,40]}
+ default:{const c=205+F(5)*30;return[c,c+1,c+6,.7,36]}}}
+// sprites render in small time slices so swiping never stalls
+const sprC=new Map(),jobs=[],sprWait=new Set();let jobT=0;
+const fallback=(kind,S)=>{const k='f'+kind+S;if(sprC.has(k))return sprC.get(k);const c=document.createElement('canvas');c.width=c.height=S;const g=c.getContext('2d'),col=MAT[MIDX[kind]][2],r=S/2,gr=g.createRadialGradient(r*.7,r*.6,r*.05,r,r,r);gr.addColorStop(0,'#ffffffcc');gr.addColorStop(.35,col);gr.addColorStop(1,'#00000066');g.fillStyle=gr;g.beginPath();g.arc(r,r,r-1,0,TAU);g.fill();sprC.set(k,c);return c};
+function sprite(kind,S){const key=kind+S;if(sprC.has(key))return sprC.get(key);if(!sprWait.has(key)){sprWait.add(key);const c=document.createElement('canvas');c.width=c.height=S;jobs.push({key,kind,S,c,img:c.getContext('2d').createImageData(S,S),y:0});if(!jobT)jobT=setTimeout(runJobs,30)}return fallback(kind,S)}
+function runJobs(){jobT=0;const j=jobs[0];if(!j)return;const t0=performance.now(),{S,kind,img}=j,d=img.data,R=S/2,L=[-.45,-.6,.66],ll=Math.hypot(...L);L[0]/=ll;L[1]/=ll;L[2]/=ll;
+ while(j.y<S&&performance.now()-t0<9){const py=j.y++;for(let px=0;px<S;px++){const x=(px+.5-R)/R,y=(py+.5-R)/R,r2=x*x+y*y,o=(py*S+px)*4;if(r2>1){d[o+3]=0;continue}
+  const z=Math.sqrt(1-r2),m=mat(kind,x,y,z,Math.atan2(x,z),Math.asin(y)),dif=Math.max(0,x*L[0]+y*L[1]+z*L[2]),hx=L[0],hy=L[1],hz=L[2]+1,hl=Math.hypot(hx,hy,hz),
+  sp=Math.pow(Math.max(0,(x*hx+y*hy+z*hz)/hl),m[4]||24)*m[3],lit=.38+.62*dif,ed=Math.pow(z,.35)*.4+.6;
+  d[o]=Math.min(255,m[0]*lit*ed+255*sp);d[o+1]=Math.min(255,m[1]*lit*ed+255*sp);d[o+2]=Math.min(255,m[2]*lit*ed+255*sp);d[o+3]=255*Math.min(1,(1-Math.sqrt(r2))*R*1.2)}}
+ if(j.y>=S){j.c.getContext('2d').putImageData(img,0,0);sprC.set(j.key,j.c);jobs.shift();sprRedraw()}
+ if(jobs.length)jobT=setTimeout(runJobs,12)}
+function sprRedraw(){if(cur=='insights')drawFlower();if(cur=='product')drawDome();if(cur=='board1'||cur=='board2'){car1.draw();car2.draw()}}
+// ---- outlined dot-matrix numerals ----
+const ell=(cx,cy,rx,ry,a0,a1,n=36)=>{const o=[];for(let i=0;i<=n;i++){const a=(a0+(a1-a0)*i/n)*Math.PI/180;o.push([cx+Math.cos(a)*rx,cy+Math.sin(a)*ry])}return o};
+const six=[ell(.5,.85,.5,.85,-50,-180,22),ell(.5,1.2,.5,.5,0,360)],
+ GLY={'0':[ell(.5,.85,.46,.85,0,360,44)],'1':[[[.1,.38],[.55,0],[.55,1.7]]],'2':[ell(.5,.42,.46,.42,190,375).concat([[.05,1.7],[.97,1.7]])],
+ '3':[ell(.5,.42,.44,.42,-165,90),ell(.5,1.27,.5,.43,-90,165)],'4':[[[.78,1.7],[.78,0],[0,1.15],[1,1.15]]],'5':[[[.92,0],[.12,0],[.06,.8]].concat(ell(.5,1.22,.5,.48,-110,155))],
+ '6':six,'7':[[[.05,0],[.95,0],[.35,1.7]]],'8':[ell(.5,.42,.42,.42,0,360),ell(.5,1.25,.5,.45,0,360)],'9':six.map(st=>st.map(p=>[1-p[0],1.7-p[1]]))};
+function dotNum(x,str,right,bottom,h,col){const sc=h/1.7,sx=sc*1.28,gap=.42*sc;let w=0;for(const ch of str)w+=sx+gap;w-=gap;let ox=right-w;x.fillStyle=col;
+ for(const ch of str){const g=GLY[ch];if(g)g.forEach(st=>{let carry=0;for(let i=1;i<st.length;i++){const a=st[i-1],b=st[i],dx=(b[0]-a[0])*sx,dy=(b[1]-a[1])*sc,L=Math.hypot(dx,dy),sp=.1*sc;let t=carry;while(t<=L){const k=t/L;x.beginPath();x.arc(ox+(a[0]+(b[0]-a[0])*k)*sx,bottom-h+(a[1]+(b[1]-a[1])*k)*sc,.036*sc,0,TAU);x.fill();t+=sp}carry=t-L}});ox+=sx+gap}}
+const numTo=(cv,str)=>{const x=cv.getContext('2d');x.clearRect(0,0,cv.width,cv.height);dotNum(x,String(str),cv.width-8,cv.height-8,cv.height-16,DK()?'#f2f2f4':'#111')};
+// ---- stats data ----
+let STATS={p:0,s:0,ms:0,w:[0,0,0,0,0,0,0],days:[]};
+function monthInfo(i){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-(11-i));return{key:d.getFullYear()+'-'+(d.getMonth()+1),y:d.getFullYear(),dim:new Date(d.getFullYear(),d.getMonth()+1,0).getDate(),name:d.toLocaleString('en-US',{month:'long'}),short:d.toLocaleString('en-US',{month:'short'})}}
+function monthData(i){const k=monthInfo(i),ms=(STATS.months||{})[k.key];let dp=Array(31).fill(0),dm=Array(31).fill(0),w=[0,0,0,0,0,0,0];
+ if(ms){dp=ms.dp.slice();dm=ms.dm.slice();w=ms.w.slice()}else if(i==11){(STATS.days||[]).forEach(d=>dp[d-1]=1);w=(STATS.w||w).slice()}return Object.assign({dp,dm,w},k)}
+// ---- Data Insights: 6 material spheres ----
+const flc=$('flc'),flx=flc.getContext('2d'),RING=[-90,-150,-30,150,90,30];let skinSet=0,pop=0,popRaf=0;
+const ringItems=()=>RING.map((_,i)=>(skinSet*6+i)%MAT.length);
+function drawFlower(){if(cur!='insights')return;const S=flc.width,C=S/2,x=flx,dk=DK(),rr0=.285*S,it=ringItems();x.clearRect(0,0,S,S);
+ x.save();x.shadowColor=dk?'rgba(0,0,0,.5)':'rgba(0,0,0,.08)';x.shadowBlur=30;x.shadowOffsetY=10;x.fillStyle=dk?'#26262b':'#efefef';x.beginPath();
+ RING.forEach(a=>{const r=a*Math.PI/180;x.moveTo(C+Math.cos(r)*rr0+.185*S,C+Math.sin(r)*rr0);x.arc(C+Math.cos(r)*rr0,C+Math.sin(r)*rr0,.185*S,0,TAU)});x.moveTo(C+.25*S,C);x.arc(C,C,.25*S,0,TAU);x.fill();x.restore();
+ x.fillStyle=dk?'#35353b':'#e2e2e4';x.beginPath();x.moveTo(C,C-.045*S);x.lineTo(C+.04*S,C+.03*S);x.lineTo(C-.04*S,C+.03*S);x.closePath();x.fill();
+ RING.forEach((a,i)=>{const r=a*Math.PI/180,cx=C+Math.cos(r)*rr0,cy=C+Math.sin(r)*rr0,sel=it[i]==skin,R=.125*S*(sel?1+.08*pop+.04:1);
+  x.save();x.fillStyle='rgba(0,0,0,.18)';x.filter='blur(8px)';x.beginPath();x.ellipse(cx+4,cy+R*.85,R*.8,R*.18,0,0,TAU);x.fill();x.restore();
+  x.drawImage(sprite(MAT[it[i]][0],144),cx-R,cy-R,R*2,R*2);
+  if(sel){x.strokeStyle=dk?'rgba(255,255,255,.7)':'rgba(255,255,255,.95)';x.lineWidth=5;x.beginPath();x.arc(cx,cy,R+6,0,TAU);x.stroke();x.strokeStyle=MAT[it[i]][2];x.lineWidth=2;x.beginPath();x.arc(cx,cy,R+9,0,TAU);x.stroke()}})}
+function popAnim(){pop=1;const f=()=>{pop*=.85;drawFlower();popRaf=pop>.02?requestAnimationFrame(f):0};if(!popRaf)popRaf=requestAnimationFrame(f)}
+function applySkin(){const m=MAT[skin];document.documentElement.style.setProperty('--acc',m[2]);$('inSkin').textContent=m[1];$('inPin').classList.toggle('on',+localStorage.skin==skin&&localStorage.skin!==undefined);paint();if(cur=='product')drawDome()}
+function insEnter(){applySkin();drawFlower()}
+flc.onclick=e=>{const r=flc.getBoundingClientRect(),k=flc.width/r.width,px=(e.clientX-r.left)*k,py=(e.clientY-r.top)*k,C=flc.width/2,it=ringItems();let best=-1,bd=1e9;
+ RING.forEach((a,i)=>{const t=a*Math.PI/180,d=Math.hypot(px-(C+Math.cos(t)*.285*flc.width),py-(C+Math.sin(t)*.285*flc.width));if(d<bd){bd=d;best=i}});
+ if(bd<.17*flc.width){skin=it[best];hap('click');applySkin();popAnim()}};
+$('inPin').onclick=()=>{localStorage.skin=skin;hap('heavy');applySkin()};
+$('inPlus').onclick=()=>{skinSet=(skinSet+1)%Math.ceil(MAT.length/6);hap('click');popAnim();drawFlower()};
+$('inTune').onclick=()=>{hap('click');go('eq')};$('inGo').onclick=()=>{hap('click');go('product')};
+$('inLink').onclick=()=>{const d=monthData(11),days=d.dp.slice(0,d.dim).filter(v=>v>0).length;const t=`My Air.INC · ${d.name}: ${days} days of music, ${STATS.p} plays, ${Math.round(STATS.ms/60000)} min listened.`;hap('click');try{AirPlayer.share(t)}catch(e){}};
+// ---- Product Analytics ----
+function prodRender(){const d=monthData(11),td=new Date().getDate(),pcs=[...document.querySelectorAll('.pn')],ar=new Set(tracks.map(t=>t.artist).filter(Boolean)).size;
+ [d.dp[td-1]||0,ar,Math.round(d.dm.reduce((a,b)=>a+b,0)/60000)].forEach((v,i)=>numTo(pcs[i],Math.min(99999,v)));drawDome()}
+const domeC=$('dome'),domeX=domeC.getContext('2d');
+function drawDome(){if(cur!='product')return;const W=domeC.width,H=domeC.height,x=domeX;x.clearRect(0,0,W,H);const D=W*.84,sp=sprite(MAT[skin][0],300);
+ x.save();x.shadowColor='rgba(0,0,0,.18)';x.shadowBlur=40;x.drawImage(sp,(W-D)/2,H-D*.46,D,D);x.restore()}
+domeC.onclick=()=>{skin=(skin+1)%MAT.length;hap('click');applySkin()};
+// ---- Board: month carousel + dot calendar + weekday pills ----
+let mSel=11;const CARM=['chrome','matte','moss','shingle','concrete','golf','stripe','bowling','wood','pearl','steel','pebble'];
+function mkCar(el){const cv=el.querySelector('canvas'),x=cv.getContext('2d'),b=el.querySelector('b'),sp=el.querySelector('span');let pos=mSel,tgt=mSel,v=0,dr=null,raf=0,last=0,smp=[],lastSel=-1;const SP=226;
+ const label=()=>{const k=monthInfo(Math.max(0,Math.min(11,Math.round(pos))));b.textContent=k.name;sp.textContent=k.y};
+ function draw(){const W=cv.width,H=cv.height,dk=DK();x.clearRect(0,0,W,H);
+  for(let i=Math.max(0,Math.floor(pos)-3);i<=Math.min(11,Math.ceil(pos)+3);i++){const d=i-pos,a=Math.abs(d),px=W/2+d*SP,R=78*(1-.07*Math.min(a,2)),py=98+36*Math.min(a,1)+54*Math.max(0,a-1);
+   x.save();x.fillStyle=dk?'rgba(0,0,0,.4)':'rgba(0,0,0,.14)';x.filter='blur(7px)';x.beginPath();x.ellipse(px+3,py+R*.88,R*.78,R*.16,0,0,TAU);x.fill();x.restore();
+   x.globalAlpha=Math.max(.3,1-a*.18);x.drawImage(sprite(CARM[i],144),px-R,py-R,R*2,R*2);x.globalAlpha=1}label()}
+ function tick(t){const now=t||performance.now(),dt=Math.min(.05,(now-last)/1000||.016);last=now;
+  if(!dr){if(Math.abs(v)>.4){pos+=v*dt;v*=Math.exp(-dt*3.4);if(pos<0||pos>11){pos=Math.max(-.2,Math.min(11.2,pos));v*=.4}tgt=Math.max(0,Math.min(11,Math.round(pos+v*.2)))}else{v=0;pos+=(tgt-pos)*(1-Math.exp(-dt*12));if(Math.abs(tgt-pos)<.001)pos=tgt}}
+  const c=Math.max(0,Math.min(11,Math.round(pos)));if(c!=lastSel){if(lastSel>=0)hap('tick');lastSel=c;if(mSel!=c){mSel=c;boardRender()}}
+  draw();raf=(dr||v||pos!=tgt)?requestAnimationFrame(tick):0}
+ const kick=()=>{if(!raf){last=performance.now();raf=requestAnimationFrame(tick)}};
+ cv.onpointerdown=e=>{cv.setPointerCapture(e.pointerId);dr={x:e.clientX,p:pos};smp=[[performance.now(),pos]];v=0;kick()};
+ cv.onpointermove=e=>{if(!dr)return;const r=cv.getBoundingClientRect(),k=cv.width/r.width;pos=Math.max(-.3,Math.min(11.3,dr.p-(e.clientX-dr.x)*k/SP));tgt=pos;smp.push([performance.now(),pos]);if(smp.length>6)smp.shift()};
+ cv.onpointerup=cv.onpointercancel=()=>{if(!dr)return;const a=smp[0],z=smp[smp.length-1];dr=null;v=(z[0]>a[0]&&performance.now()-z[0]<90)?(z[1]-a[1])/((z[0]-a[0])/1000):0;v=Math.max(-10,Math.min(10,v));tgt=Math.max(0,Math.min(11,Math.round(pos+v*.2)));kick()};
+ return{draw,sync(){pos=tgt=mSel;lastSel=mSel;draw()}}}
+const car1=mkCar($('car1')),car2=mkCar($('car2'));
+function boardEnter(){car1.sync();car2.sync();boardRender()}
+function boardRender(){const d=monthData(mSel),n=d.dim,acc=getComputedStyle(document.documentElement).getPropertyValue('--acc').trim()||'#e8872e',dk=DK();
+ const days=d.dp.slice(0,n).filter(v=>v>0).length;numTo($('b1n'),days);
+ const cv=$('b1d'),x=cv.getContext('2d'),W=cv.width,H=cv.height,cols=Math.ceil(n/3),vals=d.dp.slice(0,n).filter(v=>v>0),avg=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:0;x.clearRect(0,0,W,H);
+ for(let i=0;i<n;i++){const r=Math.floor(i/cols),c=i%cols,cx=(c+.5)*W/cols,cy=(r+.5)*H/3,val=d.dp[i];x.beginPath();
+  if(val>0){x.fillStyle=acc;x.arc(cx,cy,val>=avg?15:7,0,TAU)}else{x.fillStyle=dk?'#2c2c31':'#ececee';x.arc(cx,cy,14,0,TAU)}x.fill()}
+ const wd=d.w.filter(v=>v>0).length;numTo($('b2n'),wd);
+ const mx=Math.max(1,...d.w),P=$('b2p');if(P.children.length!=7)P.innerHTML=[0,1,2,3,4,5,6].map(i=>`<button class="plr" data-i="${i}"></button>`).join('');
+ [...P.children].forEach((b,i)=>{const f=d.w[i]/mx;b.style.background=d.w[i]>0?`linear-gradient(180deg,${dk?'#4a4f60':'#d6dae6'},${dk?'#3b3f4e':'#c2c8d8'})`:'';b.style.opacity=d.w[i]>0?.5+.5*f:1})
+ $('b1Tip').textContent=$('b2Tip').textContent='Days'}
+$('b1d').onclick=e=>{const r=e.target.getBoundingClientRect(),k=e.target.width/r.width,d=monthData(mSel),n=d.dim,cols=Math.ceil(n/3),c=Math.floor((e.clientX-r.left)*k/(e.target.width/cols)),row=Math.floor((e.clientY-r.top)*k/(e.target.height/3)),i=row*cols+c;
+ if(i>=0&&i<n){hap('tick');$('b1Tip').textContent=`${d.short} ${i+1} · ${d.dp[i]} play${d.dp[i]==1?'':'s'}`}};
+$('b2p').onclick=e=>{const b=e.target.closest('.plr');if(!b)return;const d=monthData(mSel),i=+b.dataset.i;hap('tick');$('b2Tip').textContent=`${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][i]} · ${d.w[i]} play${d.w[i]==1?'':'s'}`};
+$('b1Mk').onclick=()=>{hap('click');go('board2')};$('b2Mk').onclick=()=>{hap('click');go('board1')};
+if(localStorage.skin!==undefined)skin=+localStorage.skin||0;
 // ---- opening + boot ----
 
 window.airGo=id=>{if(!SCR.find(x=>x[0]==id))return;document.body.classList.remove('introing');$('intro').style.display='none';go(id)};
-applyTheme();go('explore');buildArc();
+applyTheme();applySkin();go('explore');buildArc();
 try{perm=AirPlayer.perm();airLib(JSON.parse(AirPlayer.library()),false);airState(JSON.parse(AirPlayer.state()));loadAlarm()}catch(e){}
 hpRefresh();uiMusic();stats();
 </script></body></html>
