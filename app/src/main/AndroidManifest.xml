@@ -1,0 +1,46 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.microphone" android:required="false"/>
+    <queries>
+        <intent><action android:name="android.media.action.IMAGE_CAPTURE"/></intent>
+        <intent><action android:name="android.media.action.VIDEO_CAPTURE"/></intent>
+    </queries>
+    <application android:label="Air.INC" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:theme="@style/AppTheme" android:allowBackup="true">
+        <activity android:name=".MainActivity" android:exported="true"
+            android:screenOrientation="portrait" android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustPan" android:configChanges="orientation|screenSize|keyboardHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+    <service android:name=".MediaService" android:exported="false" android:foregroundServiceType="mediaPlayback"/>
+    <receiver android:name=".AirWidget$Player" android:exported="true" android:label="Air · Now playing">
+        <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
+        <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_player"/>
+    </receiver>
+    <receiver android:name=".AirWidget$Stats" android:exported="true" android:label="Air · Listening">
+        <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
+        <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_stats"/>
+    </receiver>
+    <receiver android:name=".AirWidget$Alarm" android:exported="true" android:label="Air · Alarm">
+        <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter>
+        <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_alarm"/>
+    </receiver>
+    <receiver android:name=".AlarmReceiver" android:exported="false"/>
+    <provider android:name="androidx.core.content.FileProvider" android:authorities="com.airinc.player.files" android:exported="false" android:grantUriPermissions="true">
+        <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths"/>
+    </provider>
+    </application>
+</manifest>

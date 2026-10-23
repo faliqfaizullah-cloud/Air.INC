@@ -1,0 +1,16 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'com.airinc.player'
+    lint { checkReleaseBuilds false; abortOnError false }
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.airinc.player'
+        minSdk 24
+        targetSdk 34
+        versionCode 3
+        versionName '2.1'
+    }
+    buildTypes { release { minifyEnabled false; signingConfig signingConfigs.debug } }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+dependencies { implementation 'androidx.core:core:1.12.0' }
