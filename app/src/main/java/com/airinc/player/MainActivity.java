@@ -208,6 +208,14 @@ public class MainActivity extends Activity {
             } catch (Exception e) { }
             if (Build.VERSION.SDK_INT >= 26 && !MediaService.running) startForegroundService(i); else startService(i);
         }
+        @JavascriptInterface public void lyrics(String id, String t, String a, String al, int dur) {
+            new Thread(() -> {
+                String r;
+                try { r = Lyrics.get(MainActivity.this, Long.parseLong(id), t, a, al, dur); } catch (Exception e) { r = "{\"err\":true}"; }
+                run("window.airLyrics&&airLyrics('" + id + "'," + r + ")");
+            }).start();
+        }
+        @JavascriptInterface public void lyricsRetry(String id) { try { new File(new File(getFilesDir(), "lyrics"), id + ".json").delete(); } catch (Exception e) { } }
         @JavascriptInterface public String memList() { return Memories.list(MainActivity.this); }
         @JavascriptInterface public void memCapture(String k) { runOnUiThread(() -> startCapture(k)); }
         @JavascriptInterface public String memText(String t, String x) { String id = Memories.addText(MainActivity.this, t, x); pushMem(id); return id == null ? "" : id; }

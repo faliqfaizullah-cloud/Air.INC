@@ -428,7 +428,18 @@ textarea.mmin{font-weight:500;font-size:15px;resize:none;height:150px;line-heigh
 #mmToast{bottom:auto;top:62px;transform:translate(-50%,-14px)}
 .fhint{left:17%;right:auto;width:46%;top:41%;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.25);transform:rotate(-5deg);font-size:14px;line-height:1.3}.dark .fhint{color:#e9e9ee}
 #mmPill.rcd{width:150px;margin-left:-75px}#mmX{left:calc(50% - 75px - 42px)}
-</style></head><body class="introing">
+
+.strip{grid-template-columns:repeat(5,1fr)!important;gap:8px!important}
+.mini.tg{color:#a9a9ae}.mini.tg.on{color:var(--acc)}.mini.tg svg{fill:none}
+body.noglow #aura,body.noglow #fx{display:none!important}
+.lysh{height:80%;display:flex;flex-direction:column}
+#lyBox{flex:1;overflow:auto;text-align:center;padding:26vh 4px;margin:4px -6px 0;-webkit-mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent);scrollbar-width:none}
+#lyBox::-webkit-scrollbar{display:none}
+.ll{font-size:23px;line-height:1.25;font-weight:700;letter-spacing:-.02em;color:#c4c4c9;padding:9px 12px;transition:color .35s,transform .35s;transform-origin:center}.ll.on{color:var(--ink);transform:scale(1.05)}.ll.past{color:#9c9ca2}
+.lp{white-space:pre-wrap;font-size:17px;line-height:1.65;color:#555;padding:0 10px;font-weight:600}
+.ls{color:#a4a4aa;padding:12vh 16px;font-size:14px;line-height:1.5;font-weight:600}.ls button{margin-top:14px;border:0;border-radius:20px;padding:11px 20px;background:#111;color:#fff;font:700 14px system-ui}
+.dark .ll{color:#4c4c54}.dark .ll.on{color:#f2f2f4}.dark .ll.past{color:#6d6d75}.dark .lp{color:#c7c7cc}.dark .ls button{background:#f2f2f4;color:#111}.dark .mini.tg{color:#6a6a72}.dark .mini.tg.on{color:var(--acc)}
+.nt.mini.tg svg{stroke:#a9a9ae}.nt.mini.tg.on svg{stroke:#e8872e}.dark .nt.mini.tg svg{stroke:#6a6a72}.dark .nt.mini.tg.on svg{stroke:#e8872e}</style></head><body class="introing">
 <div id="aura"><i></i><i></i><i></i><i></i></div>
 <canvas id="fx"></canvas><div id="err"></div><div class="sheetwrap" id="srch"><div class="sheet"><div class="grab"></div><input id="sq" type="search" placeholder="Search songs, artists, albums" autocomplete="off"><div id="sres"></div></div></div>
 <div class="sheetwrap" id="calw"><div class="sheet"><div class="grab"></div><h3 id="calT"></h3><p id="calS"></p><div class="calg" id="calg"></div><div class="srow2"><button class="pillbtn dim" id="calX">Done</button></div></div></div>
@@ -449,6 +460,7 @@ textarea.mmin{font-weight:500;font-size:15px;resize:none;height:150px;line-heigh
 <div class="sheetwrap" id="mmTxt"><div class="sheet top"><h3>New memory</h3><p>Write down what you want to keep</p><input class="mmin" id="mmTi" placeholder="Title" maxlength="60" autocomplete="off"><textarea class="mmin" id="mmTx" placeholder="What's on your mind?"></textarea><div class="srow2"><button class="pillbtn dim" id="mmTxX">Cancel</button><button class="pillbtn" id="mmTxS">Save memory</button></div></div></div>
 <div class="sheetwrap" id="mmVw"><div class="sheet"><div class="grab"></div><div id="mmVwBody"></div></div></div>
 <div class="sheetwrap" id="mmAll"><div class="sheet"><div class="grab"></div><h3>All memories</h3><p id="mmAllN"></p><div class="mmfil" id="mmFil"></div><div class="mmgrid" id="mmGrid"></div><div class="srow2"><button class="pillbtn dim" id="mmAllX">Done</button></div></div></div>
+<div class="sheetwrap" id="lyr"><div class="sheet lysh"><div class="grab"></div><h3 id="lyT">Lyrics</h3><p id="lyA"></p><div id="lyBox"></div><div class="srow2"><button class="pillbtn dim" id="lyX">Done</button></div></div></div>
 <div id="mmToast"></div>
 <div class="fade t"></div><div class="fade b"></div>
 <div id="app">
@@ -473,7 +485,8 @@ textarea.mmin{font-weight:500;font-size:15px;resize:none;height:150px;line-heigh
  <div class="mgrid">
   <div class="strip"><button class="nt mini" id="shuf" aria-label="Shuffle"><svg viewBox="0 0 24 24"><path d="M3 7h4l10 10h4M3 17h4l3-3M14 10l3-3h4M18 4l3 3-3 3M18 14l3 3-3 3"/></svg></button>
    <button class="nt mini" id="rep" aria-label="Repeat"><svg viewBox="0 0 24 24"><path d="M4 11V9a3 3 0 0 1 3-3h12M16 3l3 3-3 3M20 13v2a3 3 0 0 1-3 3H5M8 21l-3-3 3-3"/></svg></button>
-   <button class="nt mini" id="open" aria-label="Rescan"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v5h-5"/></svg></button></div>
+   <button class="nt mini" id="open" aria-label="Rescan"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v5h-5"/></svg></button>
+   <button class="nt mini tg" id="lyB" aria-label="Lyrics"><svg viewBox="0 0 24 24"><path d="M5 7h10M5 12h14M5 17h8"/></svg></button><button class="nt mini tg on" id="glowB" aria-label="Glow effect"><svg viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/></svg></button></div>
   <div class="mleft">
    <button class="nt spdk" id="spd" aria-label="Speed"><i id="spdDot"></i><b id="spdTxt">x1</b></button>
    <button class="nt hpt" id="hpTile" aria-label="Headphones"><svg viewBox="0 0 120 120"><path d="M26 70C24 22 96 22 94 70" fill="none" stroke="url(#hg2)" stroke-width="7" stroke-linecap="round"/><rect x="12" y="58" width="28" height="44" rx="14" fill="url(#hg)"/><rect x="80" y="58" width="28" height="44" rx="14" fill="url(#hg)"/><rect x="18" y="66" width="12" height="28" rx="6" fill="#fff" opacity=".35"/><rect x="90" y="66" width="12" height="28" rx="6" fill="#fff" opacity=".35"/></svg><em id="hpBat"></em></button></div>
@@ -631,9 +644,9 @@ function paint(){const t=tracks[idx],h=HUE[skin]+idx*40;document.documentElement
 const TH=['auto','light','dark'],themeNow=()=>localStorage.th||'auto';
 function applyTheme(){const m=themeNow(),d=m=='dark'||(m=='auto'&&matchMedia('(prefers-color-scheme: dark)').matches);document.body.classList.toggle('dark',d);try{AirPlayer.theme(m)}catch(e){}if(typeof layoutArc=='function')layoutArc()}
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}
-const extras=()=>`<div data-act="theme">Theme · ${themeNow()}</div><div data-act="scan">Rescan music</div><div data-act="bg">Allow background</div>`;
+const extras=()=>`<div data-act="theme">Theme · ${themeNow()}</div><div data-act="glow">Glow effect · ${glowOn()?'On':'Off'}</div><div data-act="lyr">Lyrics</div><div data-act="scan">Rescan music</div><div data-act="bg">Allow background</div>`;
 menu.onclick=e=>{const d=e.target.dataset;if(d.i)go(d.i);else if(d.act=='theme'){localStorage.th=TH[(TH.indexOf(themeNow())+1)%3];applyTheme();go(cur);menu.classList.add('on')}
- else if(d.act=='scan'){menu.classList.remove('on');askScan()}else if(d.act=='bg'){menu.classList.remove('on');try{AirPlayer.battery()}catch(e){}}};
+ else if(d.act=='glow'){setGlow(!glowOn());go(cur);menu.classList.add('on')}else if(d.act=='lyr'){menu.classList.remove('on');go('music');lyOpen()}else if(d.act=='scan'){menu.classList.remove('on');askScan()}else if(d.act=='bg'){menu.classList.remove('on');try{AirPlayer.battery()}catch(e){}}};
 // ---- library (auto-scanned natively and saved) ----
 const esc=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const norm=a=>a.map(t=>({id:t.id,genre:t.genre||'',n:t.title||'Unknown',artist:t.artist||'',album:t.album||'',dur:t.dur,art:t.art?'file://'+t.art:''}));
@@ -763,9 +776,9 @@ function fxFrame(t){const dt=Math.min(.05,(t-lastT)/1000||.016);lastT=t;level+=(
   [[0,'#ff6b6b'],[.17,'#ffb86b'],[.34,'#ff7ad9'],[.5,'#7b5cff'],[.67,'#4bc8ff'],[.84,'#7dffb8'],[1,'#ff6b6b']].forEach(a=>g.addColorStop(a[0],a[1]));
   fc.globalCompositeOperation='source-over';fc.globalAlpha=.8*level;fc.lineWidth=rw;fc.strokeStyle=g;fc.shadowColor='rgba(170,120,255,.6)';fc.shadowBlur=14;
   fc.beginPath();fc.moveTo(x+r,y);fc.arcTo(x+w,y,x+w,y+h,r);fc.arcTo(x+w,y+h,x,y+h,r);fc.arcTo(x,y+h,x,y,r);fc.arcTo(x,y,x+w,y,r);fc.closePath();fc.stroke();fc.shadowBlur=0;fc.globalAlpha=1}}
-function fxLoop(t){fxFrame(t);if(level>.01||st.playing||parts.length)fxRaf=requestAnimationFrame(fxLoop);else{fxRaf=0;fc.clearRect(0,0,W,H)}}
-const fxKick=()=>{if(RM||fxRaf)return;lastT=performance.now();fxRaf=requestAnimationFrame(fxLoop)};
-const burst=()=>{if(RM||!st.playing)return;for(let i=0;i<46;i++)spawn(true);fxKick()};
+function fxLoop(t){fxFrame(t);if(level>.01||(st.playing&&glowOn())||parts.length)fxRaf=requestAnimationFrame(fxLoop);else{fxRaf=0;fc.clearRect(0,0,W,H)}}
+const fxKick=()=>{if(RM||fxRaf||!glowOn())return;lastT=performance.now();fxRaf=requestAnimationFrame(fxLoop)};
+const burst=()=>{if(RM||!st.playing||!glowOn())return;for(let i=0;i<46;i++)spawn(true);fxKick()};
 
 
 
@@ -1266,10 +1279,42 @@ $('mmVwBody').onclick=e=>{const b=e.target.closest('button');if(!b||!mmCur)retur
  else if(b.id=='mmVd'){if(!b.classList.contains('arm')){b.classList.add('arm');b.querySelector('span').textContent='Tap again';clearTimeout(mmDelT);mmDelT=setTimeout(()=>{b.classList.remove('arm');const s=b.querySelector('span');if(s)s.textContent='Delete'},2500);return}
   hap('heavy');try{AirPlayer.memDel(m.id)}catch(e){}M=M.filter(x=>x.id!=m.id);mmVwClose(false);mmRender();mmToast('Memory deleted')}};
 
+/* ===== Glow toggle + lyrics ===== */
+const glowOn=()=>{try{return localStorage.glow!=='off'}catch(e){return true}};
+function applyGlow(){document.body.classList.toggle('noglow',!glowOn());$('glowB').classList.toggle('on',glowOn());if(glowOn()&&st.playing)fxKick()}
+function setGlow(v){try{localStorage.glow=v?'on':'off'}catch(e){}applyGlow();hap('click');if(typeof mmToast=='function')mmToast(v?'Glow effect on':'Glow effect off')}
+$('glowB').onclick=()=>setGlow(!glowOn());
+let LY={id:null,lines:[],plain:'',st:'idle',act:-1,els:[]};
+const lyOpenNow=()=>$('lyr').classList.contains('on');
+function parseLrc(t){const o=[];String(t).split(/\r?\n/).forEach(l=>{const tx=l.replace(/\[[^\]]*\]/g,'').trim(),re=/\[(\d+):(\d+(?:\.\d+)?)\]/g;let m;while(m=re.exec(l))o.push([(+m[1])*60000+Math.round(parseFloat(m[2])*1000),tx])});return o.sort((a,b)=>a[0]-b[0])}
+function lyRender(){const b=$('lyBox');LY.act=-1;LY.els=[];
+ if(LY.st=='load'){b.innerHTML='<div class="ls">Searching for lyrics…</div>';return}
+ if(LY.lines.length){b.innerHTML=LY.lines.map((l,i)=>`<div class="ll" data-i="${i}">${esc(l[1]||'♪')}</div>`).join('');LY.els=[...b.children];return}
+ if(LY.plain){b.innerHTML='<div class="lp">'+esc(LY.plain)+'</div>';return}
+ b.innerHTML=`<div class="ls">${LY.st=='err'?'Couldn’t reach the lyrics service.<br>Check your connection.':'No lyrics found for this song.<br>Put a .lrc file with the same name next to it, or try again later.'}<br><button id="lyRe">Try again</button></div>`}
+function lyFetch(force){const t=tracks[idx];if(!t)return;LY={id:t.id,lines:[],plain:'',st:'load',act:-1,els:[]};lyRender();
+ try{if(force)AirPlayer.lyricsRetry&&AirPlayer.lyricsRetry(String(t.id));AirPlayer.lyrics(String(t.id),t.n,t.artist||'',t.album||'',Math.round((t.dur||0)/1000))}catch(e){LY.st='none';lyRender()}}
+window.airLyrics=(id,j)=>{if(String(LY.id)!=String(id))return;
+ if(j.err){LY.st='err'}else if(j.none){LY.st='none'}else{LY.lines=j.synced?parseLrc(j.synced):[];LY.plain=j.plain||'';LY.st=(LY.lines.length||LY.plain)?'ok':'none';if(!LY.lines.length&&!LY.plain&&j.synced)LY.plain=String(j.synced).replace(/\[[^\]]*\]/g,'').trim()}
+ lyRender();lyTick()};
+function lyOpen(){const t=tracks[idx];$('lyr').classList.add('on');
+ if(!t){$('lyT').textContent='Lyrics';$('lyA').textContent='';$('lyBox').innerHTML='<div class="ls">Play a song to see its lyrics.</div>';return}
+ $('lyT').textContent=t.n;$('lyA').textContent=t.artist||t.album||'';if(String(LY.id)!=String(t.id)||LY.st=='err')lyFetch()}
+$('lyB').onclick=lyOpen;$('lyX').onclick=()=>$('lyr').classList.remove('on');$('lyr').onclick=e=>{if(e.target.id=='lyr')$('lyr').classList.remove('on')};
+$('trk').onclick=lyOpen;
+$('lyBox').onclick=e=>{if(e.target.id=='lyRe'){lyFetch(true);return}const l=e.target.closest('.ll');if(!l||!LY.lines.length)return;const ms=LY.lines[+l.dataset.i][0];P('seek',{ms});st.pos=ms;stTs=performance.now();hap('tick');progress()};
+function lyTick(){if(!lyOpenNow())return;const t=tracks[idx];
+ if(t&&String(LY.id)!=String(t.id)){$('lyT').textContent=t.n;$('lyA').textContent=t.artist||t.album||'';lyFetch();return}
+ if(!LY.lines.length)return;const pos=curPos()+300;let a=-1;for(let i=0;i<LY.lines.length;i++){if(LY.lines[i][0]<=pos)a=i;else break}
+ if(a===LY.act)return;LY.act=a;LY.els.forEach((e,i)=>{e.classList.toggle('on',i==a);e.classList.toggle('past',i<a)});
+ const e=LY.els[a],bx=$('lyBox');if(e)bx.scrollTo({top:e.offsetTop-bx.clientHeight/2+e.offsetHeight/2,behavior:'smooth'})}
+{const _pg=progress;progress=function(){_pg.apply(this,arguments);try{lyTick()}catch(e){}}}
+setInterval(()=>{if(lyOpenNow())lyTick()},400);
+
 // ---- opening + boot ----
 
 window.airGo=id=>{if(!SCR.find(x=>x[0]==id))return;document.body.classList.remove('introing');$('intro').style.display='none';go(id)};
-applyTheme();applySkin();go('explore');buildArc();
+applyTheme();applyGlow();applySkin();go('explore');buildArc();
 try{perm=AirPlayer.perm();airLib(JSON.parse(AirPlayer.library()),false);airState(JSON.parse(AirPlayer.state()));loadAlarm()}catch(e){}
 hpRefresh();uiMusic();stats();
 </script></body></html>
