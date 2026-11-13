@@ -15,3 +15,6 @@ Catch a memory with the camera, a video, the gallery, your voice or a written no
 
 ## Android 8+
 minSdk 24 (Android 7+), so Android 8 (API 26) is fully supported.
+
+## Karaoke
+Lyrics screen -> KARAOKE: word-by-word lyrics, vocal remover (centre-channel removal between 140 Hz and 8.5 kHz, bass/kick/cymbals/panned instruments kept), key change +/-6 semitones, lyric sync nudge, sing-along with score (saved to Memories).

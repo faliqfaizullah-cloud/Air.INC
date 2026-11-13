@@ -513,6 +513,22 @@ body.mem #app{grid-template-columns:minmax(0,1fr)}body.mem header,body.mem main{
 .sheet{max-height:94vh;overflow:auto}
 }
 #lyMode{display:flex;justify-content:center;gap:26px;margin-top:15px}#lyMode span{font:500 9.5px/1 Montserrat,Arial,sans-serif;letter-spacing:.22em;text-transform:uppercase;color:#5d5d5d;padding:6px 4px;border-bottom:1px solid transparent}#lyMode span.on{color:#fff;border-bottom-color:#777}
+
+#lyK{display:none;position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 44px);flex-wrap:wrap;justify-content:center;align-items:center;gap:10px 12px;padding:0 14px;z-index:3}
+#lyr.kar #lyK{display:flex}
+#lyK button{border:1px solid #3d3d3d;background:rgba(0,0,0,.4);color:#cfcfcf;border-radius:18px;padding:9px 15px;font:500 10px/1 Montserrat,"Helvetica Neue",Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap}
+#lyK button.on{background:#fff;color:#000;border-color:#fff}
+#lyK .kg{display:flex;align-items:center;border:1px solid #3d3d3d;border-radius:18px;overflow:hidden}
+#lyK .kg button{border:0;border-radius:0;padding:9px 13px;font-size:14px;letter-spacing:0}
+#lyK .kg b{font:500 10px/1 Montserrat,Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#cfcfcf;min-width:74px;text-align:center}
+#kSing i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#e8392e;margin-right:8px;vertical-align:-1px}
+#kSing.on{background:#e8392e;border-color:#e8392e;color:#fff}#kSing.on i{background:#fff;animation:mmblink 1s infinite}
+#lyNote{position:absolute;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 98px);text-align:center;font:500 10px/1.6 Montserrat,Arial,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#aaa;opacity:0;transition:opacity .4s;z-index:3;pointer-events:none}#lyNote.on{opacity:1}
+#lyScore{position:absolute;left:0;right:0;top:34%;text-align:center;opacity:0;pointer-events:none;transition:opacity .6s;z-index:4}#lyScore.on{opacity:1}
+#lyScore b{display:block;font:400 76px/1 "EB Garamond",Georgia,serif;color:#fff;text-shadow:0 0 24px rgba(255,255,255,.4)}#lyScore span{display:block;margin-top:12px;font:500 10px/1.6 Montserrat,Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#999}
+@media (orientation:landscape) and (max-height:640px){#lyK{bottom:34px;flex-wrap:nowrap;gap:8px}#lyK button{padding:8px 12px}#lyScore{top:26%}#lyScore b{font-size:58px}}
+#lyK #kSing.on{background:#e8392e;border-color:#e8392e;color:#fff}#lyNote{top:calc(env(safe-area-inset-top,0px) + 124px)}#lyScore{top:30%;background:rgba(0,0,0,.86);padding:26px 0 22px}
+@media (orientation:landscape) and (max-height:640px){#lyNote{top:calc(env(safe-area-inset-top,0px) + 108px)}#lyScore{top:24%}}
 </style></head><body class="introing">
 <div id="aura"><i></i><i></i><i></i><i></i></div>
 <canvas id="fx"></canvas><div id="err"></div><div class="sheetwrap" id="srch"><div class="sheet"><div class="grab"></div><input id="sq" type="search" placeholder="Search songs, artists, albums" autocomplete="off"><div id="sres"></div></div></div>
@@ -534,7 +550,7 @@ body.mem #app{grid-template-columns:minmax(0,1fr)}body.mem header,body.mem main{
 <div class="sheetwrap" id="mmTxt"><div class="sheet top"><h3>New memory</h3><p>Write down what you want to keep</p><input class="mmin" id="mmTi" placeholder="Title" maxlength="60" autocomplete="off"><textarea class="mmin" id="mmTx" placeholder="What's on your mind?"></textarea><div class="srow2"><button class="pillbtn dim" id="mmTxX">Cancel</button><button class="pillbtn" id="mmTxS">Save memory</button></div></div></div>
 <div class="sheetwrap" id="mmVw"><div class="sheet"><div class="grab"></div><div id="mmVwBody"></div></div></div>
 <div class="sheetwrap" id="mmAll"><div class="sheet"><div class="grab"></div><h3>All memories</h3><p id="mmAllN"></p><div class="mmfil" id="mmFil"></div><div class="mmgrid" id="mmGrid"></div><div class="srow2"><button class="pillbtn dim" id="mmAllX">Done</button></div></div></div>
-<div class="sheetwrap" id="lyr"><canvas id="lyC"></canvas><div class="lyH"><i id="lyGrab"></i><b id="lyT">LYRICS</b><div id="lyMode"><span data-m="stars">Stars</span><span data-m="karaoke">Karaoke</span></div></div><div id="lyMsg"></div><div id="lyPlain"></div><div id="lyF"></div></div>
+<div class="sheetwrap" id="lyr"><canvas id="lyC"></canvas><div class="lyH"><i id="lyGrab"></i><b id="lyT">LYRICS</b><div id="lyMode"><span data-m="stars">Stars</span><span data-m="karaoke">Karaoke</span></div></div><div id="lyNote"></div><div id="lyK"><button id="kVoc">Vocals · On</button><span class="kg"><button id="kKm" aria-label="Key down">−</button><b id="kKv">Key 0</b><button id="kKp" aria-label="Key up">+</button></span><span class="kg"><button id="kSm" aria-label="Lyrics earlier">−</button><b id="kSv">Sync 0.0s</b><button id="kSp" aria-label="Lyrics later">+</button></span><button id="kSing"><i></i>Sing</button></div><div id="lyScore"><b></b><span></span></div><div id="lyMsg"></div><div id="lyPlain"></div><div id="lyF"></div></div>
 <div id="mmToast"></div>
 <div class="fade t"></div><div class="fade b"></div>
 <div id="app">
@@ -1386,7 +1402,7 @@ function lyDraw(ts){lyRaf=0;if(!lyOpenNow())return;lyRaf=requestAnimationFrame(l
  lx.fillStyle='#000';lx.fillRect(0,0,lyW,lyH);
  lyDust.forEach(d=>{lx.globalAlpha=d.a*(.65+.35*Math.sin(ts/1100+d.p));lx.fillStyle='#fff';lx.beginPath();lx.arc(d.x,d.y,d.r,0,6.3);lx.fill()});lx.globalAlpha=1;
  if(LY.st!='ok')return;if(LYM=='karaoke'){if(LY.kl.length)lyKaraoke(ts);return}if(!LY.chunks.length)return;
- const pos=curPos(),C=LY.chunks;let cj=-1;for(let j=0;j<C.length;j++){if(C[j].start<=pos)cj=j;else break}if(cj<0)return;
+ const pos=curPos()+lyOff,C=LY.chunks;let cj=-1;for(let j=0;j<C.length;j++){if(C[j].start<=pos)cj=j;else break}if(cj<0)return;
  const cur=C[cj];let k=0;for(let i=0;i<cur.words.length;i++)if(cur.words[i].t<=pos)k=i;
  if(lyAct.j!=cj||lyAct.k!=k){lyAct={j:cj,k:k,t:performance.now(),pj:lyAct.j,pk:lyAct.k}}
  const e=ease((performance.now()-lyAct.t)/520);
@@ -1409,7 +1425,7 @@ const lyFont=px=>`700 ${px}px Montserrat,"Helvetica Neue",Roboto,Arial,sans-seri
 function lyWrap(L,fs,maxW){const key=fs+'|'+maxW;if(L._k==key)return L._rows;lx.font=lyFont(fs);const sp=lx.measureText(' ').width,rows=[[]];let w=0;
  L.words.forEach(o=>{o.mw=lx.measureText(o.w).width;if(w+o.mw>maxW&&rows[rows.length-1].length){rows.push([]);w=0}rows[rows.length-1].push(o);w+=o.mw+sp});
  rows.forEach(r=>{r.w=r.reduce((a,o)=>a+o.mw,0)+sp*(r.length-1)});L._k=key;L._rows=rows;L._sp=sp;return rows}
-function lyKaraoke(ts){const K=LY.kl,pos=curPos(),fs=Math.round(Math.max(22,Math.min(lyW*.07,lyH*.105))),lh=fs*1.32,maxW=lyW*.86;
+function lyKaraoke(ts){const K=LY.kl,pos=curPos()+lyOff,fs=Math.round(Math.max(22,Math.min(lyW*.07,lyH*.105))),lh=fs*1.32,maxW=lyW*.86;
  let ci=-1;for(let i=0;i<K.length;i++){if(K[i].t0<=pos+120)ci=i;else break}
  const nxt=K[ci+1],prevEnd=ci>=0?K[ci].tEnd:0,wait=nxt&&pos>prevEnd+250&&nxt.t0-prevEnd>5200&&nxt.t0-pos<4200;
  const tgt=wait||ci<0?ci+1:ci;if(LY.ks===undefined)LY.ks=tgt;LY.ks+=(tgt-LY.ks)*.12;
@@ -1426,14 +1442,40 @@ function lyKaraoke(ts){const K=LY.kl,pos=curPos(),fs=Math.round(Math.max(22,Math
  {const g1=lx.createLinearGradient(0,0,0,lyH*.2);g1.addColorStop(0,'#000');g1.addColorStop(.62,'#000');g1.addColorStop(1,'rgba(0,0,0,0)');lx.fillStyle=g1;lx.fillRect(0,0,lyW,lyH*.2);const g2=lx.createLinearGradient(0,lyH*.86,0,lyH);g2.addColorStop(0,'rgba(0,0,0,0)');g2.addColorStop(.5,'#000');g2.addColorStop(1,'#000');lx.fillStyle=g2;lx.fillRect(0,lyH*.86,lyW,lyH*.14)}
  if(wait||(ci<0&&K.length&&K[0].t0-pos<6000&&K[0].t0>2500)){const nx=K[ci+1],left=nx.t0-pos,lit=Math.max(0,Math.min(3,Math.ceil(3*(1-left/4200)))),y=base+cum[ci+1]-fs*.9;
   for(let q=0;q<3;q++){const x=lyW/2+(q-1)*fs*.9,on=q<lit;lx.fillStyle='#fff';lx.globalAlpha=on?(.6+.4*Math.sin(ts/260+q)):.22;lx.beginPath();lx.arc(x,y,fs*.16,0,6.3);lx.fill()}lx.globalAlpha=1}}
-function setLyMode(m){LYM=m;try{localStorage.lymode=m}catch(e){}document.querySelectorAll('#lyMode span').forEach(x=>x.classList.toggle('on',x.dataset.m==m));lyShow();hap('click')}
+function setLyMode(m){if(m!='karaoke'){if(sing)singStop(false);if(st.kar){st.kar=false;P('kar',{on:0})}}LYM=m;$('lyr').classList.toggle('kar',m=='karaoke');try{localStorage.lymode=m}catch(e){}document.querySelectorAll('#lyMode span').forEach(x=>x.classList.toggle('on',x.dataset.m==m));lyShow();hap('click')}
+
+/* ---- karaoke tools: vocal remover, key, sync, sing-along score ---- */
+let lyOff=0,lyNoteT=0,sing=null;
+function lyNote(t,ms){const e=$('lyNote');e.textContent=t;e.classList.add('on');clearTimeout(lyNoteT);lyNoteT=setTimeout(()=>e.classList.remove('on'),ms||2600)}
+function lyKarUI(){const on=!!st.kar,ps=st.karst;const b=$('kVoc');b.classList.toggle('on',on);
+ b.textContent=!on?'Vocals · On':ps=='prep'?'Preparing '+(st.karp||0)+'%':ps=='fail'?'Unavailable':'Instrumental';
+ const k=st.key||0;$('kKv').textContent='Key '+(k>0?'+':'')+k;$('kSv').textContent='Sync '+(lyOff>=0?'+':'−')+(Math.abs(lyOff)/1000).toFixed(1)+'s'}
+$('kVoc').onclick=()=>{const t=tracks[idx];if(!t){lyNote('Play a song first');return}const n=!st.kar;st.kar=n;P('kar',{on:n?1:0});hap('heavy');
+ lyNote(n?'Removing vocals — plays on as soon as it is ready':'Original vocals back',3200);lyKarUI()};
+$('kKm').onclick=()=>{P('key',{n:-1});st.key=Math.max(-6,(st.key||0)-1);hap('tick');lyKarUI()};
+$('kKp').onclick=()=>{P('key',{n:1});st.key=Math.min(6,(st.key||0)+1);hap('tick');lyKarUI()};
+$('kKv').onclick=()=>{P('key',{reset:1});st.key=0;hap('tick');lyKarUI()};
+const lySaveOff=()=>{try{localStorage['lyoff_'+LY.id]=lyOff}catch(e){}};
+$('kSm').onclick=()=>{lyOff-=500;lySaveOff();hap('tick');lyKarUI()};$('kSp').onclick=()=>{lyOff+=500;lySaveOff();hap('tick');lyKarUI()};
+$('kSv').onclick=()=>{lyOff=0;lySaveOff();lyKarUI()};
+function singStop(save){if(!sing)return;clearInterval(sing.timer);const s=sing;sing=null;$('kSing').classList.remove('on');$('kSing').lastChild.textContent='Sing';
+ let id='';try{id=AirPlayer.memRecStop(!!save)}catch(e){}
+ if(save&&s.tot>8){const sc=Math.min(100,Math.round(100*s.hit/s.tot*1.15));try{if(id)AirPlayer.memEdit(id,'Karaoke · '+(tracks[idx]?tracks[idx].n:''),'Sing-along score '+sc)}catch(e){}
+  const e=$('lyScore');e.firstChild.textContent=sc;e.lastChild.textContent=(sc>=90?'Superstar':sc>=70?'Great voice':sc>=45?'Nice try':'Keep singing')+(id?' · saved to Memories':'');e.classList.add('on');setTimeout(()=>e.classList.remove('on'),6000)}}
+$('kSing').onclick=()=>{if(sing){singStop(true);return}
+ let r='err';try{r=AirPlayer.memRecStart()}catch(e){}
+ if(r=='perm'){lyNote('Allow the microphone, then tap Sing again',3500);return}if(r!='ok'){lyNote('Microphone unavailable');return}
+ sing={hit:0,tot:0,timer:setInterval(()=>{if(!sing)return;const pos=curPos()+lyOff;let want=false;for(const L of LY.kl){if(pos>=L.t0-100&&pos<=L.tEnd+150){want=true;break}}
+  let a=0;try{a=AirPlayer.memAmp()}catch(e){}$('kSing').firstChild.style.transform='scale('+(1+a*1.6)+')';if(want){sing.tot++;if(a>.07)sing.hit++}},100)};
+ $('kSing').classList.add('on');$('kSing').lastChild.textContent='Stop';hap('heavy');lyNote('Singing… headphones give the best score',3200)};
+{const _arp=window.airRecPerm;window.airRecPerm=ok=>{if(lyOpenNow())lyNote(ok?'Microphone ready — tap Sing again':'Microphone permission denied',3200);else _arp&&_arp(ok)}}
 function lyKick(){if(!lyRaf)lyRaf=requestAnimationFrame(lyDraw)}
 function lyShow(){const m=$('lyMsg'),p=$('lyPlain');m.style.display='none';p.style.display='none';
  if(LY.st=='load')m.innerHTML='Searching for lyrics…',m.style.display='block';
  else if(LY.st=='ok'&&!LY.chunks.length&&LY.plain){p.textContent=LY.plain;p.style.display='block';p.scrollTop=0}
  else if(LY.st!='ok'&&LY.st!='idle'){m.innerHTML=(LY.st=='err'?'Couldn’t reach the<br>lyrics service':'No lyrics found<br>for this song')+'<br><button id="lyRe">Try again</button>';m.style.display='block'}
  $('lyF').textContent=LY.st=='ok'?'WORDS: '+(LY.src=='file'?'LOCAL FILE':'LRCLIB')+(LY.chunks.length?(LYM=='karaoke'?'  ·  KARAOKE':'  ·  WORD BY WORD'):''):''}
-function lyFetch(force){const t=tracks[idx];if(!t)return;LY={id:t.id,lines:[],plain:'',st:'load',src:'',chunks:[],seed:(+t.id||7)};lyAct={j:-2,k:-2,t:0};lyShow();
+function lyFetch(force){const t=tracks[idx];if(!t)return;LY={id:t.id,lines:[],plain:'',st:'load',src:'',chunks:[],seed:(+t.id||7)};lyAct={j:-2,k:-2,t:0};try{lyOff=+localStorage['lyoff_'+t.id]||0}catch(e){lyOff=0}lyShow();
  try{if(force)AirPlayer.lyricsRetry&&AirPlayer.lyricsRetry(String(t.id));AirPlayer.lyrics(String(t.id),t.n,t.artist||'',t.album||'',Math.round((t.dur||0)/1000))}catch(e){LY.st='none';lyShow()}}
 window.airLyrics=(id,j)=>{if(String(LY.id)!=String(id))return;
  if(j.err){LY.st='err'}else if(j.none){LY.st='none'}else{LY.src=j.src||'';LY.lines=j.synced?parseLrc(j.synced):[];LY.plain=j.plain||'';LY.st=(LY.lines.length||LY.plain)?'ok':'none';if(!LY.lines.length&&!LY.plain&&j.synced)LY.plain=String(j.synced).replace(/\[[^\]]*\]/g,'').trim();if(LY.lines.length)lyBuild()}
@@ -1442,13 +1484,13 @@ function lyOpen(){const t=tracks[idx];$('lyr').classList.add('on');lyResize();
  try{document.fonts&&document.fonts.load('40px "EB Garamond"');document.fonts.load('14px Montserrat')}catch(e){}
  if(!t){$('lyT').textContent='LYRICS';LY.st='none';lyShow();lyKick();return}
  $('lyT').textContent=t.n.toUpperCase();if(String(LY.id)!=String(t.id)||LY.st=='err')lyFetch();else lyShow();lyKick()}
-const lyClose=()=>$('lyr').classList.remove('on');
-document.querySelectorAll('#lyMode span').forEach(x=>x.classList.toggle('on',x.dataset.m==LYM));$('lyMode').onclick=e=>{const m=e.target.dataset&&e.target.dataset.m;if(m)setLyMode(m)};
+const lyClose=()=>{if(sing)singStop(true);$('lyr').classList.remove('on')};
+$('lyr').classList.toggle('kar',LYM=='karaoke');document.querySelectorAll('#lyMode span').forEach(x=>x.classList.toggle('on',x.dataset.m==LYM));$('lyMode').onclick=e=>{const m=e.target.dataset&&e.target.dataset.m;if(m)setLyMode(m)};
 $('lyB').onclick=lyOpen;$('trk').onclick=lyOpen;$('lyGrab').onclick=lyClose;
 $('lyMsg').onclick=e=>{if(e.target.id=='lyRe')lyFetch(true)};
 {let sy=null;$('lyr').addEventListener('pointerdown',e=>{sy=e.target.closest('#lyPlain')?null:e.clientY});$('lyr').addEventListener('pointerup',e=>{if(sy!==null&&e.clientY-sy>90)lyClose();sy=null})}
 {let _o=innerWidth>innerHeight,_t=0;addEventListener('resize',()=>{const l=innerWidth>innerHeight;if(l!=_o){_o=l;clearTimeout(_t);_t=setTimeout(()=>{try{go(cur)}catch(e){}if(typeof mmWiresLater=='function')mmWiresLater()},300)}})}
-setInterval(()=>{if(!lyOpenNow())return;const t=tracks[idx];if(t&&String(LY.id)!=String(t.id)){$('lyT').textContent=t.n.toUpperCase();lyFetch()}},500);
+setInterval(()=>{if(!lyOpenNow())return;lyKarUI();const t=tracks[idx];if(t&&String(LY.id)!=String(t.id)){$('lyT').textContent=t.n.toUpperCase();lyFetch()}},500);
 
 // ---- opening + boot ----
 

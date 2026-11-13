@@ -15,7 +15,9 @@ import android.os.*;
 import android.provider.MediaStore;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.io.File;
 import java.util.Calendar;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Native music engine: background playback, EQ, stats, alarm, lock-screen / Quick Settings controls. */
 public class MediaService extends Service implements MediaPlayer.OnCompletionListener, AudioManager.OnAudioFocusChangeListener {
@@ -25,6 +27,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     public static String lastState = "{\"idx\":-1,\"playing\":false,\"pos\":0,\"dur\":0,\"vol\":1,\"shuf\":false,\"rep\":false}";
     static final String CH = "air_media";
 
+    boolean karOn, karRun, usingKar; String karState = "idle"; int karProg, key, karSeek = -1; long karId = -1; AtomicBoolean karCancel;
     MediaPlayer mp; Equalizer eq; BassBoost bb; LoudnessEnhancer le; AudioDeviceCallback devCb;
     float speed = 1f; long sleepEnd; boolean pausedByNoisy; int[] queue;
     final Runnable sleepR = new Runnable() { @Override public void run() { pause(); sleepEnd = 0; push(); } };
@@ -116,7 +119,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
         registerReceiver(noisy, new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
         lib = Library.load(this);
         shuffle = sp.getBoolean("shuf", false); repeat = sp.getBoolean("rep", false); vol = sp.getFloat("vol", 1f);
-        speed = sp.getFloat("speed", 1f);
+        speed = sp.getFloat("speed", 1f); karOn = sp.getBoolean("kar", false); key = sp.getInt("key", 0);
         reindex(sp.getLong("lastId", -1));
         devCb = new AudioDeviceCallback() {
             @Override public void onAudioDevicesAdded(AudioDeviceInfo[] a) {
@@ -160,6 +163,12 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
             case "bass": sp.edit().putInt("bass", I(i, "s")).apply(); applyFx(); break;
             case "loud": sp.edit().putInt("loud", I(i, "g")).apply(); applyFx(); break;
             case "limit": sp.edit().putFloat("vlimit", Math.max(.4f, Math.min(1f, F(i, "v")))).apply(); av(1f); break;
+            case "kar": {
+                karOn = I(i, "on") == 1; sp.edit().putBoolean("kar", karOn).apply();
+                if (karOn) karStart(); else { if (karCancel != null) karCancel.set(true); karRun = false; karState = "idle"; if (usingKar) swapSrc(false); }
+                push(); break;
+            }
+            case "key": key = Math.max(-6, Math.min(6, key + I(i, "n"))); if (I(i, "reset") == 1) key = 0; sp.edit().putInt("key", key).apply(); spd(); push(); break;
             case "speed": speed = Math.max(.5f, Math.min(2f, F(i, "v"))); sp.edit().putFloat("speed", speed).apply(); spd(); push(); break;
             case "sleep": { h.removeCallbacks(sleepR); int m = I(i, "m"); sleepEnd = m > 0 ? System.currentTimeMillis() + m * 60000L : 0; if (m > 0) h.postDelayed(sleepR, m * 60000L); push(); break; }
         }
@@ -175,6 +184,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
         mp.setOnErrorListener((m, w, x) -> { prepared = false; loading = false; playing = false; refresh(); push(); return true; });
         mp.setOnPreparedListener(m -> {
             prepared = true; loading = false; av(1f);
+            if (karSeek > 0) { try { m.seekTo(karSeek); } catch (Exception e) { } } karSeek = -1;
             if (wantPlay && focus()) { m.start(); playing = true; spd(); }
             refresh(); push();
         });
@@ -214,7 +224,7 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     /** Playback speed; only applied while playing (setting it while paused would start playback). */
     void spd() {
         if (playing && mp != null) {
-            try { PlaybackParams pp = mp.getPlaybackParams(); pp.setSpeed(speed); mp.setPlaybackParams(pp); } catch (Exception e) { }
+            try { PlaybackParams pp = mp.getPlaybackParams(); pp.setSpeed(speed); pp.setPitch((float) Math.pow(2.0, key / 12.0)); mp.setPlaybackParams(pp); } catch (Exception e) { }
         }
     }
 
@@ -240,12 +250,17 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
         JSONObject t = lib.optJSONObject(idx);
         ensureMp();
         try {
-            mp.reset(); prepared = false; playing = false; loading = true; wantPlay = auto;
-            mp.setDataSource(this, Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, String.valueOf(t.optLong("id"))));
+            mp.reset(); prepared = false; playing = false; loading = true; wantPlay = auto; karSeek = -1;
+            if (karCancel != null) karCancel.set(true); karRun = false;
+            long tid = t.optLong("id"); boolean useK = karOn && Karaoke.ready(this, tid);
+            if (useK) mp.setDataSource(Karaoke.fileFor(this, tid).getAbsolutePath());
+            else mp.setDataSource(this, Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, String.valueOf(tid)));
+            usingKar = useK; karState = useK ? "ready" : "idle";
             mp.prepareAsync();
             sp.edit().putLong("lastId", t.optLong("id")).apply();
             if (auto) addPlay();
         } catch (Exception e) { loading = false; wantPlay = false; }
+        if (karOn && !usingKar) karStart();
         refresh(); push();
     }
 
@@ -343,13 +358,54 @@ public class MediaService extends Service implements MediaPlayer.OnCompletionLis
     }
     void flushStats() { sp.edit().putString("stats", st.toString()).apply(); }
 
+
+    // ---------- karaoke: vocal remover ----------
+    void karStart() {
+        JSONObject t = cur(); if (!karOn || t == null) return;
+        final long id = t.optLong("id");
+        if (Karaoke.ready(this, id)) { karState = "ready"; if (!usingKar) swapSrc(true); return; }
+        if (karRun && karId == id) return;
+        if (karCancel != null) karCancel.set(true);
+        final AtomicBoolean cancel = new AtomicBoolean(false); karCancel = cancel;
+        karRun = true; karId = id; karState = "prep"; karProg = 0;
+        new Thread(() -> {
+            boolean ok = false;
+            try { ok = Karaoke.process(this, id, cancel, pct -> { karProg = pct; h.post(this::push); }); } catch (Throwable e) { }
+            final boolean fok = ok;
+            h.post(() -> {
+                if (cancel.get()) return;
+                karRun = false;
+                JSONObject c = cur();
+                karState = fok ? "ready" : "fail";
+                if (fok && karOn && c != null && c.optLong("id") == id) swapSrc(true);
+                push();
+            });
+        }, "karaoke").start();
+        push();
+    }
+
+    /** hot-swaps the data source (original <-> instrumental) at the same position */
+    void swapSrc(boolean toKar) {
+        try {
+            JSONObject t = cur(); if (t == null || mp == null || !prepared || toKar == usingKar) return;
+            long id = t.optLong("id"); File f = Karaoke.fileFor(this, id);
+            if (toKar && !f.exists()) return;
+            int pos = mp.getCurrentPosition(); boolean was = playing;
+            mp.reset(); prepared = false; playing = false; loading = true; wantPlay = was; karSeek = pos;
+            if (toKar) mp.setDataSource(f.getAbsolutePath());
+            else mp.setDataSource(this, Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, String.valueOf(id)));
+            usingKar = toKar; mp.prepareAsync();
+        } catch (Exception e) { loading = false; }
+        refresh(); push();
+    }
+
     // ---------- state out ----------
     JSONObject cur() { return idx >= 0 ? lib.optJSONObject(idx) : null; }
 
     void push() {
         long pos = 0, dur = 0; JSONObject t = cur();
         try { if (prepared && mp != null) { pos = mp.getCurrentPosition(); dur = mp.getDuration(); } else if (t != null) dur = t.optLong("dur"); } catch (Exception e) { }
-        String js = "{\"idx\":" + idx + ",\"playing\":" + playing + ",\"pos\":" + pos + ",\"dur\":" + dur + ",\"vol\":" + vol + ",\"shuf\":" + shuffle + ",\"rep\":" + repeat + ",\"speed\":" + speed + ",\"sleep\":" + (sleepEnd > 0 ? Math.max(0, sleepEnd - System.currentTimeMillis()) : 0) + "}";
+        String js = "{\"idx\":" + idx + ",\"playing\":" + playing + ",\"pos\":" + pos + ",\"dur\":" + dur + ",\"vol\":" + vol + ",\"shuf\":" + shuffle + ",\"rep\":" + repeat + ",\"speed\":" + speed + ",\"sleep\":" + (sleepEnd > 0 ? Math.max(0, sleepEnd - System.currentTimeMillis()) : 0) + ",\"kar\":" + karOn + ",\"karst\":\"" + karState + "\",\"karp\":" + karProg + ",\"key\":" + key + "}";
         lastState = js;
         if (listener != null) listener.state(js);
     }
