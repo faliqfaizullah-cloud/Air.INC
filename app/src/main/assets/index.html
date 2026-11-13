@@ -529,6 +529,10 @@ body.mem #app{grid-template-columns:minmax(0,1fr)}body.mem header,body.mem main{
 @media (orientation:landscape) and (max-height:640px){#lyK{bottom:34px;flex-wrap:nowrap;gap:8px}#lyK button{padding:8px 12px}#lyScore{top:26%}#lyScore b{font-size:58px}}
 #lyK #kSing.on{background:#e8392e;border-color:#e8392e;color:#fff}#lyNote{top:calc(env(safe-area-inset-top,0px) + 124px)}#lyScore{top:30%;background:rgba(0,0,0,.86);padding:26px 0 22px}
 @media (orientation:landscape) and (max-height:640px){#lyNote{top:calc(env(safe-area-inset-top,0px) + 108px)}#lyScore{top:24%}}
+#lyMode{max-height:0;opacity:0;overflow:hidden;margin-top:0;pointer-events:none;transition:max-height .45s cubic-bezier(.2,.9,.25,1),opacity .35s,margin-top .45s}
+#lyMode.open{max-height:40px;opacity:1;margin-top:15px;pointer-events:auto}
+#lyT{cursor:pointer}#lyT:after{content:"";display:inline-block;width:5px;height:5px;border-right:1px solid #8a8a8a;border-bottom:1px solid #8a8a8a;transform:rotate(45deg);margin-left:10px;vertical-align:3px;transition:transform .35s}
+#lyT.open:after{transform:rotate(-135deg);vertical-align:-1px}
 </style></head><body class="introing">
 <div id="aura"><i></i><i></i><i></i><i></i></div>
 <canvas id="fx"></canvas><div id="err"></div><div class="sheetwrap" id="srch"><div class="sheet"><div class="grab"></div><input id="sq" type="search" placeholder="Search songs, artists, albums" autocomplete="off"><div id="sres"></div></div></div>
@@ -1442,7 +1446,7 @@ function lyKaraoke(ts){const K=LY.kl,pos=curPos()+lyOff,fs=Math.round(Math.max(2
  {const g1=lx.createLinearGradient(0,0,0,lyH*.2);g1.addColorStop(0,'#000');g1.addColorStop(.62,'#000');g1.addColorStop(1,'rgba(0,0,0,0)');lx.fillStyle=g1;lx.fillRect(0,0,lyW,lyH*.2);const g2=lx.createLinearGradient(0,lyH*.86,0,lyH);g2.addColorStop(0,'rgba(0,0,0,0)');g2.addColorStop(.5,'#000');g2.addColorStop(1,'#000');lx.fillStyle=g2;lx.fillRect(0,lyH*.86,lyW,lyH*.14)}
  if(wait||(ci<0&&K.length&&K[0].t0-pos<6000&&K[0].t0>2500)){const nx=K[ci+1],left=nx.t0-pos,lit=Math.max(0,Math.min(3,Math.ceil(3*(1-left/4200)))),y=base+cum[ci+1]-fs*.9;
   for(let q=0;q<3;q++){const x=lyW/2+(q-1)*fs*.9,on=q<lit;lx.fillStyle='#fff';lx.globalAlpha=on?(.6+.4*Math.sin(ts/260+q)):.22;lx.beginPath();lx.arc(x,y,fs*.16,0,6.3);lx.fill()}lx.globalAlpha=1}}
-function setLyMode(m){if(m!='karaoke'){if(sing)singStop(false);if(st.kar){st.kar=false;P('kar',{on:0})}}LYM=m;$('lyr').classList.toggle('kar',m=='karaoke');try{localStorage.lymode=m}catch(e){}document.querySelectorAll('#lyMode span').forEach(x=>x.classList.toggle('on',x.dataset.m==m));lyShow();hap('click')}
+function setLyMode(m){if(m!='karaoke'){if(sing)singStop(false);if(st.kar){st.kar=false;P('kar',{on:0})}}LYM=m;$('lyr').classList.toggle('kar',m=='karaoke');setTimeout(()=>lyMenu(false),450);try{localStorage.lymode=m}catch(e){}document.querySelectorAll('#lyMode span').forEach(x=>x.classList.toggle('on',x.dataset.m==m));lyShow();hap('click')}
 
 /* ---- karaoke tools: vocal remover, key, sync, sing-along score ---- */
 let lyOff=0,lyNoteT=0,sing=null;
@@ -1484,8 +1488,10 @@ function lyOpen(){const t=tracks[idx];$('lyr').classList.add('on');lyResize();
  try{document.fonts&&document.fonts.load('40px "EB Garamond"');document.fonts.load('14px Montserrat')}catch(e){}
  if(!t){$('lyT').textContent='LYRICS';LY.st='none';lyShow();lyKick();return}
  $('lyT').textContent=t.n.toUpperCase();if(String(LY.id)!=String(t.id)||LY.st=='err')lyFetch();else lyShow();lyKick()}
-const lyClose=()=>{if(sing)singStop(true);$('lyr').classList.remove('on')};
+const lyClose=()=>{lyMenu(false);if(sing)singStop(true);$('lyr').classList.remove('on')};
 $('lyr').classList.toggle('kar',LYM=='karaoke');document.querySelectorAll('#lyMode span').forEach(x=>x.classList.toggle('on',x.dataset.m==LYM));$('lyMode').onclick=e=>{const m=e.target.dataset&&e.target.dataset.m;if(m)setLyMode(m)};
+let lyMT=0;function lyMenu(v){const o=v===undefined?!$('lyMode').classList.contains('open'):v;$('lyMode').classList.toggle('open',o);$('lyT').classList.toggle('open',o);clearTimeout(lyMT);if(o)lyMT=setTimeout(()=>lyMenu(false),5000)}
+$('lyT').onclick=()=>{hap('click');lyMenu()};
 $('lyB').onclick=lyOpen;$('trk').onclick=lyOpen;$('lyGrab').onclick=lyClose;
 $('lyMsg').onclick=e=>{if(e.target.id=='lyRe')lyFetch(true)};
 {let sy=null;$('lyr').addEventListener('pointerdown',e=>{sy=e.target.closest('#lyPlain')?null:e.clientY});$('lyr').addEventListener('pointerup',e=>{if(sy!==null&&e.clientY-sy>90)lyClose();sy=null})}
