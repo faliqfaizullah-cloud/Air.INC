@@ -216,6 +216,27 @@ public class MainActivity extends Activity {
             }).start();
         }
         @JavascriptInterface public void lyricsRetry(String id) { try { new File(new File(getFilesDir(), "lyrics"), id + ".json").delete(); } catch (Exception e) { } }
+        @JavascriptInterface public String appVer() { try { return getPackageManager().getPackageInfo(getPackageName(), 0).versionName; } catch (Exception e) { return ""; } }
+        @JavascriptInterface public void updCheck() { Updater.check(MainActivity.this, j -> run("window.airUpd&&airUpd(" + j + ")")); }
+        @JavascriptInterface public void updGet(String url) { Updater.download(MainActivity.this, url, j -> run("window.airUpd&&airUpd(" + j + ")")); }
+        @JavascriptInterface public void updCancel() { Updater.cancel(); }
+        @JavascriptInterface public String updInstall() {
+            final File f = Updater.apk(MainActivity.this);
+            if (!f.exists()) return "nofile";
+            if (Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
+                runOnUiThread(() -> startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:" + getPackageName()))));
+                return "perm";
+            }
+            runOnUiThread(() -> {
+                try {
+                    Uri u = FileProvider.getUriForFile(MainActivity.this, "com.airinc.player.files", f);
+                    Intent i = new Intent(Intent.ACTION_VIEW).setDataAndType(u, "application/vnd.android.package-archive")
+                        .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                } catch (Exception e) { run("window.airUpd&&airUpd({t:'fail',why:'install'})"); }
+            });
+            return "ok";
+        }
         @JavascriptInterface public String memList() { return Memories.list(MainActivity.this); }
         @JavascriptInterface public void memCapture(String k) { runOnUiThread(() -> startCapture(k)); }
         @JavascriptInterface public String memText(String t, String x) { String id = Memories.addText(MainActivity.this, t, x); pushMem(id); return id == null ? "" : id; }

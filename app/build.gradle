@@ -7,10 +7,16 @@ android {
         applicationId 'com.airinc.player'
         minSdk 24
         targetSdk 34
-        versionCode 9
-        versionName '2.8'
+        versionCode 11
+        versionName '3.0'
+        buildConfigField 'String', 'REPO', "\"${System.getenv('GITHUB_REPOSITORY') ?: ''}\""
     }
-    buildTypes { release { minifyEnabled false; signingConfig signingConfigs.debug } }
+    buildFeatures { buildConfig true }
+    signingConfigs {
+        // Fixed key committed to the repo so EVERY build is signed identically -> updates install over the old app
+        release { storeFile file('air-release.jks'); storePassword 'airinc123'; keyAlias 'airinc'; keyPassword 'airinc123' }
+    }
+    buildTypes { release { minifyEnabled false; signingConfig signingConfigs.release } }
     compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
 }
 dependencies { implementation 'androidx.core:core:1.12.0' }
