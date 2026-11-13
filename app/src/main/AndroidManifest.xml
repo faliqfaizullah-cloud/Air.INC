@@ -19,8 +19,8 @@
     </queries>
     <application android:label="Air.INC" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:theme="@style/AppTheme" android:allowBackup="true">
         <activity android:name=".MainActivity" android:exported="true"
-            android:screenOrientation="portrait" android:launchMode="singleTask"
-            android:windowSoftInputMode="adjustPan" android:configChanges="orientation|screenSize|keyboardHidden">
+            android:screenOrientation="fullUser" android:launchMode="singleTask"
+            android:windowSoftInputMode="adjustPan" android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
