@@ -109,8 +109,9 @@
   function push() {
     var o = state();
     LASTJ = JSON.stringify(o); call('airState', o); mediaSessionPos();
+    var now = Date.now(); if (now - lastLinkPush > 400 || !S.playing) { lastLinkPush = now; invoke('link:state', LASTJ); }
   }
-  var LASTJ = '';
+  var LASTJ = '', lastLinkPush = 0;
   function state() {
     var t = track(S.idx), dur = isFinite(A.duration) && A.duration > 0 ? Math.round(A.duration * 1000) : (t ? t.dur : 0);
     return { idx: S.idx, playing: S.playing, pos: Math.round((loaded === S.idx ? A.currentTime : 0) * 1000), dur: dur, vol: S.vol, shuf: S.shuf, rep: S.rep, speed: S.speed,
@@ -119,7 +120,7 @@
   function load(i) {
     var t = track(i); if (!t) return false;
     S.idx = i; jset('lastIdx', i); jset('lastId', t.id);
-    if (loaded !== i) { A.src = mediaUrl(t.id); loaded = i; try { A.currentTime = 0; } catch (e) { } applyKey(); mediaSessionMeta(t); }
+    if (loaded !== i) { A.src = t.src || mediaUrl(t.id); loaded = i; try { A.currentTime = 0; } catch (e) { } applyKey(); mediaSessionMeta(t); }
     return true;
   }
   function playIdx(i, play) {
@@ -362,6 +363,46 @@
       try { r.mr.stop(); } catch (e) { } return id;
     },
   };
+  /* ---------------- Air Link (phone <-> PC) ---------------- */
+  var sync = function (ch) { try { return H.sync.apply(H, arguments); } catch (e) { return null; } };
+  Object.assign(window.AirPlayer, {
+    linkServer: function () { return sync('link:srv') || '{"on":false,"ip":"","port":0,"name":"PC","platform":"windows","code":"","qr":"","secret":"","peers":[],"out":[]}'; },
+    linkNew: function () { return sync('link:new'); },
+    linkKick: function (id) { sync('link:kick', id); },
+    linkMint: function (id) { return sync('link:mint', id) || ''; },
+    linkAddOut: function (json) { sync('link:addout', json); },
+    linkDelOut: function (id) { sync('link:delout', id); },
+    linkAsset: function (peerId, path) { return 'air://peer/' + peerId + path; },
+    linkFetch: function (url, opts) { return invoke('link:req', url, opts); },
+    linkScan: function () { scanOpen(); },
+  });
+  H.on('link:cmd', function (a, o) { window.AirPlayer.cmd(a, JSON.stringify(o || {})); });
+  H.on('link:evt', function (e) { call('airLinkEvt', e); });
+  var castN = 0;
+  H.on('link:cast', function (c) {
+    var t = { id: 900000000 + (++castN), title: c.title || 'Shared song', artist: c.artist || '', album: c.album || '', aid: 0, dur: c.dur || 0, genre: '', art: c.art ? (H.castUrl ? H.castUrl(c.token + 'a') : 'air://cast/' + c.token + 'a') : '', src: H.castUrl ? H.castUrl(c.token) : 'air://cast/' + c.token };
+    lib = lib.filter(function (x) { return !x.src; }).concat([t]);    // only one shared song at a time
+    call('airLib', lib, true); queue = null; playIdx(lib.length - 1, true); toast('Playing “' + t.title + '” from your phone');
+  });
+  /* QR scanner for the Link screen (uses jsQR when it was bundled with the app) */
+  var scan = null;
+  function scanClose() { if (scan) { clearInterval(scan.t); try { scan.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) { } if (scan.el.parentNode) scan.el.parentNode.removeChild(scan.el); scan = null; } }
+  function scanOpen() {
+    if (scan) return;
+    if (!window.jsQR) { toast('Type the code instead'); return; }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 } } }).then(function (stream) {
+      var el = document.createElement('div'); el.id = 'camM';
+      el.innerHTML = '<div class="cb"><video autoplay muted playsinline style="transform:none"></video><div class="cr"><button class="x" aria-label="Close">✕</button><span class="ct" style="position:static;font-size:14px">Point the camera at the QR code</span></div></div>';
+      document.body.appendChild(el); var v = el.querySelector('video'); v.srcObject = stream;
+      var c = document.createElement('canvas'), g = c.getContext('2d', { willReadFrequently: true });
+      scan = { el: el, stream: stream, t: setInterval(function () {
+        if (!v.videoWidth) return; c.width = v.videoWidth; c.height = v.videoHeight; g.drawImage(v, 0, 0);
+        var r = window.jsQR(g.getImageData(0, 0, c.width, c.height).data, c.width, c.height);
+        if (r && /^airlink:\/\//.test(r.data)) { var d = r.data; scanClose(); call('airLinkScan', d); }
+      }, 250) };
+      el.querySelector('.x').onclick = scanClose; el.onclick = function (e) { if (e.target === el) scanClose(); };
+    }).catch(function () { toast('No camera found — type the code instead'); });
+  }
   window.AirHaptic = { hap: function () { } };
   // desktop helpers used by desk.js
   window.AirDeskApi = { graph: function () { return G; }, ctx: function () { return ctx; }, setVol: setVol, state: state, lib: function () { return lib; }, resume: resume, pause: pause, seek: seek, next: next, prev: prev, toast: toast };

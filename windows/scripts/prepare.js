@@ -24,7 +24,8 @@ function transform(html) {
     const i = html.indexOf(needle); if (i < 0) throw new Error('missing ' + needle);
     html = after ? html.slice(0, i + needle.length) + text + html.slice(i + needle.length) : html.slice(0, i) + text + html.slice(i);
   };
-  inject('<head>', '\n<script src="bridge.js"></script>', true);
+  const jq = fs.existsSync(path.join(root, 'node_modules', 'jsqr', 'dist', 'jsQR.js'));
+  inject('<head>', (jq ? '\n<script src="jsQR.js"></script>' : '') + '\n<script src="bridge.js"></script>', true);
   inject('</head>', '<link rel="stylesheet" href="desk.css">\n');
   inject('</body>', '<script src="desk.js"></script>\n');
   return { html, n };
@@ -35,6 +36,7 @@ function main() {
   const r = transform(fs.readFileSync(path.join(src, 'index.html'), 'utf8'));
   fs.writeFileSync(path.join(www, 'index.html'), r.html);
   for (const f of ['bridge.js', 'pitch-worklet.js', 'desk.css', 'desk.js']) fs.copyFileSync(path.join(root, 'renderer', f), path.join(www, f));
+  const jqf = path.join(root, 'node_modules', 'jsqr', 'dist', 'jsQR.js'); if (fs.existsSync(jqf)) fs.copyFileSync(jqf, path.join(www, 'jsQR.js'));
   if (process.env.GITHUB_REPOSITORY) fs.writeFileSync(path.join(root, 'repo.json'), JSON.stringify({ repo: process.env.GITHUB_REPOSITORY }));
   else if (!fs.existsSync(path.join(root, 'repo.json'))) fs.writeFileSync(path.join(root, 'repo.json'), JSON.stringify({ repo: '' }));
   console.log('www ready (' + r.n + ' viewport units converted)');

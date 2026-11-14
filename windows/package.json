@@ -9,11 +9,12 @@
   "scripts": {
     "prepare-www": "node scripts/prepare.js",
     "start": "node scripts/prepare.js && electron .",
-    "test": "node test/lib.test.js",
+    "test": "node test/lib.test.js && node test/link.test.js",
     "dist": "node scripts/prepare.js && electron-builder --win --x64 --publish never"
   },
   "dependencies": {
-    "music-metadata": "^7.14.0"
+    "music-metadata": "^7.14.0",
+    "jsqr": "^1.4.0"
   },
   "devDependencies": {
     "electron": "^33.2.1",

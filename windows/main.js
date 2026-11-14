@@ -6,6 +6,7 @@ const os = require('os');
 const { Readable } = require('stream');
 const { spawn } = require('child_process');
 const L = require('./src/lib');
+const K = require('./src/link');
 
 protocol.registerSchemesAsPrivileged([{ scheme: 'air', privileges: { standard: true, secure: true, supportFetchAPI: true, stream: true, corsEnabled: true } }]);
 
@@ -41,9 +42,24 @@ function onAir(req) {
     case 'app': { const f = path.join(WWW, name || 'index.html'); return L.inside(WWW, f) ? serve(f, req) : new Response('forbidden', { status: 403 }); }
     case 'media': { const t = byId.get(parseInt(name, 10)); return t ? serve(t.path, req) : new Response('not found', { status: 404 }); }
     case 'art': { const f = path.join(ART, path.basename(name)); return serve(f, req); }
+    case 'cast': { const u = lh().castUrl(name); return u ? proxyTo(u, req) : new Response('gone', { status: 404 }); }
+    case 'peer': { const u = lh().peerUrl(name); return u ? proxyTo(u, req) : new Response('not found', { status: 404 }); }   // air://peer/<peerId>/art/<trackId>
     case 'mem': { const f = path.join(MEM, path.basename(name)); return serve(f, req); }
     default: return new Response('not found', { status: 404 });
   }
+}
+
+// ---------- Air Link (phone <-> PC over the local network) ----------
+let linkHost = null;
+const lh = () => linkHost || (linkHost = require('./src/linkhost')({
+  cfg: () => CFG, saveCfg, send, getLib: () => lib, byId, get artDir() { return ART; }, musicDir: () => app.getPath('music'), startScan: () => startScan(), name: os.hostname(), platform: 'windows',
+}));
+async function proxyTo(url, req) {
+  const r = await K.proxy(url, req.headers.get('range'));
+  if (!r) return new Response('unreachable', { status: 502 });
+  const h = { 'Access-Control-Allow-Origin': '*' };
+  for (const k of ['content-type', 'content-length', 'content-range', 'accept-ranges']) if (r.headers[k]) h[k] = r.headers[k];
+  return new Response(Readable.toWeb(r), { status: r.statusCode, headers: h });
 }
 
 // ---------- library ----------
@@ -70,7 +86,7 @@ async function startScan() {
   try {
     const arr = await L.scan(folders, {
       prev: lib, meta: readMeta, saveArt, isCancelled: () => token !== scanToken,
-      onBatch: (a, done) => { if (token !== scanToken) return; setLib(a); send('lib:update', a.map(pub), done); if (done) fs.writeFile(libFile(), JSON.stringify(a), () => { }); },
+      onBatch: (a, done) => { if (token !== scanToken) return; setLib(a); lh().bump(); send('lib:update', a.map(pub), done); if (done) fs.writeFile(libFile(), JSON.stringify(a), () => { }); },
     });
     void arr;
   } catch (e) { send('lib:update', lib.map(pub), true); }
@@ -176,6 +192,14 @@ function ipc() {
   });
   ipcMain.handle('mem:del', (_e, files) => { for (const f of files || []) { if (f) try { fs.unlinkSync(path.join(MEM, path.basename(f))); } catch (e) { } } return true; });
   ipcMain.handle('mem:show', (_e, f) => { const p = path.join(MEM, path.basename(f)); if (fs.existsSync(p)) shell.showItemInFolder(p); return true; });
+  ipcMain.on('link:srv', e => { e.returnValue = JSON.stringify(lh().info()); });
+  ipcMain.on('link:new', e => { e.returnValue = JSON.stringify(lh().newSecret()); });
+  ipcMain.on('link:kick', (e, id) => { lh().kick(id); e.returnValue = true; });
+  ipcMain.on('link:mint', (e, id) => { const m = lh().mint(id); e.returnValue = m ? JSON.stringify(m) : ''; });
+  ipcMain.on('link:addout', (e, json) => { lh().addOutJson(json); e.returnValue = true; });
+  ipcMain.on('link:delout', (e, id) => { lh().delOut(id); e.returnValue = true; });
+  ipcMain.handle('link:state', (_e, json) => { lh().setState(json); return true; });
+  ipcMain.handle('link:req', (_e, url, opts) => lh().request(url, opts));
   ipcMain.handle('upd:check', () => updCheck());
   ipcMain.handle('upd:get', (_e, url) => updGet(url));
   ipcMain.handle('upd:cancel', () => { updCancel = true; return true; });
@@ -208,6 +232,7 @@ if (!app.requestSingleInstanceLock()) { app.quit(); } else {
     Menu.setApplicationMenu(null);
     ipc(); createWindow();
     if (!lib.length) startScan(); else setTimeout(startScan, 1500);
+    if (Object.keys(CFG.linkKeys || {}).length || Object.keys(CFG.linkOut || {}).length) lh().ensure();   // stay reachable for paired devices
     app.on('activate', () => { if (!BrowserWindow.getAllWindows().length) createWindow(); });
   });
   app.on('before-quit', () => { quitting = true; });

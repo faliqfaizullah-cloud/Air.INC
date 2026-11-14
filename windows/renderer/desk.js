@@ -21,6 +21,7 @@
     analytics: '<path d="M12 3v9h9"/><path d="M20 15a8.5 8.5 0 1 1-11-11"/>',
     sales: '<path d="M4 17l5-5 4 3 7-8"/><path d="M15 7h5v5"/>',
     insights: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18 16l.8 2.2L21 19l-2.2.8L18 22l-.8-2.2L15 19l2.2-.8z"/>',
+    link: '<rect x="3" y="5" width="12" height="9" rx="1.500"/><rect x="15" y="9" width="6" height="10" rx="1.500"/><path d="M7 18h4"/>',
     product: '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 12l8-4.5M12 12L4 7.5M12 12v9"/>',
     memory: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.600-7 10-7 10z"/>',
     folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
@@ -32,6 +33,7 @@
   var GROUPS = [
     ['Listen', [['music', 'Music'], ['explore', 'Explore'], ['wheel', 'Click wheel'], ['eq', 'Equalizer'], ['alarm', 'Alarm']]],
     ['Library', [['library', 'Calendar'], ['memory', 'Memories']]],
+    ['Devices', [['link', 'Link devices']]],
     ['Play', [['game', 'Game']]],
     ['Insights', [['board1', 'Board · Month'], ['board2', 'Board · Weekdays'], ['analytics', 'Analytics'], ['sales', 'Sales'], ['insights', 'Data Insights'], ['product', 'Product Analytics']]],
   ];

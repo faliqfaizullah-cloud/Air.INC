@@ -34,6 +34,8 @@ import java.io.File;
 import org.json.JSONObject;
 import java.util.Calendar;
 import java.util.Iterator;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 public class MainActivity extends Activity {
     private WebView web;
@@ -83,6 +85,7 @@ public class MainActivity extends Activity {
         });
         web.loadUrl("file:///android_asset/index.html");
         if (hasPerm()) scanLib(); else askPermissions();
+        if (LinkServer.wanted(this)) link();
         // refresh the headphone card when devices connect / disconnect or report a battery level
         AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
         am.registerAudioDeviceCallback(new AudioDeviceCallback() {
@@ -129,6 +132,7 @@ public class MainActivity extends Activity {
         lastScan = System.currentTimeMillis();
         Library.scan(this, (arr, done) -> runOnUiThread(() -> {
             web.evaluateJavascript("window.airLib&&airLib(" + arr.toString() + "," + done + ")", null);
+            if (done && LinkServer.inst != null) LinkServer.inst.bump();
             if (MediaService.running) startService(new Intent(MainActivity.this, MediaService.class).setAction("reload"));
         }));
     }
@@ -168,7 +172,25 @@ public class MainActivity extends Activity {
         } catch (Exception e) { run("window.airMemErr&&airMemErr('No camera app available')"); }
     }
 
+    // ---------- Air Link (phone <-> Windows) ----------
+    private LinkServer link() {
+        return LinkServer.ensure(this, new LinkServer.Host() {
+            @Override public void cmd(String a, JSONObject o) {
+                try { new Bridge().cmd(a, o.toString()); } catch (Exception e) { }
+            }
+            @Override public void pulled(String name) {
+                runOnUiThread(() -> { run("window.airLinkEvt&&airLinkEvt({t:'pulled',name:" + JSONObject.quote(name) + "})"); scanLib(); });
+            }
+            @Override public void changed() { run("window.airLinkEvt&&airLinkEvt({t:'change'})"); }
+        });
+    }
+
     @Override protected void onActivityResult(int code, int res, Intent data) {
+        if (code == IntentIntegrator.REQUEST_CODE) {
+            IntentResult r = IntentIntegrator.parseActivityResult(code, res, data);
+            if (r != null && r.getContents() != null) run("window.airLinkScan&&airLinkScan(" + JSONObject.quote(r.getContents()) + ")");
+            return;
+        }
         super.onActivityResult(code, res, data);
         if (code < 11 || code > 13) return;
         if (res != RESULT_OK) { String pp = sp.getString("mem_pending", null); if (pp != null) new File(pp).delete(); sp.edit().remove("mem_pending").apply(); run("window.airMemErr&&airMemErr('')"); return; }
@@ -290,6 +312,16 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void askBt() { runOnUiThread(() -> { if (Build.VERSION.SDK_INT >= 31) requestPermissions(new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 2); }); }
         @JavascriptInterface public void openBt() { startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS)); }
         @JavascriptInterface public String state() { return MediaService.lastState; }
+        @JavascriptInterface public String linkServer() { LinkServer l = link(); return l == null ? "{\"on\":false,\"name\":\"" + Build.MODEL + "\",\"platform\":\"android\",\"out\":[],\"peers\":[]}" : l.info(); }
+        @JavascriptInterface public String linkNew() { LinkServer l = link(); return l == null ? "" : l.newSecret(); }
+        @JavascriptInterface public void linkKick(String id) { LinkServer l = link(); if (l != null) l.kick(id); }
+        @JavascriptInterface public String linkMint(String id) { LinkServer l = link(); return l == null ? "" : l.mint(id); }
+        @JavascriptInterface public void linkAddOut(String json) { LinkServer l = link(); if (l != null) l.addOut(json); }
+        @JavascriptInterface public void linkDelOut(String id) { LinkServer l = link(); if (l != null) l.delOut(id); }
+        @JavascriptInterface public void linkScan() {
+            runOnUiThread(() -> new IntentIntegrator(MainActivity.this).setDesiredBarcodeFormats(IntentIntegrator.QR_CODE)
+                .setPrompt("Scan the QR code on the other device").setBeepEnabled(false).setOrientationLocked(false).initiateScan());
+        }
         @JavascriptInterface public String library() { return Library.load(MainActivity.this).toString(); }
         @JavascriptInterface public void scan() { runOnUiThread(() -> scanLib()); }
         @JavascriptInterface public boolean perm() { return hasPerm(); }
