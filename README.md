@@ -24,3 +24,15 @@ Builds are signed with the fixed key `app/air-release.jks`, so a new release ins
 
 ## Motion
 Screen transitions use depth + slide with staggered entrances (compositor-only). Controls ripple on tap, and scrolling/swiping applies a light speed-based directional motion blur. If frames drop, the blur turns itself off for that session. Animations pause when the app is hidden.
+
+## Windows version
+`windows/` is an Electron app that reuses the same UI (`app/src/main/assets/index.html`) with a desktop arrangement:
+sidebar with every section, the section in a centred stage, a searchable library/queue panel on the right and a
+full-width now-playing bar. Audio runs on Web Audio (5-band EQ, bass, loudness, real-time vocal remover, key shift
+without changing tempo), media keys + Windows media overlay, tray icon so the alarm can ring, in-app updates.
+
+Shortcuts: Space play/pause, ←/→ seek 5 s (Shift 15 s), Ctrl+←/→ previous/next, ↑/↓ volume, M mute, S shuffle, R repeat,
+L lyrics, K karaoke, Ctrl+K or / search, Alt+1…9 sections, Esc close, F11 full screen.
+
+Build: push a tag (e.g. `v3.1`) – GitHub Actions attaches `Air.INC-Setup-<ver>.exe` (installer) and
+`Air.INC-<ver>-portable.exe` to the same release as the APK. Local: `cd windows && npm install && npm start`.

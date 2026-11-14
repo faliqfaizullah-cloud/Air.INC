@@ -2,3 +2,7 @@ build/
 .gradle/
 local.properties
 *.apk
+node_modules/
+windows/www/
+windows/dist/
+windows/repo.json

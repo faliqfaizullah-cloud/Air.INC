@@ -1,0 +1,68 @@
+{
+  "name": "air-inc",
+  "productName": "Air.INC",
+  "version": "3.1.0",
+  "description": "Air.INC music player for Windows",
+  "author": "Air.INC",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "prepare-www": "node scripts/prepare.js",
+    "start": "node scripts/prepare.js && electron .",
+    "test": "node test/lib.test.js",
+    "dist": "node scripts/prepare.js && electron-builder --win --x64 --publish never"
+  },
+  "dependencies": {
+    "music-metadata": "^7.14.0"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.airinc.player.win",
+    "productName": "Air.INC",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "www/**/*",
+      "repo.json",
+      "build/icon.png"
+    ],
+    "asar": true,
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "runAfterFinish": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Air.INC",
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "Air.INC-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Air.INC-${version}-portable.${ext}"
+    }
+  }
+}

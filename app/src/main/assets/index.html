@@ -782,7 +782,7 @@ menu.onclick=e=>{const d=e.target.dataset;if(d.i)go(d.i);else if(d.act=='theme')
  else if(d.act=='glow'){setGlow(!glowOn());go(cur);menu.classList.add('on')}else if(d.act=='kar'){menu.classList.remove('on');go('music');setLyMode('karaoke');lyOpen()}else if(d.act=='lyr'){menu.classList.remove('on');go('music');lyOpen()}else if(d.act=='scan'){menu.classList.remove('on');askScan()}else if(d.act=='bg'){menu.classList.remove('on');try{AirPlayer.battery()}catch(e){}}};
 // ---- library (auto-scanned natively and saved) ----
 const esc=x=>String(x).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const norm=a=>a.map(t=>({id:t.id,genre:t.genre||'',n:t.title||'Unknown',artist:t.artist||'',album:t.album||'',dur:t.dur,art:t.art?'file://'+t.art:''}));
+const norm=a=>a.map(t=>({id:t.id,genre:t.genre||'',n:t.title||'Unknown',artist:t.artist||'',album:t.album||'',dur:t.dur,art:t.art?(/^(air:|data:|blob:|https?:|file:)/.test(t.art)?t.art:'file://'+t.art):''}));
 window.airLib=(a,done)=>{tracks=norm(a);buildCats();buildArc();refreshTrack();stats()};
 window.airPerm=()=>{perm=true;$('art').textContent='Scanning your music…'};
 function askScan(){try{perm=AirPlayer.perm();if(!perm){AirPlayer.askPerm();return}AirPlayer.scan();$('art').textContent='Scanning your music…'}catch(e){}}
@@ -1281,7 +1281,7 @@ if(localStorage.skin!==undefined)skin=+localStorage.skin||0;
 
 /* ===== Memories: catch a memory and keep it inside the app ===== */
 let M=[],mmMode='cap',mmIdx=0,mmCur=null,mmRecOn=false,mmT0=0,mmAmpT=0,mmFilt='All',mmTo=0,mmDelT=0;
-const mmUrl=p=>!p?'':/^(data:|blob:|https?:|file:)/.test(p)?p:'file://'+encodeURI(p).replace(/#/g,'%23');
+const mmUrl=p=>!p?'':/^(data:|blob:|https?:|file:|air:)/.test(p)?p:'file://'+encodeURI(p).replace(/#/g,'%23');
 const mmHue=id=>(parseInt(String(id).replace(/\D/g,'').slice(-6))||7)%360;
 const mmK=d=>d.getFullYear()*400+d.getMonth()*32+d.getDate();
 const mmDay=ts=>mmK(new Date(ts))==mmK(new Date())?'Today':new Date(ts).toLocaleString('en-US',{month:'short',day:'numeric'});
