@@ -46,12 +46,12 @@ const K = require('../src/link');
   // brute force: 6 wrong codes lock pairing and rotate the secret
   const old = B.secret; for (let i = 0; i < 6; i++) await K.request('http://127.0.0.1:' + B.port, '/pair', { method: 'POST', body: { secret: '00000' } });
   assert.strictEqual((await K.request('http://127.0.0.1:' + B.port, '/pair', { method: 'POST', body: { secret: old } })).status, 429); assert.notStrictEqual(B.secret, old);
-  B.stop(); C.stop();   // only 5 fixed ports exist
+  B.stop(); C.stop(); await new Promise(r => setTimeout(r, 300));   // only 5 fixed ports exist; let Windows release them
   // mutual pairing: D connects to A and offers its own server; A pairs back and ends up with an outgoing record for D
   const outs = []; const D = await mk('Phone3', 'android', { loadKeys: () => ({}), saveKeys: () => { } }).start('127.0.0.1');
   const A2 = await mk('PC2', 'windows', { loadKeys: () => ({}), saveKeys: () => { }, addOut: r => outs.push(r) }).start('127.0.0.1');
   const mp = await K.request('http://127.0.0.1:' + A2.port, '/pair', { method: 'POST', body: { secret: A2.secret, name: 'Phone3', platform: 'android', reverse: { ip: '127.0.0.1', port: D.port, secret: D.secret } } });
-  assert.strictEqual(mp.status, 200); for (let i = 0; i < 40 && !outs.length; i++) await new Promise(r => setTimeout(r, 25));
+  assert.strictEqual(mp.status, 200, 'pair via A2 port ' + A2.port + ' D ' + D.port + ' -> ' + mp.text); for (let i = 0; i < 40 && !outs.length; i++) await new Promise(r => setTimeout(r, 25));
   assert.strictEqual(outs.length, 1); assert.strictEqual(outs[0].name, 'Phone3'); assert.strictEqual(outs[0].port, D.port);
   assert.strictEqual(JSON.parse((await K.request('http://127.0.0.1:' + D.port, '/state', { headers: { 'X-Air-Key': outs[0].key } })).text).idx, 0);   // key really works on D
   const A3 = await mk('PC3', 'windows', { loadKeys: () => ({}), saveKeys: () => { }, addOut: r => outs.push(r) }).start('127.0.0.1');

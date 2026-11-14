@@ -181,7 +181,7 @@ class LinkServer {
       let dest = path.join(dir, name); const ext = path.extname(name), base = name.slice(0, -ext.length);
       for (let i = 2; fs.existsSync(dest); i++) dest = path.join(dir, base + ' (' + i + ')' + ext);
       const tmp = dest + '.part';
-      const req = http.get(u.href, { timeout: 15000 }, res => {
+      const req = http.get(u.href, { agent: false, timeout: 15000 }, res => {
         if (res.statusCode !== 200) { res.resume(); return no(new Error('http' + res.statusCode)); }
         const total = Number(res.headers['content-length']) || 0; let got = 0;
         const out = fs.createWriteStream(tmp);
@@ -203,7 +203,7 @@ function request(base, pth, o) {
     let u; try { u = new URL(pth, base); } catch (e) { return res({ status: 0, text: '' }); }
     const body = o.body == null ? null : Buffer.from(typeof o.body === 'string' ? o.body : JSON.stringify(o.body));
     const hd = Object.assign({}, o.headers || {}); if (body) { hd['Content-Type'] = 'application/json'; hd['Content-Length'] = body.length; }
-    const q = http.request({ host: u.hostname, port: u.port, path: u.pathname + u.search, method: o.method || 'GET', headers: hd, timeout: o.timeout || 6000 }, r => {
+    const q = http.request({ host: u.hostname, port: u.port, path: u.pathname + u.search, method: o.method || 'GET', headers: hd, agent: false, timeout: o.timeout || 6000 }, r => {
       const c = []; r.on('data', d => c.push(d)); r.on('end', () => res({ status: r.statusCode, text: Buffer.concat(c).toString('utf8') }));
     });
     q.on('error', () => res({ status: 0, text: '' })); q.on('timeout', () => { q.destroy(); res({ status: 0, text: '' }); });
@@ -214,7 +214,7 @@ function request(base, pth, o) {
 function proxy(url, range) {
   return new Promise(res => {
     let u; try { u = new URL(url); } catch (e) { return res(null); }
-    const q = http.get({ host: u.hostname, port: u.port, path: u.pathname + u.search, headers: range ? { Range: range } : {}, timeout: 10000 }, r => res(r));
+    const q = http.get({ host: u.hostname, port: u.port, path: u.pathname + u.search, headers: range ? { Range: range } : {}, agent: false, timeout: 10000 }, r => res(r));
     q.on('error', () => res(null)); q.on('timeout', () => { q.destroy(); res(null); });
   });
 }
