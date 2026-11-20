@@ -1798,20 +1798,22 @@ function skDraw(ts){const L=skLay(),pos=curPos()+lyOff,C=LY.chunks;let j=-1;for(
  if(!SK.pre&&ts-SK.t0>350&&j+1<C.length&&!SK.cache.has(LY.id+'|'+(j+1)+'|'+L.key+'|0')){SK.pre=1;setTimeout(()=>{SK.pre=0;if(lyOpenNow()&&LYM=='sketch'){const b=LY.id+'|'+(j+1)+'|'+L.key+'|0';if(!SK.cache.has(b))SK.cache.set(b,skRender(j+1,0))}},0)}}
 
 /* ---- draw on the cards: pens + markers on the right, OOPS! = undo, ALTER = eraser, OBLITERATE! = clear, arrows = size ---- */
-SK.tool={id:'p0',size:3,erase:false};SK.strokes=new Map();SK.ov=new Map();SK.cur=null;
+SK.tool={id:'p0',size:3,erase:false};SK.ov=new Map();SK.cur=null;
+SK.all=(()=>{try{return(JSON.parse(localStorage.skink||'[]')||[]).map(o=>({id:o.i,size:o.s,e:!!o.e,col:o.c||null,seed:o.d,pts:o.p}))}catch(e){return[]}})();
+function skSave(){try{let a=SK.all.slice(-400),n=0;for(let i=a.length-1;i>=0;i--){n+=a[i].pts.length;if(n>60000){a=a.slice(i+1);break}}localStorage.skink=JSON.stringify(a.map(t=>({i:t.id,s:t.size,e:t.e?1:0,c:t.col,d:t.seed,p:t.pts.map(q=>[Math.round(q[0]),Math.round(q[1])])})))}catch(e){}}
 const SKP=[['p0',30,78],['p1',84,118],['p2',124,156],['p3',162,200],['p4',208,248],['m0',258,306],['m1',316,364],['m2',374,422]];
-const skSK=j=>LY.id+'|'+j;
-function skStrokes(j){const k=skSK(j);let a=SK.strokes.get(k);if(!a){a=[];SK.strokes.set(k,a);if(SK.strokes.size>40)SK.strokes.delete(SK.strokes.keys().next().value)}return a}
-function skOvFor(j){const k=skSK(j),L=skLay(),key=k+'|'+L.key;let o=SK.ov.get(key);if(o)return o;const st=SK.strokes.get(k);if(!st||!st.length)return null;
- o=document.createElement('canvas');o.width=Math.ceil(L.Wi/2);o.height=Math.ceil(L.Hi/2);SK.ov.set(key,o);if(SK.ov.size>14)SK.ov.delete(SK.ov.keys().next().value);const g=skG(o,L);st.forEach(t=>skPlay(g,t,j));return o}
-function skG(o,L){const g=o.getContext('2d');g.setTransform(L.k/2,0,0,L.k/2,L.cx*L.k/2,L.cy*L.k/2);return g}
+function skStrokes(){return SK.all}
+function skOvFor(j){const L=skLay(),n=skScene(j).night,key=L.key+'|'+(n?'n':'l');let o=SK.ov.get(key);if(o)return o;if(!SK.all.length)return null;
+ o=document.createElement('canvas');o.width=Math.ceil(L.Wi/2);o.height=Math.ceil(L.Hi/2);SK.ov.set(key,o);if(SK.ov.size>6)SK.ov.delete(SK.ov.keys().next().value);const g=skG(o,L,n);SK.all.forEach(t=>skPlay(g,t));return o}
+function skOvNew(j,L){const n=skScene(j).night,o=document.createElement('canvas');o.width=Math.ceil(L.Wi/2);o.height=Math.ceil(L.Hi/2);SK.ov.set(L.key+'|'+(n?'n':'l'),o);return o}
+function skG(o,L,n){const g=o.getContext('2d');g.setTransform(L.k/2,0,0,L.k/2,L.cx*L.k/2,L.cy*L.k/2);g.__n=n;return g}
 function skTipCol(id,j){const S=skScene(j);return(SKT[S.motif]||SKT.blank)['m0m1m2'.indexOf(id)/2]||'#000'}
-function skSeg(g,t,a,b,R){const sz=t.size,id=t.id;g.globalCompositeOperation=t.e?'destination-out':'source-over';g.strokeStyle=g.fillStyle=t.col;g.lineCap=g.lineJoin='round';
+function skSeg(g,t,a,b,R){const sz=t.size,id=t.id;g.globalCompositeOperation=t.e?'destination-out':'source-over';g.strokeStyle=g.fillStyle=t.col||(g.__n?'#f8efc0':'#000');g.lineCap=g.lineJoin='round';
  if(t.e){g.lineWidth=12+sz*5;g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke();return}
  if(id=='p3'){const r=8+sz*5,n=Math.max(1,Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/4));for(let i=0;i<n;i++){const f=i/n,cx=a[0]+(b[0]-a[0])*f,cy=a[1]+(b[1]-a[1])*f;for(let q=0;q<7;q++){const an=R()*6.3,rr=Math.sqrt(R())*r;g.fillRect(Math.round((cx+Math.cos(an)*rr)/2)*2,Math.round((cy+Math.sin(an)*rr)/2)*2,2,2)}}return}
  if(id=='p4'){const w=5+sz*2,ox=w*.7,oy=-w*.7;g.beginPath();g.moveTo(a[0]-ox,a[1]-oy);g.lineTo(a[0]+ox,a[1]+oy);g.lineTo(b[0]+ox,b[1]+oy);g.lineTo(b[0]-ox,b[1]-oy);g.closePath();g.fill();return}
  g.lineWidth=id=='p0'?2+sz*.9:id=='p1'?1.5+sz*.35:id=='p2'?5+sz*2.2:10+sz*3.5;g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke()}
-function skPlay(g,t,j){const R=mulb(t.seed);g.save();for(let i=0;i<t.pts.length;i++)skSeg(g,t,t.pts[Math.max(0,i-1)],t.pts[i],R);g.restore();g.globalCompositeOperation='source-over'}
+function skPlay(g,t){const R=mulb(t.seed);g.save();for(let i=0;i<t.pts.length;i++)skSeg(g,t,t.pts[Math.max(0,i-1)],t.pts[i],R);g.restore();g.globalCompositeOperation='source-over'}
 function skUnit(e){const r=lyC.getBoundingClientRect(),L=skLay(),x=(e.clientX-r.left)*(lyW/r.width),y=(e.clientY-r.top)*(lyH/r.height),ux=(x-L.wx)/L.ww*(L.Wi/L.k),uy=(y-L.wy)/L.wh*(L.Hi/L.k);
  if(ux<0||uy<0||ux>L.Wi/L.k||uy>L.Hu)return null;return{x:ux,y:uy,cx:ux-L.cx,cy:uy-L.cy,card:ux>=L.cx&&ux<=L.cx+L.cw&&uy>=L.cy&&uy<=L.cy+L.ch,L}}
 function skExport(j){const L=skLay(),v=Math.floor(performance.now()/83.3)%3,cv=skCard(j,v),t=document.createElement('canvas');t.width=L.Wi;t.height=L.Hi;const g=t.getContext('2d');g.drawImage(cv,0,0);const o=skOvFor(j);if(o){g.imageSmoothingEnabled=false;g.drawImage(o,0,0,L.Wi,L.Hi)}
@@ -1822,9 +1824,9 @@ function skHit(u){const L=u.L,j=SK.last;if(u.x>=640)for(const[id,a,b]of SKP)if(u
  const yb=u.y-(L.Hu-576);if(yb<500||u.card)return false;
  if(u.x<178&&yb>=530){hap('click');skExport(j);return true}
  if(u.x>=226&&u.x<=358&&yb>=538){SK.tool.erase=!SK.tool.erase;hap('click');return true}
- if(u.x>=364&&u.x<478){const a=SK.strokes.get(skSK(j));if(a&&a.length){a.pop();SK.ov.forEach((o,k)=>{if(k.startsWith(skSK(j)+'|'))SK.ov.delete(k)});hap('tick')}return true}
+ if(u.x>=364&&u.x<478){if(SK.all.length){SK.all.pop();SK.ov.clear();skSave();hap('tick')}return true}
  if(u.x>=462&&u.x<632&&yb>=508){SK.tool.size=Math.max(1,Math.min(6,SK.tool.size+(u.x<548?-1:1)));hap('tick');return true}
- if(u.x>=700&&yb>=538){SK.strokes.delete(skSK(j));SK.ov.forEach((o,k)=>{if(k.startsWith(skSK(j)+'|'))SK.ov.delete(k)});hap('heavy');return true}
+ if(u.x>=700&&yb>=538){SK.all.length=0;SK.ov.clear();skSave();hap('heavy');return true}
  return false}
 function skMarks(L,d){const f=L.ww*d/L.Wi*L.k,yb=L.Hu-576;lx.setTransform(f,0,0,f,L.wx*d,L.wy*d);lx.lineJoin='round';
  const box=(x,y,w,h)=>{lx.lineWidth=7;lx.strokeStyle='#fff';lx.strokeRect(x,y,w,h);lx.lineWidth=3;lx.strokeStyle='#000';lx.strokeRect(x,y,w,h)};
@@ -1832,12 +1834,12 @@ function skMarks(L,d){const f=L.ww*d/L.Wi*L.k,yb=L.Hu-576;lx.setTransform(f,0,0,
  lx.fillStyle='#fff';lx.fillRect(500,yb+541,92,28);lx.fillStyle='#000';lx.beginPath();lx.arc(546,yb+555,2+SK.tool.size*1.6,0,6.3);lx.fill()}
 function skDown(e){if(LYM!='sketch'||!lyOpenNow()||LY.st!='ok'||!LY.chunks.length||(e.button&&e.button!=0))return;const u=skUnit(e);if(!u)return;
  if(!u.card){if(skHit(u)){e.stopPropagation();e.preventDefault()}return}
- e.stopPropagation();e.preventDefault();const j=SK.last,S=skScene(j),T=SK.tool,id=T.id,col=id[0]=='m'?skTipCol(id,j):(S.night?'#f8efc0':'#000');
- const t={id,size:T.size,e:T.erase,col,seed:(Math.random()*1e9)|0,pts:[[u.cx,u.cy]]};skStrokes(j).push(t);SK.cur={t,j,id:e.pointerId};try{lyC.setPointerCapture(e.pointerId)}catch(x){}
- const L=u.L;let o=skOvFor(j);if(!o){const k=skSK(j)+'|'+L.key;o=document.createElement('canvas');o.width=Math.ceil(L.Wi/2);o.height=Math.ceil(L.Hi/2);SK.ov.set(k,o)}SK.cur.R=mulb(t.seed);SK.cur.n=1;skSeg(skG(o,L),t,t.pts[0],t.pts[0],SK.cur.R);SK.cur.g=0}
+ e.stopPropagation();e.preventDefault();const j=SK.last,S=skScene(j),T=SK.tool,id=T.id,col=id[0]=='m'?skTipCol(id,j):null;
+ const t={id,size:T.size,e:T.erase,col,seed:(Math.random()*1e9)|0,pts:[[u.cx,u.cy]]};SK.all.push(t);SK.ov.forEach((o,k)=>{if(!k.endsWith(S.night?'|n':'|l'))SK.ov.delete(k)});SK.cur={t,j,id:e.pointerId};try{lyC.setPointerCapture(e.pointerId)}catch(x){}
+ const L=u.L;let o=skOvFor(j)||skOvNew(j,L);SK.cur.R=mulb(t.seed);skSeg(skG(o,L,S.night),t,t.pts[0],t.pts[0],SK.cur.R)}
 function skMove(e){const c=SK.cur;if(!c||c.id!=e.pointerId)return;const u=skUnit(e);if(!u)return;const t=c.t,l=t.pts[t.pts.length-1],p=[u.cx,u.cy];if(Math.hypot(p[0]-l[0],p[1]-l[1])<2)return;e.stopPropagation();e.preventDefault();
- t.pts.push(p);const L=u.L,o=skOvFor(c.j)||(()=>{const k=skSK(c.j)+'|'+L.key,n=document.createElement('canvas');n.width=Math.ceil(L.Wi/2);n.height=Math.ceil(L.Hi/2);SK.ov.set(k,n);return n})();skSeg(skG(o,L),t,l,p,c.R)}
-function skUp(e){if(SK.cur&&SK.cur.id==e.pointerId){e.stopPropagation();SK.cur=null}}
+ t.pts.push(p);const L=u.L,o=skOvFor(c.j)||skOvNew(c.j,L);skSeg(skG(o,L,skScene(c.j).night),t,l,p,c.R)}
+function skUp(e){if(SK.cur&&SK.cur.id==e.pointerId){e.stopPropagation();SK.cur=null;skSave()}}
 lyC.addEventListener('pointerdown',skDown);lyC.addEventListener('pointermove',skMove);lyC.addEventListener('pointerup',skUp);lyC.addEventListener('pointercancel',skUp);
 
 // ---- opening + boot ----
