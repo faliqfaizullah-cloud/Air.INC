@@ -48,3 +48,6 @@ Either device can show the code and the other one connects; pairing is mutual, s
 
 ## Sketch lyrics
 In the lyrics view tap the song title and choose **Sketch**. Every lyric line becomes a hand-drawn 1-bit card inside a Decker-style window (menu bar, pens, markers, toolbar). Cards cut hard on each line, the drawing "boils" at ~12 fps, and the words of the line pick the doodle (moon + sea, ringed planet, heart, sun, eye, flower, rain, fire, bird, house, skull, stars, or a bust). Night cards get a navy dimmed window with a light halo behind the handwriting. The handwriting font is downloaded at build time (Shadows Into Light Two, with fallbacks).
+
+### Drawing on Sketch cards
+Pick a pen or marker from the right-hand column (fountain, fine, brush, spray, chisel; pink/cyan/yellow markers use the colours of the current card) and draw on the card with a finger or mouse. **OOPS!** undoes the last stroke, **ALTER** toggles the eraser, **OBLITERATE!** clears the card, the arrows next to *marker size* change the size, and **EXPORT** shares/saves the card with your drawing as a PNG. Drawings stay on their card for the rest of the session.
