@@ -45,3 +45,6 @@ Either device can show the code and the other one connects; pairing is mutual, s
 - **Play my song there** streams a song from the phone to the PC without copying it (PC only).
 - Both devices must be on the same Wi-Fi / network. Windows asks for a Firewall exception the first time (allow *Private* networks).
 - Security: the code is a short-lived pairing secret (6 wrong tries locks it for a minute); after pairing each device holds a random 192-bit key. Remove a device any time from *Allowed to control this device*.
+
+## Sketch lyrics
+In the lyrics view tap the song title and choose **Sketch**. Every lyric line becomes a hand-drawn 1-bit card inside a Decker-style window (menu bar, pens, markers, toolbar). Cards cut hard on each line, the drawing "boils" at ~12 fps, and the words of the line pick the doodle (moon + sea, ringed planet, heart, sun, eye, flower, rain, fire, bird, house, skull, stars, or a bust). Night cards get a navy dimmed window with a light halo behind the handwriting. The handwriting font is downloaded at build time (Shadows Into Light Two, with fallbacks).

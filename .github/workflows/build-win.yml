@@ -32,6 +32,7 @@ jobs:
           mkdir -p app/src/main/assets/fonts
           curl -fsSL -o app/src/main/assets/fonts/EBGaramond.ttf "https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond%5Bwght%5D.ttf" || true
           curl -fsSL -o app/src/main/assets/fonts/Montserrat.ttf "https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf" || true
+          for u in shadowsintolighttwo/ShadowsIntoLightTwo-Regular.ttf gaegu/Gaegu-Regular.ttf patrickhand/PatrickHand-Regular.ttf; do curl -fsSL -o app/src/main/assets/fonts/Handwrite.ttf "https://raw.githubusercontent.com/google/fonts/main/ofl/$u" && break; done || true
       - run: npm install --no-audit --no-fund
       - run: npm test
       - name: Build installer + portable exe
