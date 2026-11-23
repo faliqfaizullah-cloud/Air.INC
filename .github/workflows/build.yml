@@ -1,7 +1,7 @@
 name: Build APK
 on:
   push:
-    paths-ignore: ['windows/**', '.github/workflows/build-win.yml']
+    paths-ignore: ['windows/**', 'ios/**', '.github/workflows/build-win.yml', '.github/workflows/build-ios.yml']
   workflow_dispatch:
 permissions:
   contents: write

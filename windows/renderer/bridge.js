@@ -213,7 +213,7 @@
 
   /* ---------------- memories (index in localStorage, media files saved by the host) ---------------- */
   var MEMS = jget('mems', []);
-  var mu = function (f) { return f ? 'air://mem/' + f : ''; };
+  var mu = function (f) { return f ? (H.memUrl ? H.memUrl(f) : 'air://mem/' + f) : ''; };
   var decorate = function (m) { var o = {}; for (var k in m) o[k] = m[k]; if (m.file) o.path = mu(m.file); if (m.thumb) o.tpath = mu(m.thumb); return o; };
   var memList = function () { return MEMS.slice().sort(function (a, b) { return b.ts - a.ts; }).map(decorate); };
   var memSave = function () { jset('mems', MEMS); };

@@ -51,3 +51,11 @@ In the lyrics view tap the song title and choose **Sketch**. Every lyric line be
 
 ### Drawing on Sketch cards
 Pick a pen or marker from the right-hand column (fountain, fine, brush, spray, chisel; pink/cyan/yellow markers use the colours of the current card) and draw on the card with a finger or mouse. **OOPS!** undoes the last stroke, **ALTER** toggles the eraser, **OBLITERATE!** clears the card, the arrows next to *marker size* change the size, and **EXPORT** shares/saves the card with your drawing as a PNG. Your drawing is one shared layer: it stays on screen when the lyric card changes and is remembered after you close the app, until you press OBLITERATE!. Pen ink turns cream on night cards and black on light ones.
+
+## iPhone / iPad version (IPA for Sideloadly)
+`ios/` is a native Swift shell (WKWebView + a tiny loopback server) around the same UI. GitHub Actions (`build-ios.yml`, macOS runner) builds an **unsigned** `Air.INC-iOS.ipa`; it is attached to each tag's release and to the run's artifacts (`Air.INC-iOS`).
+Install: open **Sideloadly**, drag the `.ipa` in, enter your Apple ID, Start. Then on the iPhone: Settings → General → VPN & Device Management → trust your Apple ID.
+- Needs **iOS 12 or newer** (iOS 9–11 cannot run current Xcode builds or the web features the app uses).
+- Add songs: the in-app Add button (Files picker) or the *Air.INC* folder in the Files app (On My iPhone → Air.INC).
+- Not on iOS: Link devices, in-app updater (reinstall a new IPA), photo/camera Memories; pitch/key shift needs iOS 14.5+.
+- A free Apple ID signs for 7 days (re-sideload to refresh) and 3 apps.

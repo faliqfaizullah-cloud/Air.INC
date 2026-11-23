@@ -1,0 +1,57 @@
+name: Build iOS
+on:
+  push:
+    tags: ['v*']
+    branches: [main]
+    paths: ['ios/**', 'windows/renderer/bridge.js', 'app/src/main/assets/**', '.github/workflows/build-ios.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  ios:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Version from tag
+        id: v
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF_NAME#v}"; else V="3.9"; fi
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+      - name: Download lyric fonts (OFL)
+        run: |
+          mkdir -p app/src/main/assets/fonts
+          curl -fsSL -o app/src/main/assets/fonts/EBGaramond.ttf "https://raw.githubusercontent.com/google/fonts/main/ofl/ebgaramond/EBGaramond%5Bwght%5D.ttf" || true
+          curl -fsSL -o app/src/main/assets/fonts/Montserrat.ttf "https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf" || true
+          for u in shadowsintolighttwo/ShadowsIntoLightTwo-Regular.ttf gaegu/Gaegu-Regular.ttf patrickhand/PatrickHand-Regular.ttf; do curl -fsSL -o app/src/main/assets/fonts/Handwrite.ttf "https://raw.githubusercontent.com/google/fonts/main/ofl/$u" && break; done || true
+      - name: Build web bundle (Safari 12 target)
+        working-directory: ios
+        run: |
+          npm install --no-audit --no-fund
+          node scripts/prepare.js
+      - name: Generate Xcode project
+        working-directory: ios
+        run: |
+          brew install xcodegen
+          xcodegen generate
+      - name: Build (unsigned)
+        working-directory: ios
+        run: |
+          xcodebuild -project AirInc.xcodeproj -scheme AirInc -configuration Release -sdk iphoneos \
+            -destination 'generic/platform=iOS' -derivedDataPath build \
+            MARKETING_VERSION=${{ steps.v.outputs.version }} CURRENT_PROJECT_VERSION=${{ github.run_number }} \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+      - name: Package IPA
+        working-directory: ios
+        run: |
+          APP=$(find build/Build/Products -name "*.app" -maxdepth 3 | head -1)
+          echo "app: $APP"
+          rm -rf Payload && mkdir Payload && cp -R "$APP" Payload/
+          zip -qry Air.INC-iOS.ipa Payload
+          ls -la Air.INC-iOS.ipa
+      - uses: actions/upload-artifact@v4
+        with: { name: Air.INC-iOS, path: ios/Air.INC-iOS.ipa }
+      - if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with: { files: ios/Air.INC-iOS.ipa }
