@@ -19,6 +19,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         try? AVAudioSession.sharedInstance().setActive(true)
-        (window?.rootViewController as? ViewController)?.becameActive()
+        ViewController.becameActive()
     }
 }

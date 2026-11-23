@@ -211,8 +211,8 @@ enum Lyrics {
         }
         func enc(_ s: String) -> String { s.addingPercentEncoding(withAllowedCharacters: CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~")) ?? "" }
         let q = "track_name=\(enc(title))&artist_name=\(enc(artist))&album_name=\(enc(album))" + (dur > 0 ? "&duration=\(dur)" : "")
-        guard let d1 = http("https://lrclib.net/api/get?" + q) ?? Data("null".utf8) as Data? else { return ["err": true] }
-        var o = (try? JSONSerialization.jsonObject(with: d1)) as? [String: Any]
+        let d1 = http("https://lrclib.net/api/get?" + q)
+        var o = d1.flatMap { (try? JSONSerialization.jsonObject(with: $0)) as? [String: Any] }
         if !has(o) {
             o = nil
             if let sd = http("https://lrclib.net/api/search?q=" + enc(title + " " + artist)), let arr = (try? JSONSerialization.jsonObject(with: sd)) as? [[String: Any]] {
