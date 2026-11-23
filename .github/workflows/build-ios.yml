@@ -38,10 +38,18 @@ jobs:
       - name: Build (unsigned)
         working-directory: ios
         run: |
+          set +e
           xcodebuild -project AirInc.xcodeproj -scheme AirInc -configuration Release -sdk iphoneos \
             -destination 'generic/platform=iOS' -derivedDataPath build \
             MARKETING_VERSION=${{ steps.v.outputs.version }} CURRENT_PROJECT_VERSION=${{ github.run_number }} \
-            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build > build.log 2>&1
+          RC=$?
+          if [ $RC -ne 0 ]; then
+            echo "=========== ERRORS ==========="
+            grep -E "error:|error \(|fatal|Multiple commands" build.log | sort -u | head -30
+            echo "=========== END ERRORS ==========="
+            exit $RC
+          fi
       - name: Package IPA
         working-directory: ios
         run: |
