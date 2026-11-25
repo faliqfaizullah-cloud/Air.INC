@@ -59,3 +59,6 @@ Install: open **Sideloadly**, drag the `.ipa` in, enter your Apple ID, Start. Th
 - Add songs: menu → **Add music folder** → pick any folder in Files (iCloud Drive, On My iPhone…). It is remembered and **auto-scanned on every launch**. Songs in *Files → On My iPhone → Air.INC* are scanned automatically too, and you can also copy song files in.
 - Not on iOS: Link devices, in-app updater (reinstall a new IPA), photo/camera Memories; pitch/key shift needs iOS 14.5+.
 - A free Apple ID signs for 7 days (re-sideload to refresh) and 3 apps.
+
+### iOS look: Liquid Glass
+The iOS build ships `ios/Resources/glass.css` (copied to the app by `prepare.js`): translucent, blurred and saturated glass panels with a bright specular rim, a floating capsule tab bar, round glass controls and springy press animations, in light and dark mode. It follows Apple's iOS 26 Liquid Glass design language; Android and Windows keep their own look.

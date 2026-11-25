@@ -1,0 +1,56 @@
+/* Air.INC · iOS "Liquid Glass" skin (follows Apple's iOS 26+ design language: translucent lensing material,
+   bright specular rim, floating capsule controls, springy press). Only shipped in the iOS build. */
+:root{
+  --lg-tint:rgba(255,255,255,.26);--lg-tint2:rgba(255,255,255,.08);
+  --lg-rim:rgba(255,255,255,.92);--lg-rim2:rgba(255,255,255,.38);--lg-line:rgba(255,255,255,.5);
+  --lg-shadow:0 12px 32px rgba(40,30,70,.16),0 2px 6px rgba(40,30,70,.08);
+}
+body.dark{--lg-tint:rgba(255,255,255,.11);--lg-tint2:rgba(255,255,255,.03);--lg-rim:rgba(255,255,255,.5);--lg-rim2:rgba(255,255,255,.16);--lg-line:rgba(255,255,255,.16);
+  --lg-shadow:0 14px 36px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.3)}
+
+/* the glass material */
+.glass,body.playing .glass,#menu,.chip,.pp,#pplay,#nav,.lkCard,#menuBtn,#upd .uc{
+  -webkit-backdrop-filter:blur(22px) saturate(1.9) brightness(1.05)!important;backdrop-filter:blur(22px) saturate(1.9) brightness(1.05)!important;
+  background:radial-gradient(120% 90% at 18% 0%,rgba(255,255,255,.34),rgba(255,255,255,0) 55%),linear-gradient(145deg,var(--lg-tint),var(--lg-tint2))!important;
+  border:.5px solid var(--lg-line)!important;
+  box-shadow:inset 1.5px 1.5px 0 -.5px var(--lg-rim),inset -1.5px -1.5px 0 -.5px var(--lg-rim2),inset 0 0 22px rgba(255,255,255,.10),var(--lg-shadow)!important;
+}
+body.dark .glass,body.dark.playing .glass,body.dark #menu,body.dark .chip,body.dark .pp,body.dark #pplay,body.dark #nav,body.dark .lkCard,body.dark #menuBtn,body.dark #upd .uc{
+  background:radial-gradient(120% 90% at 18% 0%,rgba(255,255,255,.16),rgba(255,255,255,0) 55%),linear-gradient(145deg,var(--lg-tint),var(--lg-tint2))!important;
+}
+#upd .uc{color:var(--ink)!important;-webkit-backdrop-filter:blur(34px) saturate(1.9)!important;backdrop-filter:blur(34px) saturate(1.9)!important}
+#upd{-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+
+/* floating capsule tab bar */
+#nav{margin:0 auto calc(env(safe-area-inset-bottom,0px) * .35);width:min(88%,360px);padding:6px!important;border-radius:999px!important;justify-content:space-between!important}
+#nav button{flex:1;padding:10px 0!important;border-radius:999px;opacity:.55!important;transform:none!important;transition:background .35s,opacity .3s,transform .35s cubic-bezier(.3,1.6,.5,1)}
+#nav button.on{opacity:1!important;background:linear-gradient(145deg,rgba(255,255,255,.55),rgba(255,255,255,.18));
+  box-shadow:inset 1px 1px 0 -.5px #fff,inset -1px -1px 0 -.5px rgba(255,255,255,.4),0 3px 10px rgba(40,30,70,.14)}
+body.dark #nav button.on{background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.06))}
+#nav button.on svg{fill:none!important}
+
+/* capsules + round controls */
+#menuBtn{width:38px;height:38px;border-radius:50%!important;padding:0!important;color:var(--ink)!important;display:grid;place-items:center}
+.chip,.pp{color:var(--ink)!important}
+#menu{border-radius:30px!important;padding:8px!important}
+#menu div{border-radius:20px!important}
+#menu div.sel{background:linear-gradient(145deg,rgba(255,255,255,.5),rgba(255,255,255,.16))!important;box-shadow:inset 1px 1px 0 -.5px #fff,0 2px 8px rgba(40,30,70,.12)}
+body.dark #menu div.sel{background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.05))!important}
+.bar{height:6px!important;border-radius:6px;background:rgba(120,120,140,.22)!important;box-shadow:inset 0 1px 2px rgba(0,0,0,.12),0 1px 0 rgba(255,255,255,.5)}
+.bar i{border-radius:6px;box-shadow:0 0 8px rgba(232,135,46,.55)}
+.disc{box-shadow:inset 2px 2px 0 -1px var(--lg-rim),inset -2px -2px 0 -1px var(--lg-rim2),inset 0 0 40px rgba(255,255,255,.15),0 22px 50px rgba(40,30,70,.18)!important}
+
+/* springy press like iOS 26 glass buttons */
+.glass,.chip,.pp,#pplay,#menu div,#nav button,.lkCard{transition:transform .38s cubic-bezier(.3,1.6,.5,1),background .3s}
+.chip:active,.pp:active,#pplay:active,.lkCard:active{transform:scale(1.07)}
+#nav button:active{transform:scale(1.12)!important}
+
+/* backdrop for the glass to refract: slightly livelier colour field */
+#aura i{opacity:1}
+*{-webkit-touch-callout:none}
+@supports not (backdrop-filter:blur(1px)) and (not (-webkit-backdrop-filter:blur(1px))){
+  .glass,#menu,.chip,.pp,#pplay,#nav,.lkCard{background:rgba(255,255,255,.7)!important}
+}
+/* menu sits over content: keep it a little denser so text stays readable */
+#menu{background:linear-gradient(145deg,rgba(255,255,255,.66),rgba(255,255,255,.38))!important}
+body.dark #menu{background:linear-gradient(145deg,rgba(68,68,82,.78),rgba(34,34,44,.7))!important}

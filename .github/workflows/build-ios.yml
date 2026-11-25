@@ -17,7 +17,7 @@ jobs:
       - name: Version from tag
         id: v
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF_NAME#v}"; else V="3.10"; fi
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF_NAME#v}"; else V="3.11"; fi
           echo "version=$V" >> "$GITHUB_OUTPUT"
       - name: Download lyric fonts (OFL)
         run: |
