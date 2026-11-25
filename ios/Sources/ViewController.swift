@@ -93,9 +93,15 @@ final class ViewController: UIViewController, WKScriptMessageHandler, WKNavigati
         let js = "__airEmit(\(jsonLit(ch)),\(jsonLit(args)))"
         DispatchQueue.main.async { self.web.evaluateJavaScript(js, completionHandler: nil) }
     }
-    func rescan() {
+    var asked = false
+    func rescan(prompt: Bool = false) {
         guard port != 0 else { return }
-        lib.scan { [weak self] list, done in self?.emit("lib:update", [list, done]) }
+        lib.scan { [weak self] list, done in
+            guard let self = self else { return }
+            self.emit("lib:update", [list, done])
+            // nothing found and the user asked for a scan -> offer to pick a folder / songs
+            if done && list.isEmpty && prompt && !self.lib.hasFolders && !self.asked { self.asked = true; DispatchQueue.main.async { self.chooser() } }
+        }
     }
 
     func userContentController(_ c: WKUserContentController, didReceive m: WKScriptMessage) {
@@ -103,14 +109,13 @@ final class ViewController: UIViewController, WKScriptMessageHandler, WKNavigati
         let a = (o["args"] as? [Any]) ?? []
         switch ch {
         case "lib:load": reply(id, true, lib.publicList())
-        case "lib:scan": rescan(); reply(id, true, true)
+        case "lib:scan": rescan(prompt: true); reply(id, true, true)
         case "lib:add":
-            pickAudio { [weak self] ok in
-                self?.reply(id, true, ok)
-                if ok { self?.rescan() }
-            }
-        case "lib:folders": reply(id, true, [])
-        case "lib:remove": reply(id, true, true)
+            DispatchQueue.main.async { self.chooser { [weak self] ok in self?.reply(id, true, ok); if ok { self?.rescan() } } }
+        case "lib:folders": reply(id, true, lib.folderNames())
+        case "lib:remove":
+            if let n = a.first as? String { lib.removeFolder(n) }
+            rescan(); reply(id, true, true)
         case "lyrics:get":
             let q = (a.first as? [String: Any]) ?? [:]
             DispatchQueue.global(qos: .userInitiated).async {
@@ -165,27 +170,33 @@ final class ViewController: UIViewController, WKScriptMessageHandler, WKNavigati
         }
     }
 
-    // MARK: song import (Files app)
-    func pickAudio(_ done: @escaping (Bool) -> Void) {
-        DispatchQueue.main.async {
-            self.pickReply = done
-            let p = UIDocumentPickerViewController(documentTypes: ["public.audio", "public.mp3", "public.mpeg-4-audio", "public.folder"], in: .import)
-            p.allowsMultipleSelection = true
-            p.delegate = self
-            self.present(p, animated: true, completion: nil)
-        }
+    // MARK: adding music (Files app)
+    enum PickMode { case folder, files }
+    var pickMode = PickMode.folder
+
+    func chooser(_ done: ((Bool) -> Void)? = nil) {
+        let ac = UIAlertController(title: "Add music", message: "Pick a folder in Files and Air.INC scans it automatically every time you open the app. You can also copy song files into the app.", preferredStyle: .actionSheet)
+        ac.addAction(UIAlertAction(title: "Choose a music folder (auto-scan)", style: .default) { _ in self.pick(.folder, done) })
+        ac.addAction(UIAlertAction(title: "Import song files (copy)", style: .default) { _ in self.pick(.files, done) })
+        ac.addAction(UIAlertAction(title: "Cancel", style: .cancel) { _ in done?(false) })
+        if let p = ac.popoverPresentationController { p.sourceView = view; p.sourceRect = CGRect(x: view.bounds.midX, y: view.bounds.midY, width: 1, height: 1); p.permittedArrowDirections = [] }
+        present(ac, animated: true, completion: nil)
+    }
+    func pick(_ mode: PickMode, _ done: ((Bool) -> Void)?) {
+        pickMode = mode
+        pickReply = done
+        let p = mode == .folder
+            ? UIDocumentPickerViewController(documentTypes: ["public.folder"], in: .open)
+            : UIDocumentPickerViewController(documentTypes: ["public.audio", "public.mp3", "public.mpeg-4-audio"], in: .import)
+        if mode == .files { p.allowsMultipleSelection = true }
+        p.delegate = self
+        present(p, animated: true, completion: nil)
     }
     func documentPicker(_ c: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        var files: [URL] = []
-        let fm = FileManager.default
-        for u in urls {
-            var isDir: ObjCBool = false
-            if fm.fileExists(atPath: u.path, isDirectory: &isDir), isDir.boolValue, let en = fm.enumerator(at: u, includingPropertiesForKeys: nil) {
-                for case let f as URL in en where LibraryStore.exts.contains(f.pathExtension.lowercased()) { files.append(f) }
-            } else { files.append(u) }
-        }
-        let n = lib.importFiles(files)
-        pickReply?(n > 0); pickReply = nil
+        var ok = false
+        if pickMode == .folder { for u in urls where lib.addFolder(u) { ok = true } }
+        else { ok = lib.importFiles(urls) > 0 }
+        pickReply?(ok); pickReply = nil
     }
     func documentPickerWasCancelled(_ c: UIDocumentPickerViewController) { pickReply?(false); pickReply = nil }
 

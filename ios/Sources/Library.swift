@@ -4,7 +4,8 @@ import UIKit
 
 struct Track {
     var id: Int
-    var rel: String          // path relative to Documents (the container path changes between installs)
+    var root: String         // "d" = the app's Documents folder, "f<hash>" = a folder the user picked in Files
+    var rel: String          // path relative to that root (container paths change between installs, so never store absolute ones)
     var title: String
     var artist: String
     var album: String
@@ -16,7 +17,8 @@ struct Track {
     var meta: Bool
 }
 
-/// Song library: scans Documents (the "Air.INC" folder in the Files app + imported songs), reads tags/artwork with AVFoundation.
+/// Song library. Auto-scans (1) the app's Documents folder (= "On My iPhone > Air.INC" in Files) and
+/// (2) any folders the user picked in Files (iCloud Drive, other apps, ...) which are remembered through security-scoped bookmarks.
 final class LibraryStore {
     static let exts: Set<String> = ["mp3", "m4a", "aac", "flac", "wav", "aif", "aiff", "caf", "mp4", "m4b"]
     let docs: URL, music: URL, artDir: URL, lyrDir: URL, memDir: URL, cacheFile: URL
@@ -24,6 +26,8 @@ final class LibraryStore {
     private var byId: [Int: Track] = [:]
     private let lock = NSLock()
     private var scanning = false
+    private var folders: [(name: String, key: String, url: URL)] = []
+    private let defKey = "airFolders"
 
     init() {
         let fm = FileManager.default
@@ -35,6 +39,7 @@ final class LibraryStore {
         memDir = lib.appendingPathComponent("memories", isDirectory: true)
         cacheFile = lib.appendingPathComponent("library.json")
         for d in [music, artDir, lyrDir, memDir] { try? fm.createDirectory(at: d, withIntermediateDirectories: true) }
+        resolveFolders()
         loadCache()
     }
 
@@ -44,13 +49,58 @@ final class LibraryStore {
         let v = Int(h & 0x7fffffff)
         return v == 0 ? 1 : v
     }
+    static func trackId(_ root: String, _ rel: String) -> Int { root == "d" ? idOf(rel) : idOf(root + "/" + rel) }
+
+    // MARK: folders the user picked in Files
+    private func resolveFolders() {
+        let saved = (UserDefaults.standard.array(forKey: defKey) as? [[String: Any]]) ?? []
+        var keep: [[String: Any]] = []
+        folders = []
+        for o in saved {
+            guard let name = o["name"] as? String, let bm = o["bm"] as? Data else { continue }
+            var stale = false
+            guard let u = try? URL(resolvingBookmarkData: bm, options: [], relativeTo: nil, bookmarkDataIsStale: &stale) else { continue }
+            _ = u.startAccessingSecurityScopedResource()   // kept open for the life of the app so songs can be streamed
+            let key = "f" + String(LibraryStore.idOf(name))
+            folders.append((name, key, u))
+            var e = o
+            if stale, let nb = try? u.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil) { e["bm"] = nb }
+            keep.append(e)
+        }
+        UserDefaults.standard.set(keep, forKey: defKey)
+    }
+    func folderNames() -> [String] { folders.map { $0.name } }
+    var hasFolders: Bool { !folders.isEmpty }
+    func addFolder(_ u: URL) -> Bool {
+        _ = u.startAccessingSecurityScopedResource()
+        guard let bm = try? u.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil) else { return false }
+        var name = u.lastPathComponent.isEmpty ? "Folder" : u.lastPathComponent
+        if folders.contains(where: { $0.name == name }) { name += " (\(folders.count + 1))" }
+        var saved = (UserDefaults.standard.array(forKey: defKey) as? [[String: Any]]) ?? []
+        saved.append(["name": name, "bm": bm])
+        UserDefaults.standard.set(saved, forKey: defKey)
+        folders.append((name, "f" + String(LibraryStore.idOf(name)), u))
+        return true
+    }
+    func removeFolder(_ name: String) {
+        var saved = (UserDefaults.standard.array(forKey: defKey) as? [[String: Any]]) ?? []
+        saved.removeAll { ($0["name"] as? String) == name }
+        UserDefaults.standard.set(saved, forKey: defKey)
+        if let f = folders.first(where: { $0.name == name }) { f.url.stopAccessingSecurityScopedResource() }
+        folders.removeAll { $0.name == name }
+    }
+    private func rootURL(_ key: String) -> URL? { key == "d" ? docs : folders.first(where: { $0.key == key })?.url }
 
     func pub(_ t: Track) -> [String: Any] {
         return ["id": t.id, "title": t.title, "artist": t.artist, "album": t.album, "aid": 0, "dur": t.dur, "genre": t.genre,
                 "art": t.hasArt ? "/art/\(t.id).jpg" : ""]
     }
     func publicList() -> [[String: Any]] { lock.lock(); defer { lock.unlock() }; return tracks.map(pub) }
-    func url(forId id: Int) -> URL? { lock.lock(); defer { lock.unlock() }; return byId[id].map { docs.appendingPathComponent($0.rel) } }
+    func url(forId id: Int) -> URL? {
+        lock.lock(); defer { lock.unlock() }
+        guard let t = byId[id], let r = rootURL(t.root) else { return nil }
+        return r.appendingPathComponent(t.rel)
+    }
     func track(_ id: Int) -> Track? { lock.lock(); defer { lock.unlock() }; return byId[id] }
 
     private func set(_ a: [Track]) {
@@ -61,8 +111,10 @@ final class LibraryStore {
         guard let d = try? Data(contentsOf: cacheFile), let arr = (try? JSONSerialization.jsonObject(with: d)) as? [[String: Any]] else { return }
         var out: [Track] = []
         for o in arr {
-            guard let rel = o["rel"] as? String, FileManager.default.fileExists(atPath: docs.appendingPathComponent(rel).path) else { continue }
-            out.append(Track(id: LibraryStore.idOf(rel), rel: rel, title: o["title"] as? String ?? "", artist: o["artist"] as? String ?? "", album: o["album"] as? String ?? "",
+            guard let rel = o["rel"] as? String else { continue }
+            let root = (o["root"] as? String) ?? "d"
+            guard let r = rootURL(root), FileManager.default.fileExists(atPath: r.appendingPathComponent(rel).path) else { continue }
+            out.append(Track(id: LibraryStore.trackId(root, rel), root: root, rel: rel, title: o["title"] as? String ?? "", artist: o["artist"] as? String ?? "", album: o["album"] as? String ?? "",
                              dur: o["dur"] as? Double ?? 0, genre: o["genre"] as? String ?? "", hasArt: o["art"] as? Bool ?? false,
                              size: UInt64(o["size"] as? Double ?? 0), mtime: o["mtime"] as? Double ?? 0, meta: o["meta"] as? Bool ?? false))
         }
@@ -70,7 +122,7 @@ final class LibraryStore {
     }
 
     private func saveCache() {
-        let arr: [[String: Any]] = tracks.map { ["rel": $0.rel, "title": $0.title, "artist": $0.artist, "album": $0.album, "dur": $0.dur, "genre": $0.genre,
+        let arr: [[String: Any]] = tracks.map { ["root": $0.root, "rel": $0.rel, "title": $0.title, "artist": $0.artist, "album": $0.album, "dur": $0.dur, "genre": $0.genre,
                                                  "art": $0.hasArt, "size": Double($0.size), "mtime": $0.mtime, "meta": $0.meta] }
         if let d = try? JSONSerialization.data(withJSONObject: arr) { try? d.write(to: cacheFile, options: .atomic) }
     }
@@ -84,36 +136,59 @@ final class LibraryStore {
         return (base, "")
     }
 
-    /// Two passes: an instant list from file names, then tags + artwork. `cb(list, done)` is called on a background queue.
+    /// Two passes: an instant list from file names, then tags + artwork (several files at a time). `cb(list, done)` runs on a background queue.
     func scan(_ cb: @escaping ([[String: Any]], Bool) -> Void) {
         lock.lock(); if scanning { lock.unlock(); return }; scanning = true; lock.unlock()
         DispatchQueue.global(qos: .utility).async {
             defer { self.lock.lock(); self.scanning = false; self.lock.unlock() }
             let fm = FileManager.default
-            let old = Dictionary(self.tracks.map { ($0.rel, $0) }, uniquingKeysWith: { x, _ in x })
+            let old = Dictionary(self.tracks.map { ($0.root + "/" + $0.rel, $0) }, uniquingKeysWith: { x, _ in x })
             var found: [Track] = []
             let keys: [URLResourceKey] = [.isRegularFileKey, .fileSizeKey, .contentModificationDateKey]
-            if let en = fm.enumerator(at: self.docs, includingPropertiesForKeys: keys, options: [.skipsHiddenFiles]) {
+            var roots: [(String, URL)] = [("d", self.docs)]
+            for f in self.folders { roots.append((f.key, f.url)) }
+            for (key, base) in roots {
+                guard let en = fm.enumerator(at: base, includingPropertiesForKeys: keys, options: []) else { continue }
                 for case let u as URL in en {
+                    var name = u.lastPathComponent
+                    var real = u
+                    if name.hasPrefix(".") && name.hasSuffix(".icloud") && name.count > 8 {   // iCloud file not downloaded yet: ask iOS to fetch it, it shows up on the next scan
+                        name = String(name.dropFirst().dropLast(7))
+                        real = u.deletingLastPathComponent().appendingPathComponent(name)
+                        if LibraryStore.exts.contains(real.pathExtension.lowercased()) { try? fm.startDownloadingUbiquitousItem(at: real) }
+                        continue
+                    }
+                    if name.hasPrefix(".") { if (try? u.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true { en.skipDescendants() }; continue }
                     guard LibraryStore.exts.contains(u.pathExtension.lowercased()) else { continue }
                     let v = try? u.resourceValues(forKeys: Set(keys))
                     guard v?.isRegularFile == true else { continue }
-                    let rel = String(u.path.dropFirst(self.docs.path.count)).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
+                    let rel = String(u.path.dropFirst(base.path.count)).trimmingCharacters(in: CharacterSet(charactersIn: "/"))
                     let size = UInt64(v?.fileSize ?? 0), mt = v?.contentModificationDate?.timeIntervalSince1970 ?? 0
-                    if let o = old[rel], o.size == size, abs(o.mtime - mt) < 1, o.meta { found.append(o); continue }
+                    if let o = old[key + "/" + rel], o.size == size, abs(o.mtime - mt) < 1, o.meta { found.append(o); continue }
                     let g = self.guess(u)
-                    found.append(Track(id: LibraryStore.idOf(rel), rel: rel, title: g.0, artist: g.1, album: u.deletingLastPathComponent().lastPathComponent == "Documents" ? "" : u.deletingLastPathComponent().lastPathComponent,
+                    let parent = u.deletingLastPathComponent()
+                    found.append(Track(id: LibraryStore.trackId(key, rel), root: key, rel: rel, title: g.0, artist: g.1,
+                                       album: parent.path == base.path || parent.lastPathComponent == "Music" ? "" : parent.lastPathComponent,
                                        dur: 0, genre: "", hasArt: false, size: size, mtime: mt, meta: false))
                 }
             }
             found.sort { $0.title.lowercased() < $1.title.lowercased() }
             self.set(found)
             cb(found.map(self.pub), false)
-            var n = 0
-            for i in 0..<found.count where !found[i].meta {
-                self.readMeta(&found[i])
-                n += 1
-                if n % 40 == 0 { self.set(found); cb(found.map(self.pub), false) }
+            let todo = (0..<found.count).filter { !found[$0].meta }
+            if !todo.isEmpty {
+                let wl = NSLock()
+                var n = 0
+                DispatchQueue.concurrentPerform(iterations: todo.count) { k in
+                    let i = todo[k]
+                    wl.lock(); let t0 = found[i]; wl.unlock()
+                    let t = self.readMeta(t0)
+                    wl.lock()
+                    found[i] = t; n += 1
+                    let snap: [Track]? = n % 40 == 0 ? found : nil
+                    wl.unlock()
+                    if let s = snap { self.set(s); cb(s.map(self.pub), false) }
+                }
             }
             found.sort { $0.title.lowercased() < $1.title.lowercased() }
             self.set(found)
@@ -122,12 +197,13 @@ final class LibraryStore {
         }
     }
 
-    private func readMeta(_ t: inout Track) {
-        let url = docs.appendingPathComponent(t.rel)
-        let asset = AVURLAsset(url: url)
+    private func readMeta(_ t0: Track) -> Track {
+        var t = t0
+        guard let r = rootURL(t.root) else { return t }
+        let asset = AVURLAsset(url: r.appendingPathComponent(t.rel))
         let sem = DispatchSemaphore(value: 0)
         asset.loadValuesAsynchronously(forKeys: ["commonMetadata", "duration"]) { sem.signal() }
-        _ = sem.wait(timeout: .now() + 6)
+        _ = sem.wait(timeout: .now() + 8)
         let secs = CMTimeGetSeconds(asset.duration)
         if secs.isFinite && secs > 0 { t.dur = secs * 1000 }
         var art: Data?
@@ -152,6 +228,7 @@ final class LibraryStore {
             }
         }
         t.meta = true
+        return t
     }
 
     /// Copies picked songs into Documents/Music (unique names) and returns how many were added.

@@ -15,6 +15,10 @@ function css(code) { if (!esbuild) return code; try { return esbuild.transformSy
 fs.rmSync(www, { recursive: true, force: true });
 copyDir(assets, www);
 let html = fs.readFileSync(path.join(assets, 'index.html'), 'utf8');
+// iOS: "Add music folder" menu entry instead of the Android-only "Allow background"
+const swap = (from, to) => { if (!html.includes(from)) throw new Error('missing: ' + from.slice(0, 50)); html = html.replace(from, () => to); };
+swap('<div data-act="bg">Allow background</div>', '<div data-act="addf">Add music folder</div>');
+swap("else if(d.act=='scan'){", "else if(d.act=='addf'){menu.classList.remove('on');try{AirHost.invoke('lib:add')}catch(e){}}else if(d.act=='scan'){");
 // inline <script> / <style> (without src) -> transpiled
 html = html.replace(/<script>([\s\S]*?)<\/script>/g, (m, c) => '<script>' + js(c, 'inline') + '</script>');
 html = html.replace(/<style>([\s\S]*?)<\/style>/g, (m, c) => '<style>' + css(c) + '</style>');

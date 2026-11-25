@@ -56,6 +56,6 @@ Pick a pen or marker from the right-hand column (fountain, fine, brush, spray, c
 `ios/` is a native Swift shell (WKWebView + a tiny loopback server) around the same UI. GitHub Actions (`build-ios.yml`, macOS runner) builds an **unsigned** `Air.INC-iOS.ipa`; it is attached to each tag's release and to the run's artifacts (`Air.INC-iOS`).
 Install: open **Sideloadly**, drag the `.ipa` in, enter your Apple ID, Start. Then on the iPhone: Settings → General → VPN & Device Management → trust your Apple ID.
 - Needs **iOS 12 or newer** (iOS 9–11 cannot run current Xcode builds or the web features the app uses).
-- Add songs: the in-app Add button (Files picker) or the *Air.INC* folder in the Files app (On My iPhone → Air.INC).
+- Add songs: menu → **Add music folder** → pick any folder in Files (iCloud Drive, On My iPhone…). It is remembered and **auto-scanned on every launch**. Songs in *Files → On My iPhone → Air.INC* are scanned automatically too, and you can also copy song files in.
 - Not on iOS: Link devices, in-app updater (reinstall a new IPA), photo/camera Memories; pitch/key shift needs iOS 14.5+.
 - A free Apple ID signs for 7 days (re-sideload to refresh) and 3 apps.
