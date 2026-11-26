@@ -25,6 +25,7 @@ final class ViewController: UIViewController, WKScriptMessageHandler, WKNavigati
     override func viewDidLoad() {
         super.viewDidLoad()
         ViewController.current = self
+        NowPlaying.shared.setup(self)
         view.backgroundColor = UIColor(red: 0.063, green: 0.063, blue: 0.082, alpha: 1)
         let cfg = WKWebViewConfiguration()
         cfg.allowsInlineMediaPlayback = true
@@ -173,7 +174,10 @@ final class ViewController: UIViewController, WKScriptMessageHandler, WKNavigati
         case "sys:bt":
             DispatchQueue.main.async { if let u = URL(string: "App-Prefs:root=Bluetooth") ?? URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(u, options: [:], completionHandler: nil) } }
             reply(id, true, true)
-        case "alarm:show", "alarm:armed", "link:state": reply(id, true, true)
+        case "link:state":
+            if let j = a.first as? String { NowPlaying.shared.update(j, lib: lib) }
+            reply(id, true, true)
+        case "alarm:show", "alarm:armed": reply(id, true, true)
         case "link:req": reply(id, true, ["status": 0, "text": ""])
         default: reply(id, false, "unsupported \(ch)")
         }

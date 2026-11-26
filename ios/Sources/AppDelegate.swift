@@ -6,9 +6,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let s = AVAudioSession.sharedInstance()
-        try? s.setCategory(.playback, mode: .default, options: [])
-        try? s.setActive(true)
+        NowPlaying.activateSession()
         let w = UIWindow(frame: UIScreen.main.bounds)
         w.backgroundColor = .black
         w.rootViewController = ViewController()
@@ -18,7 +16,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        try? AVAudioSession.sharedInstance().setActive(true)
+        NowPlaying.activateSession()
         ViewController.becameActive()
     }
 }
