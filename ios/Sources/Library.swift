@@ -37,7 +37,7 @@ final class LibraryStore {
         artDir = lib.appendingPathComponent("Caches/art", isDirectory: true)
         lyrDir = lib.appendingPathComponent("lyrics", isDirectory: true)
         memDir = lib.appendingPathComponent("memories", isDirectory: true)
-        cacheFile = lib.appendingPathComponent("library.json")
+        cacheFile = lib.appendingPathComponent("library2.json")
         for d in [music, artDir, lyrDir, memDir] { try? fm.createDirectory(at: d, withIntermediateDirectories: true) }
         resolveFolders()
         loadCache()
@@ -207,13 +207,38 @@ final class LibraryStore {
         let secs = CMTimeGetSeconds(asset.duration)
         if secs.isFinite && secs > 0 { t.dur = secs * 1000 }
         var art: Data?
+        func artData(_ it: AVMetadataItem) -> Data? {
+            if let d = it.dataValue, UIImage(data: d) != nil { return d }
+            if let d = it.value as? Data, UIImage(data: d) != nil { return d }
+            if let dict = it.value as? [AnyHashable: Any], let d = dict["data"] as? Data, UIImage(data: d) != nil { return d }
+            return nil
+        }
         for it in asset.commonMetadata {
             guard let k = it.commonKey else { continue }
             if k == .commonKeyTitle, let s = it.stringValue, !s.isEmpty { t.title = s }
             else if k == .commonKeyArtist, let s = it.stringValue, !s.isEmpty { t.artist = s }
             else if k == .commonKeyAlbumName, let s = it.stringValue, !s.isEmpty { t.album = s }
             else if k == .commonKeyType, let s = it.stringValue, !s.isEmpty { t.genre = s }
-            else if k == .commonKeyArtwork { art = it.dataValue ?? (it.value as? Data) }
+            else if k == .commonKeyArtwork, art == nil { art = artData(it) }
+        }
+        if art == nil {   // ID3 APIC / iTunes covr that were not mapped to the common keys
+            for fmt in asset.availableMetadataFormats {
+                for it in asset.metadata(forFormat: fmt) {
+                    let id = it.identifier?.rawValue ?? ""
+                    let key = (it.key as? String) ?? ""
+                    if id.contains("APIC") || id.lowercased().contains("covr") || id.lowercased().contains("artwork") || key == "APIC" || key == "covr" { if let d = artData(it) { art = d; break } }
+                }
+                if art != nil { break }
+            }
+        }
+        if art == nil {   // folder.jpg / cover.jpg next to the song
+            let dir = r.appendingPathComponent(t.rel).deletingLastPathComponent()
+            for n in ["cover", "folder", "front", "album", "albumart", "Cover", "Folder"] {
+                for e in ["jpg", "jpeg", "png"] {
+                    if let d = try? Data(contentsOf: dir.appendingPathComponent(n + "." + e)), UIImage(data: d) != nil { art = d; break }
+                }
+                if art != nil { break }
+            }
         }
         if let d = art, let img = UIImage(data: d) {
             let m: CGFloat = 480, sc = min(1, m / max(img.size.width, img.size.height))

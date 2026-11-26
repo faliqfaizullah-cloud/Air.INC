@@ -62,3 +62,4 @@ Install: open **Sideloadly**, drag the `.ipa` in, enter your Apple ID, Start. Th
 
 ### iOS look: Liquid Glass
 The iOS build ships `ios/Resources/glass.css` (copied to the app by `prepare.js`): translucent, blurred and saturated glass panels with a bright specular rim, a floating capsule tab bar, round glass controls and springy press animations, in light and dark mode. It follows Apple's iOS 26 Liquid Glass design language; Android and Windows keep their own look.
+The iOS Music tab also has its own Now Playing layout (`ios/Resources/ios-ui.js`): large album art, a seek bar, previous/play/next glass buttons and a glass toolbar with speed and sleep timer.

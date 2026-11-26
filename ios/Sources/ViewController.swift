@@ -80,6 +80,14 @@ final class ViewController: UIViewController, WKScriptMessageHandler, WKNavigati
     }
 
     // MARK: JS bridge
+    /// The page sends ids as strings ("123") and durations as numbers; accept both.
+    static func intOf(_ v: Any?) -> Int {
+        if let i = v as? Int { return i }
+        if let d = v as? Double { return Int(d) }
+        if let s = v as? String { return Int(s) ?? Int(Double(s) ?? 0) }
+        if let n = v as? NSNumber { return n.intValue }
+        return 0
+    }
     func jsonLit(_ v: Any) -> String {
         guard JSONSerialization.isValidJSONObject([v]), let d = try? JSONSerialization.data(withJSONObject: [v]), var s = String(data: d, encoding: .utf8) else { return "null" }
         s.removeFirst(); s.removeLast()   // iOS 12 cannot serialise bare fragments, so wrap in an array and strip the brackets
@@ -119,12 +127,13 @@ final class ViewController: UIViewController, WKScriptMessageHandler, WKNavigati
         case "lyrics:get":
             let q = (a.first as? [String: Any]) ?? [:]
             DispatchQueue.global(qos: .userInitiated).async {
-                let r = Lyrics.get(self.lib, id: (q["id"] as? Int) ?? Int((q["id"] as? Double) ?? 0), title: q["title"] as? String ?? "", artist: q["artist"] as? String ?? "",
-                                   album: q["album"] as? String ?? "", dur: Int(((q["dur"] as? Double) ?? 0) / 1000))
+                let r = Lyrics.get(self.lib, id: ViewController.intOf(q["id"]), title: q["title"] as? String ?? "", artist: q["artist"] as? String ?? "",
+                                   album: q["album"] as? String ?? "", dur: ViewController.intOf(q["dur"]))
                 self.reply(id, true, r)
             }
         case "lyrics:retry":
-            if let n = a.first as? Int { try? FileManager.default.removeItem(at: lib.lyrDir.appendingPathComponent("\(n).json")) }
+            let n = ViewController.intOf(a.first)
+            if n != 0 { try? FileManager.default.removeItem(at: lib.lyrDir.appendingPathComponent("\(n).json")) }
             reply(id, true, true)
         case "mem:save":
             let q = (a.first as? [String: Any]) ?? [:]

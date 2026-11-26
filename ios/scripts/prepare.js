@@ -24,8 +24,9 @@ html = html.replace(/<script>([\s\S]*?)<\/script>/g, (m, c) => '<script>' + js(c
 html = html.replace(/<style>([\s\S]*?)<\/style>/g, (m, c) => '<style>' + css(c) + '</style>');
 if (!html.includes('<head>')) throw new Error('missing <head>');
 html = html.replace('<head>', '<head>\n<script src="bridge.js"></script>');
-html = html.replace('</body>', () => '<link rel="stylesheet" href="ios-glass.css">\n</body>');
+html = html.replace('</body>', () => '<link rel="stylesheet" href="ios-glass.css">\n<script src="ios-ui.js"></script>\n</body>');
 fs.copyFileSync(path.join(root, 'Resources', 'glass.css'), path.join(www, 'ios-glass.css'));
+fs.writeFileSync(path.join(www, 'ios-ui.js'), js(fs.readFileSync(path.join(root, 'Resources', 'ios-ui.js'), 'utf8'), 'ios-ui.js'));
 fs.writeFileSync(path.join(www, 'index.html'), html);
 for (const f of ['bridge.js', 'pitch-worklet.js']) {
   const c = fs.readFileSync(path.join(win, f), 'utf8');

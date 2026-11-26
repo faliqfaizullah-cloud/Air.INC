@@ -7,8 +7,8 @@ android {
         applicationId 'com.airinc.player'
         minSdk 24
         targetSdk 34
-        versionCode 21
-        versionName '3.11'
+        versionCode 22
+        versionName '3.12'
         buildConfigField 'String', 'REPO', "\"${System.getenv('GITHUB_REPOSITORY') ?: ''}\""
     }
     buildFeatures { buildConfig true }
